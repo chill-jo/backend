@@ -10,6 +10,6 @@ public class CustomException extends RuntimeException {
   public CustomException(ErrorCode errorCode) {
     super(errorCode.getMessage());
     this.errorCode = errorCode;
-    //추가하기
+    //추가하기 어ㅚㅏㅇㄹ
   }
 }
