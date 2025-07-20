@@ -14,12 +14,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
+    // 상품 ID로 단건 조회 (mock 인증 포함)
     @GetMapping("{id}")
     ResponseEntity<String> getProductById(
             @PathVariable("id") Long id,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
+        // 인증된 사용자 정보 로그로 출력 (디버깅용)
         log.info("userDetails username: {}, roles: {}", userDetails.getUsername(), userDetails.getAuthorities());
+
+        // 일단은 상품 ID를 문자열로 응답 (예제용)
         return ResponseEntity.ok(String.valueOf(id));
     }
 }
