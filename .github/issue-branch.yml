@@ -3,3 +3,4 @@ branchName: 'issue-${issue.number}-${issue.title}'
 autoLinkIssue: true              # PR -> 이슈 자동 연결
 openPR: false                    # PR 자동 열기 여부
 baseBranch: dev                  # 브랜치 생성 기준 (main/dev)
+autoCloseIssue: true
