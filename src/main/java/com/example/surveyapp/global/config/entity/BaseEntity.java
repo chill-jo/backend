@@ -1,4 +1,4 @@
-package com.example.surveyapp.global.response.entity;
+package com.example.surveyapp.global.config.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
