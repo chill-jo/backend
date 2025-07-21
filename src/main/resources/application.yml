@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: surveyApp
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/survey_app
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        use_sql_comments: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+logging:
+  level:
+    org:
+      hibernate:
+        type:
+          descriptor:
+            sql:
+              BasicBinder: info
+        org:
+          hibernate: debug
+
+jwt:
+  secret:
+    key: ${JWT_SECRET_KEY}
