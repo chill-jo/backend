@@ -32,11 +32,19 @@ public class User extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private UserRoleEnum userRole;
 
+    private boolean isDeleted = false;
+
     @Builder(access = AccessLevel.PRIVATE)
-    private User(String email, String password, String name, String nickname) {
+    private User(String email, String password, String name, String nickname, UserRoleEnum userRole, boolean isDeleted) {
         this.email = email;
         this.password = password;
         this.name = name;
         this.nickname = nickname;
+        this.userRole = userRole;
+        this.isDeleted = isDeleted;
+    }
+
+    private void delete(){
+        this.isDeleted = true;
     }
 }
