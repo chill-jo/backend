@@ -1,6 +1,6 @@
 package com.example.surveyapp.domain.survey.entity;
 
-import com.example.surveyapp.global.response.entity.BaseEntity;
+import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
