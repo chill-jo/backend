@@ -35,13 +35,12 @@ public class User extends BaseEntity {
     private boolean isDeleted = false;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private User(String email, String password, String name, String nickname, UserRoleEnum userRole, boolean isDeleted) {
+    private User(String email, String password, String name, String nickname, UserRoleEnum userRole) {
         this.email = email;
         this.password = password;
         this.name = name;
         this.nickname = nickname;
         this.userRole = userRole;
-        this.isDeleted = isDeleted;
     }
 
     private void delete(){

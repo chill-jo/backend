@@ -16,13 +16,4 @@ public class UserResponseDto {
     private String password;
     private String name;
     private String nickname;
-
-    public static UserResponseDto from(User user) {
-        return new UserResponseDto(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getNickname()
-        );
-    }
 }
