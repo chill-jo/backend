@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.3'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'net.ltgt.apt' version '0.21' // MapStruct APT
 }
 
 group = 'com.example'
@@ -48,6 +49,10 @@ dependencies {
 //    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+    //mapstruct
+    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 }
 
 tasks.named('test') {
