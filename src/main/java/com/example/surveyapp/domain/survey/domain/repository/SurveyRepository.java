@@ -9,5 +9,5 @@ import java.util.Optional;
 @Repository
 public interface SurveyRepository extends JpaRepository<Survey, Long> {
 
-    Optional<Survey> findByIdAndIsDeletedFalse(Long id);
+    Optional<Survey> findByIdAndDeletedFalse(Long id);
 }

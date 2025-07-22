@@ -1,4 +1,4 @@
-package com.example.surveyapp.domain.survey.entity;
+package com.example.surveyapp.domain.survey.domain.model.entity;
 
 import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "option")
-public class Option extends BaseEntity {
+@Table(name = "options")
+public class Options extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
