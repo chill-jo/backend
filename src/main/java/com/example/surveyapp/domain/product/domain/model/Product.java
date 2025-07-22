@@ -1,0 +1,32 @@
+package com.example.surveyapp.domain.product.domain.model;
+
+import com.example.surveyapp.global.config.entity.BaseEntity;
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Table(name = "product")
+@Builder
+public class Product extends BaseEntity {
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = 20, unique = true)
+    private String title;
+
+    @Column(nullable = false)
+    private int price;
+
+    @Column(nullable = false, length = 255)
+    private String content;
+
+    @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    private Status status;
+
+
+}
