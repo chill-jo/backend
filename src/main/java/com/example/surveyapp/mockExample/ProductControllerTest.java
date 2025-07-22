@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequestMapping("/api/products")
-public class ProductController {
+public class ProductControllerTest {
     // 상품 ID로 단건 조회 (mock 인증 포함)
     @GetMapping("{id}")
     ResponseEntity<String> getProductById(
