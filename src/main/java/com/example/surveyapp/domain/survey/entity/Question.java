@@ -21,13 +21,14 @@ public class Question extends BaseEntity {
     @JoinColumn(name = "survey_id", nullable = false)
     private Survey survey;
 
+    @Column(nullable = false)
     private Long number;
 
+    @Column(nullable = false, length = 255)
     private String content;
 
+    @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
     private QuestionType type;
 
-    public void updateQuestion(){
-
-    }
 }

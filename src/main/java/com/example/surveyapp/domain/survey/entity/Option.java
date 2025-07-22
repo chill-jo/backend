@@ -21,11 +21,10 @@ public class Option extends BaseEntity {
     @JoinColumn(name = "question_id", nullable = false)
     private Question question;
 
+    @Column(nullable = false)
     private Long number;
 
+    @Column(nullable = false, length = 255)
     private String content;
 
-    public void updateOption(){
-
-    }
 }
