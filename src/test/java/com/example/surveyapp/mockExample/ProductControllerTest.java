@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
-@WebMvcTest(controllers = ProductController.class) // ProductController만 테스트용으로 로딩
+@WebMvcTest(controllers = ProductControllerTest.class) // ProductController만 테스트용으로 로딩
 @AutoConfigureMockMvc(addFilters = false) // Security 필터 적용 안함 (mock 인증만 사용)
 public class ProductControllerTest {
     @Autowired
