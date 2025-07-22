@@ -1,5 +1,12 @@
-mode: immediate                   # 이슈 생성 즉시 브랜치 생성
-branchName: 'issue-${issue.number}-${issue.title}'
-autoLinkIssue: true              # PR -> 이슈 자동 연결
-openPR: false                    # PR 자동 열기 여부
-baseBranch: dev                  # 브랜치 생성 기준 (main/dev)
+defaultBranch: 'dev'
+branchName: '${issue.number}'
+branches:
+  - label: '🚀 feature'
+    prefix: feature/
+  - label: '🛠 refactor'
+    prefix: refactor/
+  - label: '🐞 bug'
+    prefix: bugfix/
+  - label: '*'
+    prefix: issues/
+autoCloseIssue: true
