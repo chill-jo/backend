@@ -1,7 +1,8 @@
 package com.example.surveyapp.domain.survey.entity;
 
 import com.example.surveyapp.domain.survey.dto.request.SurveyUpdateRequestDto;
-import com.example.surveyapp.global.response.entity.BaseEntity;
+import com.example.surveyapp.domain.user.domain.model.User;
+import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,10 +22,9 @@ public class Survey extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    User 도메인 추가 후 사용
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id", nullable = false)
-//    private User user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     private String title;
 
@@ -47,6 +47,4 @@ public class Survey extends BaseEntity {
     public void updateSurvey(SurveyUpdateRequestDto requestDto){
 
     }
-
-
 }
