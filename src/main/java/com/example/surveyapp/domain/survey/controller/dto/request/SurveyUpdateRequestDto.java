@@ -25,9 +25,6 @@ public class SurveyUpdateRequestDto {
     @Min(value = 10, message = "인당 지급 포인트는 최소 10포인트입니다.")
     private Long pointPerPerson;
 
-    @Min(value = 100, message = "총 지급 포인트는 최소 100포인트입니다.")
-    private Long totalPoint;
-
     private LocalDateTime deadline;
 
     @Range(min = 1, max = 120, message = "예상 소요시간은 1분 이상, 120분 이하여야 합니다.")
