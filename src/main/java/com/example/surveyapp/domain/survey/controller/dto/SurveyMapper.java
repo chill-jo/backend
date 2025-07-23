@@ -3,7 +3,6 @@ package com.example.surveyapp.domain.survey.controller.dto;
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyCreateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyUpdateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.SurveyResponseDto;
-import com.example.surveyapp.domain.survey.domain.model.entity.SurveyStatus;
 import com.example.surveyapp.domain.survey.domain.model.entity.Survey;
 import com.example.surveyapp.domain.user.domain.model.User;
 import org.mapstruct.*;
