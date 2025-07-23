@@ -7,7 +7,7 @@ import com.example.surveyapp.domain.survey.controller.dto.response.PageSurveyRes
 import com.example.surveyapp.domain.survey.controller.dto.response.SurveyResponseDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.SurveyStatusResponseDto;
 import com.example.surveyapp.domain.survey.domain.model.entity.Survey;
-import com.example.surveyapp.domain.survey.domain.model.entity.SurveyStatus;
+import com.example.surveyapp.domain.survey.domain.model.enums.SurveyStatus;
 import com.example.surveyapp.domain.survey.service.SurveyService;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.global.response.ApiResponse;
@@ -15,7 +15,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
