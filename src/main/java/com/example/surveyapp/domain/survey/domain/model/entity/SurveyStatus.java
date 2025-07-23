@@ -1,7 +1,6 @@
-package com.example.surveyapp.domain.survey.entity;
+package com.example.surveyapp.domain.survey.domain.model.entity;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 
