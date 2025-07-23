@@ -20,7 +20,7 @@ public enum ErrorCode {
 
     //상품
     NOT_FOUND_PRODUCT(HttpStatus.UNAUTHORIZED,"존재하지 않는 상품입니다." ),
-
+    NOT_SAME_PRODUCT_TITLE(HttpStatus.BAD_REQUEST,"동일한 상품명으로 수정이 불가합니다."),
     //설문 에러
     SURVEY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 설문입니다."),
     SURVEY_ALREADY_DELETED(HttpStatus.GONE, "이미 삭제된 설문입니다."),

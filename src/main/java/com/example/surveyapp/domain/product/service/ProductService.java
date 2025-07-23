@@ -3,10 +3,10 @@ package com.example.surveyapp.domain.product.service;
 import com.example.surveyapp.domain.product.controller.dto.ProductCreateRequestDto;
 import com.example.surveyapp.domain.product.controller.dto.ProductCreateResponseDto;
 import com.example.surveyapp.domain.product.controller.dto.ProductResponseDto;
+import com.example.surveyapp.domain.product.controller.dto.ProductUpdateRequestDto;
 import com.example.surveyapp.domain.product.model.Product;
 import com.example.surveyapp.domain.product.model.Status;
 import com.example.surveyapp.domain.product.model.repository.ProductRepository;
-import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
 import com.example.surveyapp.global.response.exception.CustomException;
 import com.example.surveyapp.global.response.exception.ErrorCode;
@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -79,5 +80,27 @@ public class ProductService {
         Product product= productRepository.findByIdAndStatusAndIsDeletedFalse(id,Status.ON_SALE)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PRODUCT));
         return ProductResponseDto.from(product);
+    }
+
+    @Transactional
+    public void updateProduct(Long id, ProductUpdateRequestDto requestDto) {
+
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PRODUCT));
+
+        if (!product.getTitle().equals(requestDto.getTitle())) {
+            boolean onlyOne = productRepository.existsByTitleAndIsDeletedFalse(requestDto.getTitle());
+            if (onlyOne){
+                throw new CustomException(ErrorCode.NOT_SAME_PRODUCT_TITLE);
+            }
+        }
+
+        product.update(
+                requestDto.getTitle(),
+                requestDto.getPrice(),
+                requestDto.getContent(),
+                requestDto.getStatus());
+
     }
 }

@@ -15,4 +15,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findAllByStatusAndIsDeletedFalse(Status status, Pageable pageable);
 
     Optional<Product> findByIdAndStatusAndIsDeletedFalse(Long id, Status status);
+
+    //동일한 상품명 찾는 메서드
+    boolean existsByTitleAndIsDeletedFalse(String title);
 }
