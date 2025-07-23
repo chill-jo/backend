@@ -19,6 +19,6 @@ public class QuestionCreateRequestDto {
     private final String content;
 
     @NotNull(message = "질문 유형은 필수입니다.")
-    private final QuestionType questionType;
+    private final QuestionType type;
 
 }
