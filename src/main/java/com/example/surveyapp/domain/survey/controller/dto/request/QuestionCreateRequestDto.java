@@ -9,7 +9,7 @@ import org.hibernate.validator.constraints.Length;
 
 @Getter
 @AllArgsConstructor
-public class QuestionCreateRequest {
+public class QuestionCreateRequestDto {
 
     @NotNull(message = "질문 번호는 필수입니다.")
     private final Long number;
