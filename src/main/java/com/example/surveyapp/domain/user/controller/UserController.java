@@ -1,0 +1,50 @@
+package com.example.surveyapp.domain.user.controller;
+
+import com.example.surveyapp.domain.user.controller.dto.UserRequestDto;
+import com.example.surveyapp.domain.user.controller.dto.UserResponseDto;
+import com.example.surveyapp.domain.user.domain.model.User;
+import com.example.surveyapp.domain.user.service.UserService;
+import com.example.surveyapp.global.response.ApiResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api")
+public class UserController {
+    private final UserService userService;
+
+    // 인증인가 도입 후 AuthenticationPrincipal로 변경
+    @GetMapping("/my-page")
+    public ResponseEntity<ApiResponse<UserResponseDto>> getMyInfo(
+            @RequestParam("userId") Long userId
+    ) {
+        User user = userService.getMyInfo(userId);
+        return ResponseEntity.ok(ApiResponse.success("회원 정보 조회 성공", userData(user)));
+    }
+
+    // "
+    @PatchMapping("/my-page")
+    public ResponseEntity<ApiResponse<UserResponseDto>> updateMyInfo(
+            @RequestParam("userId") Long userId,
+            @Valid @RequestBody UserRequestDto requestDto
+    ) {
+        User user = userService.updateMyInfo(userId, requestDto);
+        return ResponseEntity.ok(ApiResponse.success("회원 정보 수정 성공", userData(user)));
+    }
+
+    // 인증인가 도입 후 CustomUserDetails로 변경
+    private UserResponseDto userData(User user) {
+        return UserResponseDto.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .name(user.getName())
+                .nickname(user.getNickname())
+                .build();
+    }
+}
