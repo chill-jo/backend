@@ -5,8 +5,10 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -27,4 +29,8 @@ public class Options extends BaseEntity {
     @Column(nullable = false, length = 255)
     private String content;
 
+    public Options(Long number, String content){
+        this.number = number;
+        this.content = content;
+    }
 }
