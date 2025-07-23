@@ -15,7 +15,10 @@ public enum ErrorCode {
 
 
 
-    NOT_ADMIN_USER_ERROR(HttpStatus.UNAUTHORIZED,"관리자 계정으로 로그인하세요.");
+    NOT_ADMIN_USER_ERROR(HttpStatus.UNAUTHORIZED,"관리자 계정으로 로그인하세요."),
+
+    // admin
+    BLACKLIST_BAD_REQUEST(HttpStatus.BAD_REQUEST, "해당 회원 정보가 없습니다.");
 
 
     private final HttpStatus status;
