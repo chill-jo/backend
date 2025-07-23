@@ -3,6 +3,7 @@ package com.example.surveyapp.domain.product.controller;
 import com.example.surveyapp.domain.product.controller.dto.ProductCreateRequestDto;
 import com.example.surveyapp.domain.product.controller.dto.ProductCreateResponseDto;
 import com.example.surveyapp.domain.product.controller.dto.ProductResponseDto;
+import com.example.surveyapp.domain.product.controller.dto.ProductUpdateRequestDto;
 import com.example.surveyapp.domain.product.model.Status;
 import com.example.surveyapp.domain.product.service.ProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -132,6 +133,37 @@ class ProductControllerTest {
     }
 
     @Test
-    void 상품을_수정한다() {
+    @DisplayName("상품을 수정 한다.")
+    @WithMockUser(username = "김도한", roles = "ADMIN")
+    void 상품을_수정한다() throws Exception{
+        // Given
+        //테스트 전제 조건 및 환경 설정
+        Long productId = 1L;
+        Long userId = 1L;
+        ProductUpdateRequestDto requestDto = new ProductUpdateRequestDto("변경된 상품명", 2500, "변경된 상품설명", Status.ON_SALE);
+
+        doNothing().when(productService).updateProduct(eq(productId), any(ProductUpdateRequestDto.class), eq(userId));
+
+        // When
+        //실행할 행동
+        ResultActions actions = mockMvc.perform(patch("/api/products/{id}", productId)
+                .param("userId", "1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDto)));
+
+        // Then
+        //검증 사항
+        verify(productService,times(1))
+                .updateProduct(eq(productId), any(ProductUpdateRequestDto.class), eq(userId));
+        actions.andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("상품을 삭제 한다.")
+    @WithMockUser(username = "김도한", roles = "ADMIN")
+    void 상품을_삭제한다() throws Exception{
+
     }
 }
