@@ -12,10 +12,10 @@ public class ErrorResponseDto {
     private final String errorCode;
     private final String message;
 
-    public ErrorResponseDto(ErrorCode errorCode) {
+    public ErrorResponseDto(ErrorCode errorCode, String message) {
         this.status = errorCode.getStatus().value();
         this.errorCode = errorCode.name();
-        this.message = errorCode.getMessage();
+        this.message = message;
     }
 
 }
