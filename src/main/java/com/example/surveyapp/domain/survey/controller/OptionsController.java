@@ -1,6 +1,7 @@
 package com.example.surveyapp.domain.survey.controller;
 
 import com.example.surveyapp.domain.survey.controller.dto.request.OptionCreateRequestDto;
+import com.example.surveyapp.domain.survey.controller.dto.request.OptionUpdateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.OptionResponseDto;
 import com.example.surveyapp.domain.survey.service.OptionsService;
 import com.example.surveyapp.global.response.ApiResponse;
@@ -39,7 +40,8 @@ public class OptionsController {
     public ResponseEntity<ApiResponse<OptionResponseDto>> updateOption(
             @PathVariable Long surveyId,
             @PathVariable Long questionId,
-            @PathVariable Long optionId
+            @PathVariable Long optionId,
+            @RequestBody OptionUpdateRequestDto requestDto
     ){
 
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "선택지가 수정되었습니다.", null));
