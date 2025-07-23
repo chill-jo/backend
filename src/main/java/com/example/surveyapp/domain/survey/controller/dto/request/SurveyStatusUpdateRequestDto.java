@@ -1,6 +1,6 @@
 package com.example.surveyapp.domain.survey.controller.dto.request;
 
-import com.example.surveyapp.domain.survey.domain.model.entity.SurveyStatus;
+import com.example.surveyapp.domain.survey.domain.model.enums.SurveyStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;

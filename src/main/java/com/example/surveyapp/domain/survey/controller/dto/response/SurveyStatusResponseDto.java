@@ -1,7 +1,6 @@
 package com.example.surveyapp.domain.survey.controller.dto.response;
 
-import com.example.surveyapp.domain.survey.controller.dto.request.SurveyStatusUpdateRequestDto;
-import com.example.surveyapp.domain.survey.domain.model.entity.SurveyStatus;
+import com.example.surveyapp.domain.survey.domain.model.enums.SurveyStatus;
 import lombok.Getter;
 
 @Getter
