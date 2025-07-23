@@ -1,5 +1,6 @@
 package com.example.surveyapp.domain.survey.domain.model.entity;
 
+import com.example.surveyapp.domain.survey.domain.model.enums.SurveyStatus;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;

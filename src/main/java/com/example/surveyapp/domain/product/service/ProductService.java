@@ -2,16 +2,26 @@ package com.example.surveyapp.domain.product.service;
 
 import com.example.surveyapp.domain.product.controller.dto.ProductCreateRequestDto;
 import com.example.surveyapp.domain.product.controller.dto.ProductCreateResponseDto;
+import com.example.surveyapp.domain.product.controller.dto.ProductResponseDto;
+import com.example.surveyapp.domain.product.controller.dto.ProductUpdateRequestDto;
 import com.example.surveyapp.domain.product.model.Product;
+import com.example.surveyapp.domain.product.model.Status;
 import com.example.surveyapp.domain.product.model.repository.ProductRepository;
+import com.example.surveyapp.domain.user.domain.model.User;
+import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
+import com.example.surveyapp.domain.user.domain.repository.UserRepository;
 import com.example.surveyapp.global.response.exception.CustomException;
 import com.example.surveyapp.global.response.exception.ErrorCode;
 
 import lombok.AllArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -19,22 +29,24 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
 
     /**
      * @param dto         생성 요청 DTO
-     * @param userDetails 인증된 사용자 정보 가져오기(관리자만)
+     * @param userId 인증된 사용자 정보 가져오기(관리자만)
      * @return
      * @PreAuthorize("hashRole('ADMIN')") ADMIN 관리자만 생성 할 수 있도록
      */
-    @PreAuthorize("hasRole('ADMIN')")
-    @Transactional
-    public ProductCreateResponseDto createProduct(ProductCreateRequestDto dto, UserDetails userDetails) {
 
-        if (userDetails == null) {
+    @Transactional
+    public ProductCreateResponseDto createProduct(ProductCreateRequestDto dto, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        if (user.getUserRole() != UserRoleEnum.ADMIN) {
             throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
         }
-
         Product product = Product.builder()
                 .title(dto.getTitle())
                 .content(dto.getContent())
@@ -44,6 +56,55 @@ public class ProductService {
 
         Product saved = productRepository.save(product);
         return ProductCreateResponseDto.from(saved);
+
+    }
+
+    /**
+     *
+     * @param page
+     * @param size
+     * @return
+     */
+    public List<ProductResponseDto> readAllProduct(int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Product> products = productRepository.findAllByStatusAndIsDeletedFalse(Status.ON_SALE,pageable);
+
+        List<Product> productList = products.getContent();
+
+        return productList.stream()
+                .map(ProductResponseDto::from)
+                .toList();
+    }
+
+
+    public ProductResponseDto readOneProduct(Long id) {
+
+        Product product= productRepository.findByIdAndStatusAndIsDeletedFalse(id,Status.ON_SALE)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PRODUCT));
+        return ProductResponseDto.from(product);
+    }
+
+    @Transactional
+    public void updateProduct(Long id, ProductUpdateRequestDto requestDto) {
+
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PRODUCT));
+
+        if (!product.getTitle().equals(requestDto.getTitle())) {
+            boolean onlyOne = productRepository.existsByTitleAndIsDeletedFalse(requestDto.getTitle());
+            if (onlyOne){
+                throw new CustomException(ErrorCode.NOT_SAME_PRODUCT_TITLE);
+            }
+        }
+
+        product.update(
+                requestDto.getTitle(),
+                requestDto.getPrice(),
+                requestDto.getContent(),
+                requestDto.getStatus());
 
     }
 }

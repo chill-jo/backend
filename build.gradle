@@ -36,10 +36,10 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // jwt
-    compileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.12.5'
-    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.12.5'
-    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.12.5'
-    testRuntimeOnly 'com.h2database:h2'
+//    compileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.12.5'
+//    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.12.5'
+//    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.12.5'
+//    testRuntimeOnly 'com.h2database:h2'
 
 // query-dsl 5.1.0
 //    implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
