@@ -1,7 +1,11 @@
 package com.example.surveyapp.domain.survey.controller;
 
+import com.example.surveyapp.domain.survey.controller.dto.request.QuestionCreateRequestDto;
+import com.example.surveyapp.domain.survey.controller.dto.request.QuestionUpdateRequestDto;
+import com.example.surveyapp.domain.survey.controller.dto.response.QuestionResponseDto;
 import com.example.surveyapp.domain.survey.service.QuestionService;
 import com.example.surveyapp.global.response.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,26 +18,40 @@ public class QuestionController {
 
     private final QuestionService questionService;
 
+    //***인증인가 추가 후 userId 부분 수정***
     @PostMapping("/{surveyId}")
-    public ResponseEntity<ApiResponse<Void>> createQuestion(
-            @PathVariable Long surveyId
-    ){
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, "질문이 생성되었습니다.", null));
-    }
-
-    @PatchMapping("/{surveyId}/question/{questionId}")
-    public ResponseEntity<ApiResponse<Void>> updateQuestion(
+    public ResponseEntity<ApiResponse<QuestionResponseDto>> createQuestion(
+            Long userId,
             @PathVariable Long surveyId,
-            @PathVariable Long questionId
+            @Valid @RequestBody QuestionCreateRequestDto requestDto
     ){
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "질문이 수정되었습니다.", null));
+        QuestionResponseDto responseDto = questionService.createQuestion(userId, surveyId, requestDto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, "질문이 생성되었습니다.", responseDto));
     }
 
+    //***인증인가 추가 후 userId 부분 수정***
+    @PatchMapping("/{surveyId}/question/{questionId}")
+    public ResponseEntity<ApiResponse<QuestionResponseDto>> updateQuestion(
+            Long userId,
+            @PathVariable Long surveyId,
+            @PathVariable Long questionId,
+            @Valid @RequestBody QuestionUpdateRequestDto requestDto
+            ){
+        QuestionResponseDto responseDto = questionService.updateQuestion(userId, surveyId, questionId, requestDto);
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "질문이 수정되었습니다.", responseDto));
+    }
+
+    //***인증인가 추가 후 userId 부분 수정***
     @DeleteMapping("/{surveyId}/question/{questionId}")
     public ResponseEntity<ApiResponse<Void>> deleteQuestion(
+            Long userId,
             @PathVariable Long surveyId,
             @PathVariable Long questionId
     ){
+        questionService.deleteQuestion(userId, surveyId, questionId);
+
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "질문이 삭제되었습니다.", null));
     }
 }
