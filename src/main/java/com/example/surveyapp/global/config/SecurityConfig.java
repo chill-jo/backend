@@ -20,6 +20,10 @@ public class SecurityConfig {
                 // HTTP Basic 인증 비활성화
                 .httpBasic(AbstractHttpConfigurer::disable)
                 // 세션을 사용하지 않고 JWT 등 stateless 방식 사용 예정
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/**"  ).permitAll()
+                        .anyRequest().authenticated()
+                )
                 .sessionManagement(it -> it.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }
