@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "options")
+@Table(name = "options" )
 public class Options extends BaseEntity {
 
     @Id

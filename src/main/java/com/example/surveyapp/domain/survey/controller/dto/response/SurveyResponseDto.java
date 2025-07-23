@@ -1,11 +1,14 @@
 package com.example.surveyapp.domain.survey.controller.dto.response;
 
 import com.example.surveyapp.domain.survey.domain.model.entity.SurveyStatus;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
+@Getter
 public class SurveyResponseDto {
     private final Long id;
 
