@@ -58,7 +58,13 @@ public class ProductController {
                .body(ApiResponse.success("상품을 조회하였습니다.",product));
     }
 
-    //추후에 ADMIN 계정 확인 예외 처리도 해야함
+    /**
+     * 추후에 ADMIN 계정 확인 예외 처리도 해야함
+     * @param id
+     * @param requestDto
+     * @return
+     */
+
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<ProductResponseDto>> update(@PathVariable Long id,
