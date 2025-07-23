@@ -1,4 +1,4 @@
-package com.example.surveyapp.domain.survey.domain.model.entity;
+package com.example.surveyapp.domain.survey.domain.model.enums;
 
 import lombok.Getter;
 

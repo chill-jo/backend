@@ -26,7 +26,7 @@ public class BlackList {
 
     @CreatedDate
     @Column(updatable = false)
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
     public BlackList(User userId) {
         this.userId = userId;
