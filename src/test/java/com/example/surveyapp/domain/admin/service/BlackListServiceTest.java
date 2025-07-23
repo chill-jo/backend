@@ -4,13 +4,16 @@ import com.example.surveyapp.domain.admin.domain.model.BlackList;
 import com.example.surveyapp.domain.admin.domain.repository.BlackListRepository;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.domain.user.domain.repository.UserRepository;
+import com.example.surveyapp.global.response.ApiResponse;
 import com.example.surveyapp.global.response.exception.CustomException;
+import com.example.surveyapp.global.response.exception.ErrorCode;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 
 import java.util.Optional;
@@ -44,29 +47,40 @@ class BlackListServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         // when
-        User blackUser = blackListService.addBlackList(userId);
+        ApiResponse<HttpStatus> result = blackListService.addBlackList(userId);
 
         // then
-        Assertions.assertThat(blackUser).isNotNull();
+        Assertions.assertThat(result.getMessage()).isEqualTo("블랙리스트에 등록되었습니다.");
 
     }
 
     @Test
-    void 블랙리스트_등록을_실패한다() {
+    void 블랙리스트_등록을_실패한다1() {
 
         // given
         Long userId = 1L;
 
-        // when & then
-        try {
-            blackListService.addBlackList(userId);
-        } catch (CustomException e) {
-            Assertions.assertThatExceptionOfType(CustomException.class)
-                    .isThrownBy(() -> {
-                        throw e;
-                    }).withMessageContaining("해당 회원 정보가 없습니다.");
-        }
+        // when
+        ApiResponse<HttpStatus> result = blackListService.addBlackList(userId);
 
+        // then
+        Assertions.assertThat(result.getMessage()).isEqualTo(ErrorCode.BLACKLIST_BAD_REQUEST1.getMessage());
+
+    }
+
+    @Test
+    void 블랙리스트_등록을_실패한다2() {
+
+        // given
+        Long userId = 1L;
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(blackListRepository.findByUserId(user)).thenReturn(Optional.of(blackList));
+
+        // when
+        ApiResponse<HttpStatus> result = blackListService.addBlackList(userId);
+
+        // then
+        Assertions.assertThat(result.getMessage()).isEqualTo(ErrorCode.BLACKLIST_BAD_REQUEST2.getMessage());
 
     }
 
@@ -80,10 +94,11 @@ class BlackListServiceTest {
         when(blackListRepository.findByUserId(user)).thenReturn(Optional.of(blackList));
 
         // when
-        User blackUser = blackListService.deleteBlackList(userId);
+        ApiResponse<HttpStatus> result = blackListService.deleteBlackList(userId);
+
 
         // then
-        Assertions.assertThat(blackUser).isNull();
+        Assertions.assertThat(result.getMessage()).isEqualTo("블랙리스트에서 삭제되었습니다.");
 
     }
 
@@ -93,15 +108,12 @@ class BlackListServiceTest {
         // given
         Long userId = 1L;
 
-        // when & then
-        try {
-            blackListService.deleteBlackList(userId);
-        } catch (CustomException e) {
-            Assertions.assertThatExceptionOfType(CustomException.class)
-                    .isThrownBy(() -> {
-                        throw e;
-                    }).withMessageContaining("해당 회원 정보가 없습니다.");
-        }
+        // when
+        ApiResponse<HttpStatus> result = blackListService.deleteBlackList(userId);
+
+
+        // then
+        Assertions.assertThat(result.getMessage()).isEqualTo(ErrorCode.BLACKLIST_BAD_REQUEST1.getMessage());
 
     }
 
@@ -112,15 +124,12 @@ class BlackListServiceTest {
         Long userId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        // when & then
-        try {
-            blackListService.deleteBlackList(userId);
-        } catch (CustomException e) {
-            Assertions.assertThatExceptionOfType(CustomException.class)
-                    .isThrownBy(() -> {
-                        throw e;
-                    }).withMessageContaining("해당 회원은 블랙이 아닙니다.");
-        }
+        // when
+        ApiResponse<HttpStatus> result = blackListService.deleteBlackList(userId);
+
+
+        // then
+        Assertions.assertThat(result.getMessage()).isEqualTo(ErrorCode.BLACKLIST_BAD_REQUEST3.getMessage());
 
     }
 

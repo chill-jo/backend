@@ -1,9 +1,9 @@
 package com.example.surveyapp.domain.admin.controller;
 
 import com.example.surveyapp.domain.admin.service.BlackListService;
-import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,8 +21,8 @@ public class BlackListController {
      * @return user 블랙리스트 등록된 유저 정보
      */
     @PostMapping("/black/{userId}")
-    public ResponseEntity<ApiResponse<User>> addBlackList(@PathVariable Long userId) {
-        return ResponseEntity.ok(ApiResponse.success("블랙리스트에 등록되었습니다.", blackListService.addBlackList(userId)));
+    public ResponseEntity<ApiResponse<HttpStatus>> addBlackList(@PathVariable Long userId) {
+        return ResponseEntity.ok(blackListService.addBlackList(userId));
     }
 
 
@@ -33,8 +33,8 @@ public class BlackListController {
      * @return user 블랙리스트 삭제된 유저 정보
      */
     @DeleteMapping("/black/{userId}")
-    public ResponseEntity<ApiResponse<User>> deleteBlackList(@PathVariable Long userId) {
-        return ResponseEntity.ok(ApiResponse.success("블랙리스트에서 삭제되었습니다.", blackListService.deleteBlackList(userId)));
+    public ResponseEntity<ApiResponse<HttpStatus>> deleteBlackList(@PathVariable Long userId) {
+        return ResponseEntity.ok(blackListService.deleteBlackList(userId));
     }
 
 }
