@@ -19,7 +19,7 @@ public enum ErrorCode {
     EXISTS_NICKNAME(HttpStatus.CONFLICT, "이미 존재하는 별명입니다."),
 
     //상품
-    NOT_ADMIN_USER_ERROR(HttpStatus.UNAUTHORIZED,"관리자 계정으로 로그인하세요."),
+    NOT_FOUND_PRODUCT(HttpStatus.UNAUTHORIZED,"존재하지 않는 상품입니다." ),
 
     //설문 에러
     SURVEY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 설문입니다."),
@@ -29,8 +29,12 @@ public enum ErrorCode {
     SURVEY_CANNOT_BE_MODIFIED(HttpStatus.CONFLICT, "설문 상세정보를 수정할 수 없습니다."),
 
     // admin
-    BLACKLIST_BAD_REQUEST(HttpStatus.BAD_REQUEST, "해당 회원 정보가 없습니다."),
-    NOT_FOUND_PRODUCT(HttpStatus.UNAUTHORIZED,"존재하지 않는 상품입니다." );
+    NOT_ADMIN_USER_ERROR(HttpStatus.UNAUTHORIZED,"관리자 계정으로 로그인하세요."),
+
+
+    BLACKLIST_BAD_REQUEST1(HttpStatus.BAD_REQUEST, "해당 회원 정보가 없습니다."),
+    BLACKLIST_BAD_REQUEST2(HttpStatus.BAD_REQUEST, "해당 회원은 이미 블랙입니다."),
+    BLACKLIST_BAD_REQUEST3(HttpStatus.BAD_REQUEST, "해당 회원은 블랙이 아닙니다.");
 
     private final HttpStatus status;
     private final String message;
