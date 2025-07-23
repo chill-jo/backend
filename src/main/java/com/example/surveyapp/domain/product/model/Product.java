@@ -30,6 +30,7 @@ public class Product extends BaseEntity {
     private Status status;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean isDeleted = false;
 
     public void delete() {
