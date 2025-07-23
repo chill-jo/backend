@@ -54,8 +54,6 @@ public class Survey extends BaseEntity {
     @Column(nullable = false)
     private boolean deleted;
 
-    public void deleteSurvey(){
-        this.deleted = true;
-    }
+    public void deleteSurvey(){ this.deleted = true; }
     public void updateSurveyStatus(SurveyStatus newStatus) {this.status = newStatus;}
 }
