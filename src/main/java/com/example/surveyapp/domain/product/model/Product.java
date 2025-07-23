@@ -35,4 +35,11 @@ public class Product extends BaseEntity {
     public void setDeleted() {
         this.isDeleted = true;
     }
+
+    public void update(String title, int price, String content, Status status) {
+        this.title = title;
+        this.price = price;
+        this.content = content;
+        this.status = status;
+    }
 }
