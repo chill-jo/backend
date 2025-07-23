@@ -80,10 +80,10 @@ public class ProductController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id,
+    public ResponseEntity<ApiResponse<?>> delete(@PathVariable Long id,
                                     @RequestParam("userId") Long userId) {
         productService.deleteProduct(id,userId);
         return ResponseEntity.status(HttpStatus.OK)
-                .body("상품이 삭제 됐습니다.");
+                .body(ApiResponse.success( "상품이 삭제 됐습니다.",null));
     }
 }

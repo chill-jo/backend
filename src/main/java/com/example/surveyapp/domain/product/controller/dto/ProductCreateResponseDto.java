@@ -7,6 +7,8 @@ import lombok.Getter;
 @Getter
 public class ProductCreateResponseDto {
 
+    private Long id;
+
     private String title;
 
     private int price;
@@ -14,9 +16,17 @@ public class ProductCreateResponseDto {
     private Status status;
 
     public ProductCreateResponseDto(Product product) {
+        this.id =product.getId();
         this.title = product.getTitle();
         this.price = product.getPrice();
         this.status = product.getStatus();
+    }
+
+    public ProductCreateResponseDto(Long id, String title, int price, Status status) {
+        this.id = id;
+        this.title = title;
+        this.price = price;
+        this.status = status;
     }
 
     public static ProductCreateResponseDto from(Product product) {
