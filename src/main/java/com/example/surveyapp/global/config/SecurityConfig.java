@@ -15,10 +15,14 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
+                .csrf(AbstractHttpConfigurer::disable)
                 // 폼 로그인 비활성화 (기본 로그인 화면 제거)
                 .formLogin(AbstractHttpConfigurer::disable)
                 // HTTP Basic 인증 비활성화
                 .httpBasic(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/**").permitAll()
+                        .anyRequest().authenticated())
                 // 세션을 사용하지 않고 JWT 등 stateless 방식 사용 예정
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/**"  ).permitAll()

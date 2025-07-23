@@ -2,6 +2,7 @@ package com.example.surveyapp.global.response.exception;
 
 import com.example.surveyapp.global.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -13,12 +14,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<ErrorResponseDto>> handleCustomException(CustomException e) {
 
         ErrorCode errorCode = e.getErrorCode();
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto(errorCode);
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(errorCode, e.getMessage());
 
-        log.warn("[클라이언트 예외 발생] {} - {}", errorCode.name(), errorCode.getMessage());
+        log.warn("[클라이언트 예외 발생] {} - {}", errorCode.name(), e.getMessage());
 
         return ResponseEntity
                 .status(errorCode.getStatus())
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(ApiResponse.fail(errorResponseDto.getMessage(), errorResponseDto));
     }
 }

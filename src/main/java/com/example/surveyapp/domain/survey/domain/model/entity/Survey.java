@@ -1,7 +1,5 @@
-package com.example.surveyapp.domain.survey.entity;
+package com.example.surveyapp.domain.survey.domain.model.entity;
 
-import com.example.surveyapp.domain.survey.dto.request.SurveyStatusUpdateRequestDto;
-import com.example.surveyapp.domain.survey.dto.request.SurveyUpdateRequestDto;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -10,7 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -55,10 +52,8 @@ public class Survey extends BaseEntity {
     private SurveyStatus status;
 
     @Column(nullable = false)
-    private boolean isDeleted;
+    private boolean deleted;
 
-    public void deleteSurvey(){
-        this.isDeleted = true;
-    }
-
+    public void deleteSurvey(){ this.deleted = true; }
+    public void updateSurveyStatus(SurveyStatus newStatus) {this.status = newStatus;}
 }

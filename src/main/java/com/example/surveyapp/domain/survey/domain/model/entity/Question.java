@@ -1,4 +1,4 @@
-package com.example.surveyapp.domain.survey.entity;
+package com.example.surveyapp.domain.survey.domain.model.entity;
 
 import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
