@@ -73,4 +73,15 @@ public class ProductController {
        return ResponseEntity.status(HttpStatus.OK)
                .body(ApiResponse.success("상품이 수정 되었습니다.",null));
     }
+
+    /**
+     * 삭제
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        productService.deleteProduct(id);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body("상품이 삭제 됐습니다.");
+    }
 }

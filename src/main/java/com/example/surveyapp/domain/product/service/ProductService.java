@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -38,7 +37,6 @@ public class ProductService {
      * @return
      * @PreAuthorize("hashRole('ADMIN')") ADMIN 관리자만 생성 할 수 있도록
      */
-
     @Transactional
     public ProductCreateResponseDto createProduct(ProductCreateRequestDto dto, Long userId) {
         User user = userRepository.findById(userId)
@@ -106,5 +104,13 @@ public class ProductService {
                 requestDto.getContent(),
                 requestDto.getStatus());
 
+    }
+
+    @Transactional
+    public void deleteProduct(Long id) {
+        Product product = productRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PRODUCT));
+
+        product.delete();
     }
 }
