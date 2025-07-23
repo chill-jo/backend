@@ -3,8 +3,10 @@ package com.example.surveyapp.domain.survey.controller;
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyCreateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyStatusUpdateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyUpdateRequestDto;
+import com.example.surveyapp.domain.survey.controller.dto.response.PageSurveyResponseDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.SurveyResponseDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.SurveyStatusResponseDto;
+import com.example.surveyapp.domain.survey.domain.model.entity.Survey;
 import com.example.surveyapp.domain.survey.domain.model.entity.SurveyStatus;
 import com.example.surveyapp.domain.survey.service.SurveyService;
 import com.example.surveyapp.domain.user.domain.model.User;
@@ -32,11 +34,16 @@ public class SurveyController {
         return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, "설문이 생성되었습니다.", responseDto));
     }
 
-    //설문 목록 조회
+    //설문 목록 조회(정렬 없이 삭제된 설문만 제외)
     @GetMapping
-    public ResponseEntity<ApiResponse<Void>> getSurveys(){
+    public ResponseEntity<ApiResponse<PageSurveyResponseDto<SurveyResponseDto>>> getSurveys(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "설문 목록을 조회했습니다.", null));
+        PageSurveyResponseDto<SurveyResponseDto> pagedSurveys = surveyService.getSurveys(page, size);
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "설문 목록을 조회했습니다.", pagedSurveys));
     }
 
     //설문 상세정보 수정

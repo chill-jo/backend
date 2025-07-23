@@ -15,10 +15,16 @@ public interface SurveyMapper {
     @Mapping(target = "user", source = "user")
     @Mapping(target = "status", expression = "java(SurveyStatus.NOT_STARTED)")
     @Mapping(target = "deleted", constant = "false")
+    @Mapping(target = "totalPoint", expression = "java(dto.getMaxSurveyee() * dto.getPointPerPerson())")
     Survey createSurveyEntity(SurveyCreateRequestDto dto, User user);
 
     SurveyResponseDto toResponseDto(Survey survey);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "totalPoint", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateSurvey(SurveyUpdateRequestDto dto, @MappingTarget Survey survey);
 

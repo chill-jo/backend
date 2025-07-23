@@ -4,6 +4,7 @@ import com.example.surveyapp.domain.survey.controller.dto.SurveyMapper;
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyCreateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyStatusUpdateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyUpdateRequestDto;
+import com.example.surveyapp.domain.survey.controller.dto.response.PageSurveyResponseDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.SurveyResponseDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.SurveyStatusResponseDto;
 import com.example.surveyapp.domain.survey.domain.model.entity.Survey;
@@ -13,7 +14,11 @@ import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.global.response.exception.CustomException;
 import com.example.surveyapp.global.response.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,9 +37,17 @@ public class SurveyService {
     }
 
     //삭제되지 않은 설문만
-//    public SurveyResponseDto getSurveys(){
-//
-//    }
+    @Transactional(readOnly = true)
+    public PageSurveyResponseDto<SurveyResponseDto> getSurveys(int page, int size){
+        Pageable pageable = PageRequest.of(page,size);
+        Page<Survey> surveyPage = surveyRepository.findAllSurveyPaged(pageable);
+
+        Page<SurveyResponseDto> surveyResponseDtoPage = surveyPage.map(surveyMapper::toResponseDto);
+
+        return new PageSurveyResponseDto<>(surveyResponseDtoPage);
+    }
+
+
     public SurveyResponseDto updateSurvey(Long surveyId, SurveyUpdateRequestDto requestDto){
 
         Survey survey = surveyRepository.findByIdAndDeletedFalse(surveyId).orElseThrow(
@@ -46,6 +59,9 @@ public class SurveyService {
         }
 
         surveyMapper.updateSurvey(requestDto, survey);
+
+        Long totalPoint = survey.getPointPerPerson() * survey.getMaxSurveyee();
+        survey.setTotalPoint(totalPoint);
 
         surveyRepository.save(survey);
 
@@ -90,6 +106,7 @@ public class SurveyService {
         return new SurveyStatusResponseDto(survey.getStatus());
     }
 
+    @Transactional
     public void deleteSurvey(Long surveyId){
 
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(
