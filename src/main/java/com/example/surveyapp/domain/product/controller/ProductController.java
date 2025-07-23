@@ -3,6 +3,7 @@ package com.example.surveyapp.domain.product.controller;
 import com.example.surveyapp.domain.product.controller.dto.ProductCreateRequestDto;
 import com.example.surveyapp.domain.product.controller.dto.ProductCreateResponseDto;
 import com.example.surveyapp.domain.product.controller.dto.ProductResponseDto;
+import com.example.surveyapp.domain.product.controller.dto.ProductUpdateRequestDto;
 import com.example.surveyapp.domain.product.model.Product;
 import com.example.surveyapp.domain.product.service.ProductService;
 import com.example.surveyapp.global.response.ApiResponse;
@@ -55,5 +56,21 @@ public class ProductController {
        ProductResponseDto product = productService.readOneProduct(id);
        return ResponseEntity.status(HttpStatus.OK)
                .body(ApiResponse.success("상품을 조회하였습니다.",product));
+    }
+
+    /**
+     * 추후에 ADMIN 계정 확인 예외 처리도 해야함
+     * @param id
+     * @param requestDto
+     * @return
+     */
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}")
+    public ResponseEntity<ApiResponse<ProductResponseDto>> update(@PathVariable Long id,
+                                                                  @RequestBody ProductUpdateRequestDto requestDto){
+       productService.updateProduct(id,requestDto);
+       return ResponseEntity.status(HttpStatus.OK)
+               .body(ApiResponse.success("상품이 수정 되었습니다.",null));
     }
 }
