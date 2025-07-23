@@ -29,7 +29,10 @@ public enum ErrorCode {
     SURVEY_CANNOT_BE_MODIFIED(HttpStatus.CONFLICT, "설문 상세정보를 수정할 수 없습니다."),
 
     // admin
-    BLACKLIST_BAD_REQUEST(HttpStatus.BAD_REQUEST, "해당 회원 정보가 없습니다.");
+    BLACKLIST_BAD_REQUEST1(HttpStatus.BAD_REQUEST, "해당 회원 정보가 없습니다."),
+    BLACKLIST_BAD_REQUEST2(HttpStatus.BAD_REQUEST, "해당 회원은 이미 블랙입니다."),
+    BLACKLIST_BAD_REQUEST3(HttpStatus.BAD_REQUEST, "해당 회원은 블랙이 아닙니다.");
+
 
     private final HttpStatus status;
     private final String message;
@@ -38,4 +41,7 @@ public enum ErrorCode {
         this.status = status;
         this.message = message;
     }
+
+
+
 }
