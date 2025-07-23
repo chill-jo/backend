@@ -73,12 +73,13 @@ public class ProductService {
                 .toList();
     }
 
-//    public ProductResponseDto readOneProduct(Long id) {
-//        if (id == null || id.equals(UserRoleEnum.SURVEYOR)) {
-//            throw new CustomException(ErrorCode.)
-//        }
-//
-//        Product product= productRepository.findByStatusAndDeletedFalse(Status.ON_SALE,id);
-//        return null;
-//    }
+
+    public ProductResponseDto readOneProduct(Long id) {
+        if (id == null) {
+            throw new CustomException(ErrorCode.NOT_FOUND_USER,);
+        }
+
+        Product product= productRepository.findByOneStatusAndDeletedFalse(Status.ON_SALE,id).
+        return null;
+    }
 }

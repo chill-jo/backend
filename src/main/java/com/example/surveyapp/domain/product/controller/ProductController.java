@@ -48,12 +48,12 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success("전체 상품을 조회하였습니다.",products));
     }
-//
-//    @GetMapping("{id}")
-//    @PreAuthorize("hasRole('ADMIN,SURVEYEE')")
-//    public ResponseEntity<ApiResponse<ProductResponseDto>> getReadOne(@PathVariable Long id) {
-//       ProductResponseDto product = productService.readOneProduct(id);
-//       return ResponseEntity.status(HttpStatus.OK)
-//               .body(ApiResponse.success("상품을 조회하였습니다.",product));
-//    }
+
+    @GetMapping("{id}")
+    @PreAuthorize("hasRole('ADMIN,SURVEYEE')")
+    public ResponseEntity<ApiResponse<ProductResponseDto>> getReadOne(@PathVariable Long id) {
+       ProductResponseDto product = productService.readOneProduct(id);
+       return ResponseEntity.status(HttpStatus.OK)
+               .body(ApiResponse.success("상품을 조회하였습니다.",product));
+    }
 }

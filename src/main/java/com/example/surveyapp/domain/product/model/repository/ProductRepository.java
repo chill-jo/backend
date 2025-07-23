@@ -10,9 +10,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
-
-  
-    Page<Product> findAllByStatusAndDeletedFalse(Status status, Pageable pageable);
-
+    
     Page<Product> findAllByStatusAndIsDeletedFalse(Status status, Pageable pageable);
+
+    Product findByOneStatusAndDeletedFalse(Status status, Long id);
 }
