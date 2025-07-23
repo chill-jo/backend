@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/products")
 public class ProductControllerTest {
     // 상품 ID로 단건 조회 (mock 인증 포함)
-    @GetMapping("{id}")
+    @GetMapping("Test/{id}")
     ResponseEntity<String> getProductById(
             @PathVariable("id") Long id,
             @AuthenticationPrincipal UserDetails userDetails
