@@ -85,9 +85,13 @@ public class ProductService {
     }
 
     @Transactional
-    public void updateProduct(Long id, ProductUpdateRequestDto requestDto) {
+    public void updateProduct(Long id, ProductUpdateRequestDto requestDto, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
-
+        if (user.getUserRole() != UserRoleEnum.ADMIN) {
+            throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
+        }
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PRODUCT));
 
@@ -107,7 +111,13 @@ public class ProductService {
     }
 
     @Transactional
-    public void deleteProduct(Long id) {
+    public void deleteProduct(Long id, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        if (user.getUserRole() != UserRoleEnum.ADMIN) {
+            throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
+        }
         Product product = productRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PRODUCT));
 
