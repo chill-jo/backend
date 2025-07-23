@@ -8,6 +8,7 @@ import com.example.surveyapp.domain.product.model.Status;
 import com.example.surveyapp.domain.product.model.repository.ProductRepository;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
+import com.example.surveyapp.domain.user.domain.repository.UserRepository;
 import com.example.surveyapp.global.response.exception.CustomException;
 import com.example.surveyapp.global.response.exception.ErrorCode;
 
@@ -26,6 +27,7 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
 
     /**
@@ -38,7 +40,10 @@ public class ProductService {
     @Transactional
     public ProductCreateResponseDto createProduct(ProductCreateRequestDto dto, Long userId) {
 
-        if (userId == null || userId.equals(UserRoleEnum.ADMIN)) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        if (user.getUserRole() != UserRoleEnum.ADMIN) {
             throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
         }
 
