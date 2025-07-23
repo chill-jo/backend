@@ -2,16 +2,23 @@ package com.example.surveyapp.domain.survey.service;
 
 import com.example.surveyapp.domain.survey.controller.dto.request.QuestionCreateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.request.QuestionUpdateRequestDto;
+import com.example.surveyapp.domain.survey.controller.dto.response.PageQuestionResponseDto;
+import com.example.surveyapp.domain.survey.controller.dto.response.PageSurveyResponseDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.QuestionResponseDto;
 import com.example.surveyapp.domain.survey.domain.model.entity.Question;
 import com.example.surveyapp.domain.survey.domain.model.entity.Survey;
 import com.example.surveyapp.domain.survey.domain.model.enums.SurveyStatus;
 import com.example.surveyapp.domain.survey.domain.repository.QuestionRepository;
 import com.example.surveyapp.domain.survey.domain.repository.SurveyRepository;
+import com.example.surveyapp.domain.user.domain.model.User;
+import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
 import com.example.surveyapp.domain.user.domain.repository.UserRepository;
 import com.example.surveyapp.global.response.exception.CustomException;
 import com.example.surveyapp.global.response.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,8 +30,7 @@ public class QuestionService {
     private final SurveyRepository surveyRepository;
     private final UserRepository userRepository;
 
-    //설문 상태 확인하는거 만들어야할듯
-    //해당 설문 출제자인지 확인해야함
+    //해당 설문 출제자가 아닐 시 예외
     public void currentUserMatchesSurveyCreator(Long userId, Survey survey, String errorMessage){
         Long surveyCreatorId = survey.getUser().getId();
 
@@ -33,11 +39,20 @@ public class QuestionService {
         }
     }
 
+    //설문 상태가 진행 전이 아닐 때 생성, 수정, 삭제 시 예외
     public void isSurveyNotStarted(Survey survey, String errorMessage){
         SurveyStatus currentStatus = survey.getStatus();
 
         if(!currentStatus.equals(SurveyStatus.NOT_STARTED)){
             throw new RuntimeException(errorMessage);
+        }
+    }
+
+    //설문에 포함된 질문이 아닐 때 예외
+    public void isQuestionFromSurvey(Survey survey, Question question){
+
+        if(!survey.getId().equals(question.getSurvey().getId())){
+            throw new RuntimeException("질문이 설문에 존재하지 않습니다.");
         }
     }
 
@@ -60,6 +75,54 @@ public class QuestionService {
         return new QuestionResponseDto(question.getId(), question.getNumber(), question.getContent(), question.getType());
     }
 
+    //질문단건조회 (필요한가??)
+    //(inprogress일때는 모두, 다른 상태에는 관리자랑 출제자만 조회가능) - 구현됨
+    //이미 참여한 설문인지 확인해야함. - 응답 도메인 생성 후 수정
+    public QuestionResponseDto getQuestion(Long userId, Long surveyId, Long questionId){
+        Survey survey = surveyRepository.findById(surveyId).orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
+        Question question = questionRepository.findById(questionId).orElseThrow(() -> new RuntimeException("질문을 찾을 수 없습니다."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        isQuestionFromSurvey(survey, question);
+
+        SurveyStatus status = survey.getStatus();
+        if(!status.equals(SurveyStatus.IN_PROGRESS)){
+            if(user.getUserRole().equals(UserRoleEnum.SURVEYEE)){
+                throw new RuntimeException("진행 중 상태가 아닌 질문은 설문 참여자 권한으로 조회할 수 없습니다.");
+            }
+        }
+
+        return new QuestionResponseDto(question.getId(), question.getNumber(), question.getContent(), question.getType());
+    }
+
+    //질문목록조회
+    //(inprogress일때는 모두, 다른 상태에는 관리자랑 출제자만 조회가능)- 구현됨,
+    //in progress이고 유저가 참여자권한인 경우 이미 참여했는지 확인해야함. - 응답 도메인 생성 후 수정
+    public PageQuestionResponseDto<QuestionResponseDto> getQuestions(int page, int size, Long userId, Long surveyId){
+        Survey survey = surveyRepository.findById(surveyId).orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
+        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        SurveyStatus status = survey.getStatus();
+        if(!status.equals(SurveyStatus.IN_PROGRESS)){
+            if(user.getUserRole().equals(UserRoleEnum.SURVEYEE)){
+                throw new RuntimeException("진행 중 상태가 아닌 질문은 설문 참여자 권한으로 조회할 수 없습니다.");
+            }
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Question> questionPage = questionRepository.findAllBySurveyId(surveyId, pageable);
+
+        Page<QuestionResponseDto> questionResponseDtoPage = questionPage.map(question -> new QuestionResponseDto(
+                question.getId(),
+                question.getNumber(),
+                question.getContent(),
+                question.getType()
+        ));
+
+        return new PageQuestionResponseDto<>(questionResponseDtoPage);
+
+    }
+
     public QuestionResponseDto updateQuestion(Long userId, Long surveyId, Long questionId, QuestionUpdateRequestDto requestDto){
 
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
@@ -67,10 +130,7 @@ public class QuestionService {
 
         currentUserMatchesSurveyCreator(userId, survey, "설문 출제자가 아닌 유저는 질문을 수정할 수 없습니다.");
         isSurveyNotStarted(survey, "설문이 진행 전 상태일 때만 질문을 수정할 수 있습니다.");
-
-        if(!surveyId.equals(question.getSurvey().getId())){
-            throw new RuntimeException("질문이 설문에 존재하지 않습니다.");
-        }
+        isQuestionFromSurvey(survey, question);
 
         if(requestDto.getNumber() != null){
             question.setNumber(requestDto.getNumber());
@@ -98,12 +158,8 @@ public class QuestionService {
 
         currentUserMatchesSurveyCreator(userId, survey, "설문 출제자가 아닌 유저는 질문을 삭제할 수 없습니다.");
         isSurveyNotStarted(survey, "설문이 진행 전 상태일 때만 질문을 삭제할 수 있습니다.");
-
-        if(!surveyId.equals(question.getSurvey().getId())){
-            throw new RuntimeException("질문이 설문에 존재하지 않습니다.");
-        }
+        isQuestionFromSurvey(survey, question);
 
         questionRepository.delete(question);
-
     }
 }
