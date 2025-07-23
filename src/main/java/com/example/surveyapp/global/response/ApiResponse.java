@@ -1,7 +1,10 @@
 package com.example.surveyapp.global.response;
 
+import lombok.Getter;
+
 import java.time.LocalDateTime;
 
+@Getter
 public class ApiResponse<T>{
 
     private boolean success;
