@@ -6,8 +6,10 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,4 +34,10 @@ public class Question extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private QuestionType type;
 
+    public Question(Survey survey, Long number, String content, QuestionType type){
+        this.survey = survey;
+        this.number = number;
+        this.content = content;
+        this.type = type;
+    }
 }
