@@ -43,7 +43,27 @@ public class User extends BaseEntity {
         this.userRole = userRole;
     }
 
+    public static User of(String email, String password, String name, String nickname, UserRoleEnum role) {
+        return User.builder()
+                .email(email)
+                .password(password)
+                .name(name)
+                .nickname(nickname)
+                .userRole(role)
+                .build();
+    }
+
     private void delete(){
         this.isDeleted = true;
+    }
+
+    public void updateInfo(String email, String name, String nickname) {
+        this.email = email;
+        this.name = name;
+        this.nickname = nickname;
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
     }
 }
