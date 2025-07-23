@@ -68,9 +68,22 @@ public class ProductController {
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<ProductResponseDto>> update(@PathVariable Long id,
-                                                                  @RequestBody ProductUpdateRequestDto requestDto){
-       productService.updateProduct(id,requestDto);
+                                                                  @RequestBody ProductUpdateRequestDto requestDto,
+                                                                  @RequestParam("userId") Long userId){
+       productService.updateProduct(id,requestDto,userId);
        return ResponseEntity.status(HttpStatus.OK)
                .body(ApiResponse.success("상품이 수정 되었습니다.",null));
+    }
+
+    /**
+     * 삭제
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<?>> delete(@PathVariable Long id,
+                                    @RequestParam("userId") Long userId) {
+        productService.deleteProduct(id,userId);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success( "상품이 삭제 됐습니다.",null));
     }
 }

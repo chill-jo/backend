@@ -32,7 +32,7 @@ public class Product extends BaseEntity {
     @Column(nullable = false)
     private boolean isDeleted = false;
 
-    public void setDeleted() {
+    public void delete() {
         this.isDeleted = true;
     }
 
