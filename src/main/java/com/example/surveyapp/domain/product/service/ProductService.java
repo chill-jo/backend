@@ -75,11 +75,9 @@ public class ProductService {
 
 
     public ProductResponseDto readOneProduct(Long id) {
-        if (id == null) {
-            throw new CustomException(ErrorCode.NOT_FOUND_USER,);
-        }
 
-        Product product= productRepository.findByOneStatusAndDeletedFalse(Status.ON_SALE,id).
-        return null;
+        Product product= productRepository.findByIdAndStatusAndIsDeletedFalse(id,Status.ON_SALE)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PRODUCT));
+        return ProductResponseDto.from(product);
     }
 }

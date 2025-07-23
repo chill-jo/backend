@@ -24,10 +24,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/**").permitAll()
                         .anyRequest().authenticated())
                 // 세션을 사용하지 않고 JWT 등 stateless 방식 사용 예정
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**"  ).permitAll()
-                        .anyRequest().authenticated()
-                )
                 .sessionManagement(it -> it.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }
