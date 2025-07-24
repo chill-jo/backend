@@ -6,6 +6,7 @@ import com.example.surveyapp.domain.product.controller.dto.ProductResponseDto;
 import com.example.surveyapp.domain.product.controller.dto.ProductUpdateRequestDto;
 import com.example.surveyapp.domain.product.model.Status;
 import com.example.surveyapp.domain.product.service.ProductService;
+import com.example.surveyapp.domain.product.service.dto.ProductUpdateResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -110,6 +111,7 @@ class ProductControllerTest {
         Long id = 1L;
         ProductResponseDto product1 = new ProductResponseDto(1L, "상품1", 2000, Status.ON_SALE);
 
+
         when(productService.readOneProduct(id)).thenReturn(product1);
 
         // When
@@ -135,10 +137,10 @@ class ProductControllerTest {
         // Given
         //테스트 전제 조건 및 환경 설정
         Long productId = 1L;
-        Long userId = 1L;
         ProductUpdateRequestDto requestDto = new ProductUpdateRequestDto("변경된 상품명", 2500, "변경된 상품설명", Status.ON_SALE);
+        ProductUpdateResponseDto responseDto = new ProductUpdateResponseDto(1L, "변경된 상품명", "변경된 상품설명:", 2500, Status.ON_SALE);
 
-        doNothing().when(productService).updateProduct(eq(productId), any(ProductUpdateRequestDto.class));
+        when(productService.updateProduct(eq(productId), any(ProductUpdateRequestDto.class))).thenReturn(responseDto);
 
         // When
         //실행할 행동
