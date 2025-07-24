@@ -4,11 +4,12 @@ import com.example.surveyapp.domain.survey.controller.dto.SurveyMapper;
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyCreateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyStatusUpdateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyUpdateRequestDto;
-import com.example.surveyapp.domain.survey.controller.dto.response.PageSurveyResponseDto;
-import com.example.surveyapp.domain.survey.controller.dto.response.SurveyResponseDto;
-import com.example.surveyapp.domain.survey.controller.dto.response.SurveyStatusResponseDto;
+import com.example.surveyapp.domain.survey.controller.dto.response.*;
+import com.example.surveyapp.domain.survey.domain.model.entity.Question;
 import com.example.surveyapp.domain.survey.domain.model.entity.Survey;
 import com.example.surveyapp.domain.survey.domain.model.enums.SurveyStatus;
+import com.example.surveyapp.domain.survey.domain.repository.OptionsRepository;
+import com.example.surveyapp.domain.survey.domain.repository.QuestionRepository;
 import com.example.surveyapp.domain.survey.domain.repository.SurveyRepository;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.global.response.exception.CustomException;
@@ -20,12 +21,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class SurveyService {
 
     private final SurveyRepository surveyRepository;
     private final SurveyMapper surveyMapper;
+    private final QuestionRepository questionRepository;
+    private final OptionsRepository optionsRepository;
 
     public SurveyResponseDto createSurvey(SurveyCreateRequestDto requestDto, User user){
 
@@ -134,6 +140,43 @@ public class SurveyService {
                 .orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
 
         return surveyMapper.toResponseDto(survey);
+    }
+
+    @Transactional(readOnly = true)
+    public SurveyQuestionDto getSurveyQuestions(Long surveyId){
+
+        Survey survey = surveyRepository.findByIdAndDeletedFalse(surveyId)
+                .orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
+
+        SurveyQuestionDto surveyQuestionDto = new SurveyQuestionDto(
+                survey.getId(),
+                survey.getTitle(),
+                survey.getDescription(),
+                survey.getMaxSurveyee(),
+                survey.getPointPerPerson(),
+                survey.getTotalPoint(),
+                survey.getDeadline(),
+                survey.getExpectedTime(),
+                new ArrayList<>()
+        );
+
+        List<Question> questions = questionRepository.findAllBySurveyIdOrderByNumberASC(surveyId);
+
+        questions.forEach(question -> {
+            List<OptionResponseDto> options = optionsRepository.findAllByQuestionIdOrderByNumberAsc(question.getId());
+            QuestionOptionsDto questionOptionsDto = new QuestionOptionsDto(
+                    question.getId(),
+                    question.getNumber(),
+                    question.getContent(),
+                    question.getType(),
+                    options
+            );
+
+            surveyQuestionDto.addQuestion(questionOptionsDto);
+        });
+
+
+        return surveyQuestionDto;
     }
 
 }
