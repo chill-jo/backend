@@ -5,6 +5,7 @@ import com.example.surveyapp.domain.admin.domain.repository.BlackListRepository;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.domain.user.domain.repository.UserRepository;
 import com.example.surveyapp.global.response.ApiResponse;
+import com.example.surveyapp.global.response.exception.CustomException;
 import com.example.surveyapp.global.response.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,42 +20,36 @@ public class BlackListService {
     private final UserRepository userRepository;
 
     @Transactional
-    public ApiResponse<HttpStatus> addBlackList(Long userId) {
+    public User addBlackList(Long userId) {
 
-        User blackUser = userRepository.findById(userId).orElse(null);
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_USER)
+        );
 
-        if (blackUser == null) {
-            return ApiResponse.fail(ErrorCode.BLACKLIST_BAD_REQUEST1.getMessage(), ErrorCode.BLACKLIST_BAD_REQUEST1.getStatus());
+        if (blackListRepository.findByUserId(user).isPresent()) {
+            throw new CustomException(ErrorCode.IS_BLACKLIST);
         }
 
-        if (blackListRepository.findByUserId(blackUser).isPresent()) {
-            return ApiResponse.fail(ErrorCode.BLACKLIST_BAD_REQUEST2.getMessage(), ErrorCode.BLACKLIST_BAD_REQUEST2.getStatus());
-        }
+        blackListRepository.save(new BlackList(user));
 
-        blackListRepository.save(new BlackList(blackUser));
-
-        return ApiResponse.success("블랙리스트에 등록되었습니다.", HttpStatus.OK);
+        return user;
     }
 
 
     @Transactional
-    public ApiResponse<HttpStatus> deleteBlackList(Long userId) {
+    public User deleteBlackList(Long userId) {
 
-        User blackUser = userRepository.findById(userId).orElse(null);
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_USER)
+        );
 
-        if (blackUser == null) {
-            return ApiResponse.fail(ErrorCode.BLACKLIST_BAD_REQUEST1.getMessage(), ErrorCode.BLACKLIST_BAD_REQUEST1.getStatus());
-        }
-
-        BlackList blackList = blackListRepository.findByUserId(blackUser).orElse(null);
-
-        if (blackList == null) {
-            return ApiResponse.fail(ErrorCode.BLACKLIST_BAD_REQUEST3.getMessage(), ErrorCode.BLACKLIST_BAD_REQUEST3.getStatus());
-        }
+        BlackList blackList = blackListRepository.findByUserId(user).orElseThrow(
+                () -> new CustomException(ErrorCode.IS_NOT_BLACKLIST)
+        );
 
         blackListRepository.delete(blackList);
 
-        return ApiResponse.success("블랙리스트에서 삭제되었습니다.", HttpStatus.OK);
+        return user;
     }
 
 }
