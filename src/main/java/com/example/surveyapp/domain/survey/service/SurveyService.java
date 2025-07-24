@@ -132,7 +132,7 @@ public class SurveyService {
 
 
     // 참여자 API
-    // 삭제 되지 않은 설문만
+    // 삭제 되지 않은 설문만 설문 상세 조회
     @Transactional
     public SurveyResponseDto getSurvey(Long surveyId){
 
@@ -142,8 +142,10 @@ public class SurveyService {
         return surveyMapper.toResponseDto(survey);
     }
 
+    // 설문 시작
+    // survey_answer 테이블 생기면 기참여자 재참여 못하게 막는 로직 추가해야함
     @Transactional(readOnly = true)
-    public SurveyQuestionDto getSurveyQuestions(Long surveyId){
+    public SurveyQuestionDto startSurvey(Long surveyId){
 
         Survey survey = surveyRepository.findByIdAndDeletedFalse(surveyId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));

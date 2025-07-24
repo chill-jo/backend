@@ -96,8 +96,8 @@ public class SurveyController {
 
     // 설문 시작 시 질문 조회
     @GetMapping("/{surveyId}/start")
-    public ResponseEntity<ApiResponse<SurveyQuestionDto>> getSurveyQuestions(@PathVariable Long surveyId) {
+    public ResponseEntity<ApiResponse<SurveyQuestionDto>> startSurvey(@PathVariable Long surveyId) {
 
-        return ResponseEntity.ok(ApiResponse.success("설문을 시작합니다.", surveyService.getSurveyQuestions(surveyId)));
+        return ResponseEntity.ok(ApiResponse.success("설문을 시작합니다.", surveyService.startSurvey(surveyId)));
     }
 }
