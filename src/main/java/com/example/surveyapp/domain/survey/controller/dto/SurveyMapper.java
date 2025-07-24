@@ -10,22 +10,32 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring")
 public interface SurveyMapper {
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "user", source = "user")
-    @Mapping(target = "status", expression = "java(SurveyStatus.NOT_STARTED)")
-    @Mapping(target = "deleted", constant = "false")
-    @Mapping(target = "totalPoint", expression = "java(dto.getMaxSurveyee() * dto.getPointPerPerson())")
-    Survey createSurveyEntity(SurveyCreateRequestDto dto, User user);
-
     SurveyResponseDto toResponseDto(Survey survey);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "user", ignore = true)
-    @Mapping(target = "status", ignore = true)
-    @Mapping(target = "deleted", ignore = true)
-    @Mapping(target = "totalPoint", ignore = true)
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateSurvey(SurveyUpdateRequestDto dto, @MappingTarget Survey survey);
+    @BeanMapping(ignoreByDefault = true)
+    default Survey createSurveyEntity(SurveyCreateRequestDto dto, User user){
+        return new Survey(
+                user,
+                dto.getTitle(),
+                dto.getDescription(),
+                dto.getMaxSurveyee(),
+                dto.getPointPerPerson(),
+                dto.getDeadline(),
+                dto.getExpectedTime()
+        );
+    }
+
+    @BeanMapping(ignoreByDefault = true)
+    default void updateSurvey(SurveyUpdateRequestDto dto, @MappingTarget Survey survey){
+        survey.update(
+                dto.getTitle(),
+                dto.getDescription(),
+                dto.getMaxSurveyee(),
+                dto.getPointPerPerson(),
+                dto.getDeadline(),
+                dto.getExpectedTime()
+        );
+    }
 
 
 
