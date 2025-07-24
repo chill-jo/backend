@@ -124,4 +124,15 @@ public class SurveyService {
         survey.deleteSurvey();
     }
 
+
+    // 참여자 API
+    @Transactional
+    public SurveyResponseDto getSurvey(Long surveyId){
+
+        Survey survey = surveyRepository.findById(surveyId)
+                .orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
+
+        return surveyMapper.toResponseDto(survey);
+    }
+
 }

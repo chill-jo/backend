@@ -85,4 +85,13 @@ public class SurveyController {
 
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "설문 통계를 조회했습니다.", null));
     }
+
+
+    // 참여자 API
+    // 설문 상세 조회
+    @GetMapping("/{surveyId}")
+    public ResponseEntity<ApiResponse<SurveyResponseDto>> getSurvey(@PathVariable Long surveyId) {
+
+        return ResponseEntity.ok(ApiResponse.success("설문 조회하였습니다.", surveyService.getSurvey(surveyId)));
+    }
 }
