@@ -1,17 +1,16 @@
 package com.example.surveyapp.domain.survey.service;
 
 import com.example.surveyapp.domain.survey.controller.dto.SurveyMapper;
+import com.example.surveyapp.domain.survey.controller.dto.request.SurveyAnswerRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyCreateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyStatusUpdateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyUpdateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.*;
-import com.example.surveyapp.domain.survey.domain.model.entity.Question;
-import com.example.surveyapp.domain.survey.domain.model.entity.Survey;
+import com.example.surveyapp.domain.survey.domain.model.entity.*;
 import com.example.surveyapp.domain.survey.domain.model.enums.SurveyStatus;
-import com.example.surveyapp.domain.survey.domain.repository.OptionsRepository;
-import com.example.surveyapp.domain.survey.domain.repository.QuestionRepository;
-import com.example.surveyapp.domain.survey.domain.repository.SurveyRepository;
+import com.example.surveyapp.domain.survey.domain.repository.*;
 import com.example.surveyapp.domain.user.domain.model.User;
+import com.example.surveyapp.domain.user.domain.repository.UserRepository;
 import com.example.surveyapp.global.response.exception.CustomException;
 import com.example.surveyapp.global.response.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import static com.example.surveyapp.domain.survey.domain.model.enums.QuestionType.SINGLE_CHOICE;
+import static com.example.surveyapp.domain.survey.domain.model.enums.QuestionType.SUBJECTIVE;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +35,10 @@ public class SurveyService {
     private final SurveyMapper surveyMapper;
     private final QuestionRepository questionRepository;
     private final OptionsRepository optionsRepository;
+    private final SurveyAnswerRepository surveyAnswerRepository;
+    private final UserRepository userRepository;
+    private final SurveyOptionsAnswerRepository surveyOptionsAnswerRepository;
+    private final SurveyTextAnswerRepository surveyTextAnswerRepository;
 
     public SurveyResponseDto createSurvey(SurveyCreateRequestDto requestDto, User user){
 
@@ -173,6 +180,44 @@ public class SurveyService {
 
 
         return surveyQuestionDto;
+    }
+
+    @Transactional
+//    public void saveSurveyAnswer(Long surveyId, SurveyAnswerRequestDto requestDto, Long userId){
+    public void saveSurveyAnswer(Long surveyId, SurveyAnswerRequestDto requestDto){
+
+        Survey survey = surveyRepository.findByIdAndDeletedFalse(surveyId)
+                .orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
+
+        Long userId = 1L;
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        SurveyAnswer surveyAnswer = surveyAnswerRepository.save(new SurveyAnswer(survey, user));
+
+        requestDto.getAnswers().forEach(questionAnswer -> {
+            Question question = questionRepository.findById(questionAnswer.getNumber()).orElseThrow(
+                    () -> new CustomException(ErrorCode.QUESTION_NOT_FOUND)
+            );
+
+            if(question.getType().equals(SUBJECTIVE)) {
+                surveyTextAnswerRepository.save(new SurveyTextAnswer(surveyAnswer, question, (String)questionAnswer.getAnswer()));
+            } else if(question.getType().equals(SINGLE_CHOICE)) {
+                Number answer = (Number)questionAnswer.getAnswer();
+                surveyOptionsAnswerRepository.save(new SurveyOptionsAnswer(surveyAnswer, question, answer.longValue()));
+            } else {
+                String str = (String) questionAnswer.getAnswer();
+                String[] split = str.split(",");
+                for (String s : split) {
+                    try {
+                        Long number = Long.parseLong(s);
+                        surveyOptionsAnswerRepository.save(new SurveyOptionsAnswer(surveyAnswer, question, number));
+                    } catch (NumberFormatException e) {
+                        throw new CustomException(ErrorCode.VALIDATION_ERROR);
+                    }
+                }
+            }
+        });
     }
 
 }

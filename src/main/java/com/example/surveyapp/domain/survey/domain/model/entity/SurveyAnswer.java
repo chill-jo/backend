@@ -28,9 +28,14 @@ public class SurveyAnswer {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user_id;
+    private User userId;
 
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime CreatedAt;
+
+    public SurveyAnswer(Survey surveyId, User userId) {
+        this.surveyId = surveyId;
+        this.userId = userId;
+    }
 }

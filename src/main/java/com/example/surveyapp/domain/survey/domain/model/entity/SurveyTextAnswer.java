@@ -25,5 +25,11 @@ public class SurveyTextAnswer {
     private Question questionId;
 
     @Column(nullable = false)
-    private Long content;
+    private String content;
+
+    public SurveyTextAnswer(SurveyAnswer surveyAnswer, Question question, String content) {
+        this.surveyAnswerId = surveyAnswer;
+        this.questionId = question;
+        this.content = content;
+    }
 }

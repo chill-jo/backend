@@ -9,6 +9,6 @@ import java.util.List;
 @AllArgsConstructor
 public class SurveyAnswerRequestDto {
 
-    private List<QuestionAnswerRequestDto> answer;
+    private List<QuestionAnswerRequestDto> answers;
 
 }
