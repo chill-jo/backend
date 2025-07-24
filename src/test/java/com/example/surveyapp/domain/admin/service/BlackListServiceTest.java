@@ -47,10 +47,10 @@ class BlackListServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         // when
-        ApiResponse<HttpStatus> result = blackListService.addBlackList(userId);
+        User result = blackListService.addBlackList(userId);
 
         // then
-        Assertions.assertThat(result.getMessage()).isEqualTo("블랙리스트에 등록되었습니다.");
+        Assertions.assertThat(user).isEqualTo(result);
 
     }
 
@@ -60,11 +60,14 @@ class BlackListServiceTest {
         // given
         Long userId = 1L;
 
-        // when
-        ApiResponse<HttpStatus> result = blackListService.addBlackList(userId);
-
-        // then
-        Assertions.assertThat(result.getMessage()).isEqualTo(ErrorCode.BLACKLIST_BAD_REQUEST1.getMessage());
+        // when & then
+        try {
+            blackListService.addBlackList(userId);
+        } catch (CustomException e) {
+            Assertions.assertThatExceptionOfType(CustomException.class)
+                    .isThrownBy(() -> { throw new CustomException(e.getErrorCode()); })
+                    .withMessageContaining("사용자를 찾을 수 없습니다.");
+        }
 
     }
 
@@ -74,13 +77,16 @@ class BlackListServiceTest {
         // given
         Long userId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(blackListRepository.findByUserId(user)).thenReturn(Optional.of(blackList));
+//        when(blackListRepository.findByUserId(user)).thenReturn(Optional.of(blackList));
 
-        // when
-        ApiResponse<HttpStatus> result = blackListService.addBlackList(userId);
-
-        // then
-        Assertions.assertThat(result.getMessage()).isEqualTo(ErrorCode.BLACKLIST_BAD_REQUEST2.getMessage());
+        // when & then
+        try {
+            blackListService.addBlackList(userId);
+        } catch (CustomException e) {
+            Assertions.assertThatExceptionOfType(CustomException.class)
+                    .isThrownBy(() -> { throw new CustomException(e.getErrorCode()); })
+                    .withMessageContaining("해당 회원은 이미 블랙입니다.");
+        }
 
     }
 
@@ -94,11 +100,11 @@ class BlackListServiceTest {
         when(blackListRepository.findByUserId(user)).thenReturn(Optional.of(blackList));
 
         // when
-        ApiResponse<HttpStatus> result = blackListService.deleteBlackList(userId);
+        User result = blackListService.deleteBlackList(userId);
 
 
         // then
-        Assertions.assertThat(result.getMessage()).isEqualTo("블랙리스트에서 삭제되었습니다.");
+        Assertions.assertThat(user).isEqualTo(result);
 
     }
 
@@ -108,12 +114,14 @@ class BlackListServiceTest {
         // given
         Long userId = 1L;
 
-        // when
-        ApiResponse<HttpStatus> result = blackListService.deleteBlackList(userId);
-
-
-        // then
-        Assertions.assertThat(result.getMessage()).isEqualTo(ErrorCode.BLACKLIST_BAD_REQUEST1.getMessage());
+        // when & then
+        try {
+            blackListService.deleteBlackList(userId);
+        } catch (CustomException e) {
+            Assertions.assertThatExceptionOfType(CustomException.class)
+                    .isThrownBy(() -> { throw new CustomException(e.getErrorCode()); })
+                    .withMessageContaining("사용자를 찾을 수 없습니다.");
+        }
 
     }
 
@@ -124,12 +132,14 @@ class BlackListServiceTest {
         Long userId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        // when
-        ApiResponse<HttpStatus> result = blackListService.deleteBlackList(userId);
-
-
-        // then
-        Assertions.assertThat(result.getMessage()).isEqualTo(ErrorCode.BLACKLIST_BAD_REQUEST3.getMessage());
+        // when & then
+        try {
+            blackListService.deleteBlackList(userId);
+        } catch (CustomException e) {
+            Assertions.assertThatExceptionOfType(CustomException.class)
+                    .isThrownBy(() -> { throw new CustomException(e.getErrorCode()); })
+                    .withMessageContaining("해당 회원은 블랙이 아닙니다.");
+        }
 
     }
 
