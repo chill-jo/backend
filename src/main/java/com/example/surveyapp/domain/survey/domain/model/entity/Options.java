@@ -34,4 +34,7 @@ public class Options extends BaseEntity {
     public void changeContent(String content){
         this.content = content;
     }
+    public boolean isFromQuestion(Question question){
+        return this.question.equals(question);
+    }
 }
