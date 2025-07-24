@@ -21,12 +21,25 @@ public enum ErrorCode {
     //상품
     NOT_FOUND_PRODUCT(HttpStatus.UNAUTHORIZED,"존재하지 않는 상품입니다." ),
     NOT_SAME_PRODUCT_TITLE(HttpStatus.BAD_REQUEST,"동일한 상품명으로 수정이 불가합니다."),
+
     //설문 에러
     SURVEY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 설문입니다."),
     SURVEY_ALREADY_DELETED(HttpStatus.GONE, "이미 삭제된 설문입니다."),
     SURVEY_CANNOT_BE_DELETED(HttpStatus.CONFLICT, "현재 설문 상태에서는 삭제할 수 없습니다."),
     INVALID_SURVEY_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "설문 상태를 변경할 수 없습니다."),
     SURVEY_CANNOT_BE_MODIFIED(HttpStatus.CONFLICT, "설문 상세정보를 수정할 수 없습니다."),
+    SURVEYEE_NOT_ALLOWED(HttpStatus.UNAUTHORIZED, "참여자 권한으로는 요청이 불가합니다."),
+    SURVEY_NOT_STARTED(HttpStatus.FORBIDDEN, "설문이 시작 전일 때는 요청이 불가합니다."),
+
+
+    //질문 에러
+    QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 질문입니다."),
+    NOT_SURVEY_CREATOR(HttpStatus.UNAUTHORIZED, "해당 설문 출제자가 아니면 요청이 불가합니다."),
+    QUESTION_NOT_FROM_SURVEY(HttpStatus.NOT_FOUND, "질문이 설문에 존재하지 않습니다."),
+    OPTIONS_NOT_FROM_SURVEY(HttpStatus.NOT_FOUND, "선택지가 질문에 존재하지 않습니다."),
+
+    //선택지 에러
+    OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 선택지입니다."),
 
     // admin
 

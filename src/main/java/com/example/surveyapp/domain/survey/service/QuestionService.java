@@ -30,12 +30,22 @@ public class QuestionService {
     private final SurveyRepository surveyRepository;
     private final UserRepository userRepository;
 
+    //참여자 권한 막기(생성, 수정, 삭제, 진행중아닌 설문선택지조회)
+    public void isCurrentUserSurveyee(Long userId, Survey survey, String message){
+        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+        Long surveyCreatorId = survey.getUser().getId();
+
+        if(user.getUserRole().equals(UserRoleEnum.SURVEYEE)){
+            throw new CustomException(ErrorCode.SURVEYEE_NOT_ALLOWED, message);
+        }
+    }
+
     //해당 설문 출제자가 아닐 시 예외
     public void currentUserMatchesSurveyCreator(Long userId, Survey survey, String errorMessage){
         Long surveyCreatorId = survey.getUser().getId();
 
         if(!userId.equals(surveyCreatorId)){
-            throw new RuntimeException(errorMessage);
+            throw new CustomException(ErrorCode.NOT_SURVEY_CREATOR, errorMessage);
         }
     }
 
@@ -44,7 +54,7 @@ public class QuestionService {
         SurveyStatus currentStatus = survey.getStatus();
 
         if(!currentStatus.equals(SurveyStatus.NOT_STARTED)){
-            throw new RuntimeException(errorMessage);
+            throw new CustomException(ErrorCode.SURVEY_NOT_STARTED, errorMessage);
         }
     }
 
@@ -52,7 +62,7 @@ public class QuestionService {
     public void isQuestionFromSurvey(Survey survey, Question question){
 
         if(!survey.getId().equals(question.getSurvey().getId())){
-            throw new RuntimeException("질문이 설문에 존재하지 않습니다.");
+            throw new CustomException(ErrorCode.QUESTION_NOT_FROM_SURVEY);
         }
     }
 
@@ -60,6 +70,7 @@ public class QuestionService {
 
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
 
+        isCurrentUserSurveyee(userId, survey, "참여자 권한으로는 질문을 생성할 수 없습니다.");
         currentUserMatchesSurveyCreator(userId, survey, "설문 출제자가 아닌 유저는 질문을 생성할 수 없습니다.");
         isSurveyNotStarted(survey, "설문이 진행 전 상태일 때만 질문을 생성할 수 있습니다.");
 
@@ -80,16 +91,15 @@ public class QuestionService {
     //이미 참여한 설문인지 확인해야함. - 응답 도메인 생성 후 수정
     public QuestionResponseDto getQuestion(Long userId, Long surveyId, Long questionId){
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
-        Question question = questionRepository.findById(questionId).orElseThrow(() -> new RuntimeException("질문을 찾을 수 없습니다."));
+        Question question = questionRepository.findById(questionId).orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
         isQuestionFromSurvey(survey, question);
 
         SurveyStatus status = survey.getStatus();
         if(!status.equals(SurveyStatus.IN_PROGRESS)){
-            if(user.getUserRole().equals(UserRoleEnum.SURVEYEE)){
-                throw new RuntimeException("진행 중 상태가 아닌 질문은 설문 참여자 권한으로 조회할 수 없습니다.");
-            }
+            isCurrentUserSurveyee(userId, survey, "진행 중 상태가 아닌 설문의 질문은 설문 참여자 권한으로 조회할 수 없습니다.");
+            currentUserMatchesSurveyCreator(userId, survey, "설문 출제자가 아닌 유저는 진행 중이 아닌 설문의 질문을 조회할 수 없습니다.");
         }
 
         return new QuestionResponseDto(question.getId(), question.getNumber(), question.getContent(), question.getType());
@@ -104,9 +114,8 @@ public class QuestionService {
 
         SurveyStatus status = survey.getStatus();
         if(!status.equals(SurveyStatus.IN_PROGRESS)){
-            if(user.getUserRole().equals(UserRoleEnum.SURVEYEE)){
-                throw new RuntimeException("진행 중 상태가 아닌 질문은 설문 참여자 권한으로 조회할 수 없습니다.");
-            }
+            isCurrentUserSurveyee(userId, survey, "진행 중 상태가 아닌 설문의 질문은 설문 참여자 권한으로 조회할 수 없습니다.");
+            currentUserMatchesSurveyCreator(userId, survey, "설문 출제자가 아닌 유저는 진행 중이 아닌 설문의 질문을 조회할 수 없습니다.");
         }
 
         Pageable pageable = PageRequest.of(page, size);
@@ -126,8 +135,9 @@ public class QuestionService {
     public QuestionResponseDto updateQuestion(Long userId, Long surveyId, Long questionId, QuestionUpdateRequestDto requestDto){
 
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
-        Question question = questionRepository.findById(questionId).orElseThrow(() -> new RuntimeException("질문을 찾을 수 없습니다."));
+        Question question = questionRepository.findById(questionId).orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
 
+        isCurrentUserSurveyee(userId, survey, "참여자 권한으로는 질문을 수정할 수 없습니다.");
         currentUserMatchesSurveyCreator(userId, survey, "설문 출제자가 아닌 유저는 질문을 수정할 수 없습니다.");
         isSurveyNotStarted(survey, "설문이 진행 전 상태일 때만 질문을 수정할 수 있습니다.");
         isQuestionFromSurvey(survey, question);
@@ -154,8 +164,9 @@ public class QuestionService {
     public void deleteQuestion(Long userId, Long surveyId, Long questionId){
 
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
-        Question question = questionRepository.findById(questionId).orElseThrow(() -> new RuntimeException("질문을 찾을 수 없습니다."));
+        Question question = questionRepository.findById(questionId).orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
 
+        isCurrentUserSurveyee(userId, survey, "참여자 권한으로는 질문을 삭제할 수 없습니다.");
         currentUserMatchesSurveyCreator(userId, survey, "설문 출제자가 아닌 유저는 질문을 삭제할 수 없습니다.");
         isSurveyNotStarted(survey, "설문이 진행 전 상태일 때만 질문을 삭제할 수 있습니다.");
         isQuestionFromSurvey(survey, question);
