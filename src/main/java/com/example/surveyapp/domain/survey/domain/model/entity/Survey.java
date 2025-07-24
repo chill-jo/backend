@@ -12,10 +12,8 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "survey")
 public class Survey extends BaseEntity {
 
@@ -56,5 +54,42 @@ public class Survey extends BaseEntity {
     private boolean deleted;
 
     public void deleteSurvey(){ this.deleted = true; }
-    public void updateSurveyStatus(SurveyStatus newStatus) {this.status = newStatus;}
+    public void changeSurveyStatus(SurveyStatus newStatus) {this.status = newStatus;}
+    public void changeTotalPoint(Long totalPoint){ this.totalPoint = totalPoint; }
+    public boolean isSurveyStatusNotStarted(){
+        return this.status.equals(SurveyStatus.NOT_STARTED);
+    }
+    public boolean isSurveyStatusInProgress(){
+        return this.status.equals(SurveyStatus.IN_PROGRESS);
+    }
+    public boolean isUserSurveyCreator(User user){
+        return this.user.equals(user);
+    }
+
+    public Survey(User user, String title, String description, Long maxSurveyee, Long pointPerPerson,
+                  LocalDateTime deadline, Long expectedTime) {
+        this.user = user;
+        this.title = title;
+        this.description = description;
+        this.maxSurveyee = maxSurveyee;
+        this.pointPerPerson = pointPerPerson;
+        this.totalPoint = maxSurveyee * pointPerPerson;
+        this.deadline = deadline;
+        this.expectedTime = expectedTime;
+        this.status = SurveyStatus.NOT_STARTED;
+        this.deleted = false;
+    }
+
+    public void update(String title, String description, Long maxSurveyee, Long pointPerPerson,
+                       LocalDateTime deadline, Long expectedTime) {
+        if (title != null) this.title = title;
+        if (description != null) this.description = description;
+        if (maxSurveyee != null) this.maxSurveyee = maxSurveyee;
+        if (pointPerPerson != null) this.pointPerPerson = pointPerPerson;
+        if (deadline != null) this.deadline = deadline;
+        if (expectedTime != null) this.expectedTime = expectedTime;
+    }
+
+
+
 }

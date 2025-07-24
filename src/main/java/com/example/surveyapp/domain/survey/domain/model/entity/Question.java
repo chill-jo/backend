@@ -3,16 +3,11 @@ package com.example.surveyapp.domain.survey.domain.model.entity;
 import com.example.surveyapp.domain.survey.domain.model.enums.QuestionType;
 import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
-@Setter
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "question")
 public class Question extends BaseEntity {
 
@@ -39,5 +34,17 @@ public class Question extends BaseEntity {
         this.number = number;
         this.content = content;
         this.type = type;
+    }
+    public void changeNumber(Long number){
+        this.number = number;
+    }
+    public void changeContent(String content){
+        this.content = content;
+    }
+    public void changeQuestionType(QuestionType type){
+        this.type = type;
+    }
+    public boolean isFromSurvey(Survey survey){
+        return this.survey.equals(survey);
     }
 }

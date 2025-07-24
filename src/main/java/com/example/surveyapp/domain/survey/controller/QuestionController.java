@@ -30,7 +30,9 @@ public class QuestionController {
     ){
         QuestionResponseDto responseDto = questionService.createQuestion(userId, surveyId, requestDto);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, "질문이 생성되었습니다.", responseDto));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new ApiResponse<>(true, "질문이 생성되었습니다.", responseDto));
     }
 
     //질문 목록 조회
@@ -44,7 +46,9 @@ public class QuestionController {
 
         PageQuestionResponseDto<QuestionResponseDto> responseDto = questionService.getQuestions(page, size, userId, surveyId);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "질문 목록을 조회했습니다.", responseDto));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ApiResponse<>(true, "질문 목록을 조회했습니다.", responseDto));
     }
 
     //질문 단건 조회
@@ -56,7 +60,9 @@ public class QuestionController {
     ){
         QuestionResponseDto responseDto = questionService.getQuestion(userId, surveyId, questionId);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "질문을 조회했습니다.", responseDto));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ApiResponse<>(true, "질문을 조회했습니다.", responseDto));
     }
 
     //***인증인가 추가 후 userId 부분 수정***
@@ -69,7 +75,9 @@ public class QuestionController {
             ){
         QuestionResponseDto responseDto = questionService.updateQuestion(userId, surveyId, questionId, requestDto);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "질문이 수정되었습니다.", responseDto));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ApiResponse<>(true, "질문이 수정되었습니다.", responseDto));
     }
 
     //***인증인가 추가 후 userId 부분 수정***
@@ -81,6 +89,8 @@ public class QuestionController {
     ){
         questionService.deleteQuestion(userId, surveyId, questionId);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "질문이 삭제되었습니다.", null));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ApiResponse<>(true, "질문이 삭제되었습니다.", null));
     }
 }
