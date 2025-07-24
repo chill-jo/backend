@@ -21,6 +21,7 @@ public enum ErrorCode {
     //상품
     NOT_FOUND_PRODUCT(HttpStatus.UNAUTHORIZED,"존재하지 않는 상품입니다." ),
     NOT_SAME_PRODUCT_TITLE(HttpStatus.BAD_REQUEST,"동일한 상품명으로 수정이 불가합니다."),
+    NOT_FOUND_PRODUCT_STATUS(HttpStatus.UNAUTHORIZED,"판매중인  상품이 아닙니다." ),
 
     //설문 에러
     SURVEY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 설문입니다."),
@@ -46,9 +47,8 @@ public enum ErrorCode {
     NOT_ADMIN_USER_ERROR(HttpStatus.UNAUTHORIZED,"관리자 계정으로 로그인하세요."),
 
 
-    BLACKLIST_BAD_REQUEST1(HttpStatus.BAD_REQUEST, "해당 회원 정보가 없습니다."),
-    BLACKLIST_BAD_REQUEST2(HttpStatus.BAD_REQUEST, "해당 회원은 이미 블랙입니다."),
-    BLACKLIST_BAD_REQUEST3(HttpStatus.BAD_REQUEST, "해당 회원은 블랙이 아닙니다.");
+    IS_BLACKLIST(HttpStatus.BAD_REQUEST, "해당 회원은 이미 블랙입니다."),
+    IS_NOT_BLACKLIST(HttpStatus.BAD_REQUEST, "해당 회원은 블랙이 아닙니다.");
 
     private final HttpStatus status;
     private final String message;
