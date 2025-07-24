@@ -4,10 +4,9 @@ import com.example.surveyapp.domain.survey.controller.dto.request.SurveyCreateRe
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyStatusUpdateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyUpdateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.PageSurveyResponseDto;
+import com.example.surveyapp.domain.survey.controller.dto.response.SurveyQuestionDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.SurveyResponseDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.SurveyStatusResponseDto;
-import com.example.surveyapp.domain.survey.domain.model.entity.Survey;
-import com.example.surveyapp.domain.survey.domain.model.enums.SurveyStatus;
 import com.example.surveyapp.domain.survey.service.SurveyService;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.global.response.ApiResponse;
@@ -93,5 +92,12 @@ public class SurveyController {
     public ResponseEntity<ApiResponse<SurveyResponseDto>> getSurvey(@PathVariable Long surveyId) {
 
         return ResponseEntity.ok(ApiResponse.success("설문 조회하였습니다.", surveyService.getSurvey(surveyId)));
+    }
+
+    // 설문 시작 시 질문 조회
+    @GetMapping("/{surveyId}/start")
+    public ResponseEntity<ApiResponse<SurveyQuestionDto>> startSurvey(@PathVariable Long surveyId) {
+
+        return ResponseEntity.ok(ApiResponse.success("설문을 시작합니다.", surveyService.startSurvey(surveyId)));
     }
 }
