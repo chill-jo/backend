@@ -2,15 +2,10 @@ package com.example.surveyapp.domain.survey.domain.model.entity;
 
 import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "options" )
 public class Options extends BaseEntity {
@@ -31,6 +26,12 @@ public class Options extends BaseEntity {
 
     public Options(Long number, String content){
         this.number = number;
+        this.content = content;
+    }
+    public void changeNumber(Long number){
+        this.number = number;
+    }
+    public void changeContent(String content){
         this.content = content;
     }
 }
