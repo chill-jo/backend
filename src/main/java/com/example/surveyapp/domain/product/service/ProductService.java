@@ -33,24 +33,29 @@ public class ProductService {
 
 
     /**
-     * @param dto         생성 요청 DTO
+     * @param requestDto         생성 요청 DTO
      * @param userId 인증된 사용자 정보 가져오기(관리자만)
      * @return
      * @PreAuthorize("hashRole('ADMIN')") ADMIN 관리자만 생성 할 수 있도록
      */
     @Transactional
-    public ProductCreateResponseDto createProduct(ProductCreateRequestDto dto, Long userId) {
+    public ProductCreateResponseDto createProduct(ProductCreateRequestDto requestDto, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
         if (user.getUserRole() != UserRoleEnum.ADMIN) {
             throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
         }
+
+        if (productRepository.existsByTitleAndIsDeletedFalse(requestDto.getTitle())){
+            throw new CustomException(ErrorCode.NOT_SAME_PRODUCT_TITLE);
+        }
+
         Product product = Product.builder()
-                .title(dto.getTitle())
-                .content(dto.getContent())
-                .price(dto.getPrice())
-                .status(dto.getStatus())
+                .title(requestDto.getTitle())
+                .content(requestDto.getContent())
+                .price(requestDto.getPrice())
+                .status(requestDto.getStatus())
                 .build();
 
         Product saved = productRepository.save(product);
@@ -106,14 +111,11 @@ public class ProductService {
                 throw new CustomException(ErrorCode.NOT_FOUND_PRODUCT_STATUS);
             }
         }
-
          product.update(
                 requestDto.getTitle(),
                 requestDto.getPrice(),
                 requestDto.getContent(),
                 requestDto.getStatus());
-
-
 
         return new ProductUpdateResponseDto(
                 product.getId(),
