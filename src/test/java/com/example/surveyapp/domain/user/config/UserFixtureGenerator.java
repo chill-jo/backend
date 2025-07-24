@@ -14,8 +14,4 @@ public class UserFixtureGenerator {
     public static User generateUserFixture() {
         return User.of(EMAIL, PASSWORD, NAME, NICKNAME, ROLE);
     }
-
-    public static User generateUpdatedUserFixture() {
-        return User.of("new@example.com", "newPassword", "newName", "newNickname", ROLE);
-    }
 }
