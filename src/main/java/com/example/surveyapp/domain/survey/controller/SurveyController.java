@@ -80,7 +80,7 @@ public class SurveyController {
     }
 
     //설문 통계 조회
-    @GetMapping("/{surveyId}")
+    @GetMapping("/{surveyId}/result")
     public ResponseEntity<ApiResponse<Void>> getSurveyStatistics(){
 
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "설문 통계를 조회했습니다.", null));

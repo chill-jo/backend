@@ -126,10 +126,11 @@ public class SurveyService {
 
 
     // 참여자 API
+    // 삭제 되지 않은 설문만
     @Transactional
     public SurveyResponseDto getSurvey(Long surveyId){
 
-        Survey survey = surveyRepository.findById(surveyId)
+        Survey survey = surveyRepository.findByIdAndDeletedFalse(surveyId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
 
         return surveyMapper.toResponseDto(survey);
