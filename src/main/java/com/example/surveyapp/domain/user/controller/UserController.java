@@ -24,8 +24,8 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserResponseDto>> getMyInfo(
             @RequestParam("userId") Long userId
     ) {
-        User user = userService.getMyInfo(userId);
-        return ResponseEntity.ok(ApiResponse.success("회원 정보 조회 성공", userData(user)));
+        UserResponseDto getResponseDto = userService.getMyInfo(userId);
+        return ResponseEntity.ok(ApiResponse.success("회원 정보 조회 성공", getResponseDto));
     }
 
     // "
@@ -34,17 +34,7 @@ public class UserController {
             @RequestParam("userId") Long userId,
             @Valid @RequestBody UserRequestDto requestDto
     ) {
-        User user = userService.updateMyInfo(userId, requestDto);
-        return ResponseEntity.ok(ApiResponse.success("회원 정보 수정 성공", userData(user)));
-    }
-
-    // 인증인가 도입 후 CustomUserDetails로 변경
-    private UserResponseDto userData(User user) {
-        return UserResponseDto.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .nickname(user.getNickname())
-                .build();
+        UserResponseDto updatedResponseDto = userService.updateMyInfo(userId, requestDto);
+        return ResponseEntity.ok(ApiResponse.success("회원 정보 수정 성공", updatedResponseDto));
     }
 }
