@@ -28,7 +28,9 @@ public class OptionsController {
 
         OptionResponseDto responseDto = optionsService.createOption(userId, surveyId, questionId, requestDto);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, "선택지가 생성되었습니다.", responseDto));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new ApiResponse<>(true, "선택지가 생성되었습니다.", responseDto));
     }
 
     @GetMapping("/{surveyId}/question/{questionId}/option")
@@ -39,7 +41,9 @@ public class OptionsController {
     ){
         List<OptionResponseDto> responseDtoList = optionsService.getOptions(userId, surveyId, questionId);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "선택지 목록을 조회했습니다.", responseDtoList));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ApiResponse<>(true, "선택지 목록을 조회했습니다.", responseDtoList));
     }
 
     @PatchMapping("/{surveyId}/question/{questionId}/option/{optionId}")
@@ -53,7 +57,9 @@ public class OptionsController {
 
         OptionResponseDto responseDto = optionsService.updateOption(userId, surveyId, questionId, optionId, requestDto);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "선택지가 수정되었습니다.", responseDto));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ApiResponse<>(true, "선택지가 수정되었습니다.", responseDto));
     }
 
     @DeleteMapping("/{surveyId}/question/{questionId}/option/{optionId}")
@@ -66,6 +72,8 @@ public class OptionsController {
     {
         optionsService.deleteOption(userId, surveyId, questionId, optionId);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "선택지가 삭제되었습니다.", null));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ApiResponse<>(true, "선택지가 삭제되었습니다.", null));
     }
 }
