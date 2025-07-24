@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "survey")
 public class Survey extends BaseEntity {
 
@@ -56,5 +55,8 @@ public class Survey extends BaseEntity {
     private boolean deleted;
 
     public void deleteSurvey(){ this.deleted = true; }
-    public void updateSurveyStatus(SurveyStatus newStatus) {this.status = newStatus;}
+    public void changeSurveyStatus(SurveyStatus newStatus) {this.status = newStatus;}
+    public boolean isSurveyStatusNotStarted(){
+        return this.status.equals(SurveyStatus.NOT_STARTED);
+    }
 }
