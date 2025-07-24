@@ -84,20 +84,14 @@ public class SurveyService {
         if(newStatus.equals(SurveyStatus.NOT_STARTED)){
             throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION, "설문은 진행 전 상태로 변경할 수 없습니다.");
         }
-        if(newStatus.equals(SurveyStatus.IN_PROGRESS)){
-            if(currentStatus == SurveyStatus.DONE){
+        if(newStatus.equals(SurveyStatus.IN_PROGRESS) && currentStatus.equals(SurveyStatus.DONE)){
                 throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION, "마감된 설문은 진행 중 상태로 변경할 수 없습니다.");
-            }
         }
-        if(newStatus.equals(SurveyStatus.PAUSED)){
-            if(currentStatus != SurveyStatus.IN_PROGRESS){
+        if(newStatus.equals(SurveyStatus.PAUSED) && !currentStatus.equals(SurveyStatus.IN_PROGRESS)){
                 throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION, "설문이 진행 중일 때만 일시정지 상태로 변경할 수 있습니다.");
-            }
         }
-        if(newStatus.equals(SurveyStatus.DONE)){
-            if(currentStatus == SurveyStatus.NOT_STARTED){
+        if(newStatus.equals(SurveyStatus.DONE) && currentStatus.equals(SurveyStatus.NOT_STARTED)){
                 throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION, "진행 전 설문은 마감 상태로 변경할 수 없습니다.");
-            }
         }
 
         survey.changeSurveyStatus(newStatus);
