@@ -54,14 +54,14 @@ public class SurveyService {
                 () -> new CustomException(ErrorCode.SURVEY_NOT_FOUND,"삭제되었거나 존재하지 않는 설문입니다.")
         );
 
-        if(survey.getStatus() != SurveyStatus.NOT_STARTED){
+        if(!survey.isSurveyStatusNotStarted()){
             throw new CustomException(ErrorCode.SURVEY_CANNOT_BE_MODIFIED,"설문 상태가 진행 전일 때만 상세정보 수정이 가능합니다.");
         }
 
         surveyMapper.updateSurvey(requestDto, survey);
 
         Long totalPoint = survey.getPointPerPerson() * survey.getMaxSurveyee();
-        survey.setTotalPoint(totalPoint);
+        survey.changeTotalPoint(totalPoint);
 
         surveyRepository.save(survey);
 
@@ -78,29 +78,29 @@ public class SurveyService {
         SurveyStatus currentStatus = survey.getStatus();
         SurveyStatus newStatus = requestDto.getStatus();
 
-        if(currentStatus == newStatus){
+        if(currentStatus.equals(newStatus)){
             throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION, "현재 설문 상태와 다른 상태로 변경해야 합니다.");
         }
-        if(newStatus == SurveyStatus.NOT_STARTED){
+        if(newStatus.equals(SurveyStatus.NOT_STARTED)){
             throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION, "설문은 진행 전 상태로 변경할 수 없습니다.");
         }
-        else if(newStatus == SurveyStatus.IN_PROGRESS){
+        if(newStatus.equals(SurveyStatus.IN_PROGRESS)){
             if(currentStatus == SurveyStatus.DONE){
                 throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION, "마감된 설문은 진행 중 상태로 변경할 수 없습니다.");
             }
         }
-        else if(newStatus == SurveyStatus.PAUSED){
+        if(newStatus.equals(SurveyStatus.PAUSED)){
             if(currentStatus != SurveyStatus.IN_PROGRESS){
                 throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION, "설문이 진행 중일 때만 일시정지 상태로 변경할 수 있습니다.");
             }
         }
-        else if(newStatus == SurveyStatus.DONE){
+        if(newStatus.equals(SurveyStatus.DONE)){
             if(currentStatus == SurveyStatus.NOT_STARTED){
                 throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION, "진행 전 설문은 마감 상태로 변경할 수 없습니다.");
             }
         }
 
-        survey.updateSurveyStatus(newStatus);
+        survey.changeSurveyStatus(newStatus);
         surveyRepository.save(survey);
 
         return new SurveyStatusResponseDto(survey.getStatus());
@@ -117,7 +117,7 @@ public class SurveyService {
             throw new CustomException(ErrorCode.SURVEY_ALREADY_DELETED, "이미 삭제된 설문입니다.");
         }
 
-        if(survey.getStatus() == SurveyStatus.IN_PROGRESS){
+        if(survey.isSurveyStatusInProgress()){
             throw new CustomException(ErrorCode.SURVEY_CANNOT_BE_DELETED, "진행 중 설문은 삭제할 수 없습니다.");
         }
 
