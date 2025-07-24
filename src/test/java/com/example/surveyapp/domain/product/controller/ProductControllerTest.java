@@ -10,11 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -142,7 +138,7 @@ class ProductControllerTest {
         Long userId = 1L;
         ProductUpdateRequestDto requestDto = new ProductUpdateRequestDto("변경된 상품명", 2500, "변경된 상품설명", Status.ON_SALE);
 
-        doNothing().when(productService).updateProduct(eq(productId), any(ProductUpdateRequestDto.class), eq(userId));
+        doNothing().when(productService).updateProduct(eq(productId), any(ProductUpdateRequestDto.class));
 
         // When
         //실행할 행동
@@ -154,10 +150,10 @@ class ProductControllerTest {
         // Then
         //검증 사항
         verify(productService,times(1))
-                .updateProduct(eq(productId), any(ProductUpdateRequestDto.class), eq(userId));
+                .updateProduct(eq(productId), any(ProductUpdateRequestDto.class));
         actions.andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data").doesNotExist());
+                .andExpect(jsonPath("$.data.title").value("변경된 상품명"));
     }
 
     @Test

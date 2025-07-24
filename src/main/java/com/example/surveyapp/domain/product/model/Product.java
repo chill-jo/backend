@@ -1,5 +1,7 @@
 package com.example.surveyapp.domain.product.model;
 
+import com.example.surveyapp.domain.product.controller.dto.ProductResponseDto;
+import com.example.surveyapp.domain.product.service.dto.ProductUpdateResponseDto;
 import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -37,10 +39,10 @@ public class Product extends BaseEntity {
         this.isDeleted = true;
     }
 
-    public void update(String title, int price, String content, Status status) {
-        this.title = title;
-        this.price = price;
-        this.content = content;
-        this.status = status;
+    public void update(String title, Integer price, String content, Status status) {
+        if (title != null) this.title = title;
+        if (price != null)  this.price = price;
+        if (content != null)  this.content = content;
+        if (status != null)  this.status = status;
     }
 }
