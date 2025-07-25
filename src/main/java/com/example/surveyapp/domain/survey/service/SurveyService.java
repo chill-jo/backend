@@ -73,9 +73,6 @@ public class SurveyService {
 
         surveyMapper.updateSurvey(requestDto, survey);
 
-        Long totalPoint = survey.getPointPerPerson() * survey.getMaxSurveyee();
-        survey.changeTotalPoint(totalPoint);
-
         surveyRepository.save(survey);
 
         return surveyMapper.toResponseDto(survey);
@@ -85,7 +82,7 @@ public class SurveyService {
     public SurveyStatusResponseDto updateSurveyStatus(Long surveyId, SurveyStatusUpdateRequestDto requestDto){
 
         Survey survey = surveyRepository.findByIdAndDeletedFalse(surveyId).orElseThrow(
-                () -> new CustomException(ErrorCode.UNEXPECTED_ERROR,"삭제되었거나 존재하지 않는 설문입니다.")
+                () -> new CustomException(ErrorCode.SURVEY_NOT_FOUND,"삭제되었거나 존재하지 않는 설문입니다.")
         );
 
         SurveyStatus currentStatus = survey.getStatus();
