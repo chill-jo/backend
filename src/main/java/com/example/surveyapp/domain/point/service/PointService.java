@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +27,7 @@ public class PointService {
     private final UserRepository userRepository;
 
 
+    // 충전
     @Transactional
     public void charge(Long userId, PointChargeRequestDto dto){
         //요청받은 금액
@@ -38,43 +38,73 @@ public class PointService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
         
-        //포인트 조회.
+        //포인트 조회
         Point point = pointRepository.findByUserId(userId)
-                .orElseGet(() -> new Point(user));
+                .orElseGet(() -> pointRepository.save(new Point(user)));
 
         //충전 전 금액
         Long currentBalance=point.getPointBalance();
 
-        //포인트 충전
+        //포인트 충전. (dirty checking)
         point.pointCharge(price);
 
-        // pointRepository에 저장
-        pointRepository.save(point);
-
         PointHistory history = new PointHistory(
-                null,
                 currentBalance,
                 price,
                 point.getPointBalance(),
                 PointType.CHARGE,
                 Target.PAYMENTS,
                 null,
-                "포인트 충전",user, null);
+                "포인트 충전",
+                user
+        );
 
         pointHistoryRepository.save(history);
 
         Payment payment = new Payment(
-                null,
                 history,
                 price,
-                UUID.randomUUID(),
                 Status.DONE,
                 Method.KAKAO_PAY,
                 TargetType.POINT_CHARGE
         );
         paymentRepository.save(payment);
+
+        //dirty checking
+        history.updateTargetId(payment.getId());
     }
 
+    // 설문 응답하는 경우 적립
+    @Transactional
+    public void earn(Long userId, Long amount, Long surveyAnswerId){
 
+        // 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        // 포인트 조회
+        Point point = pointRepository.findByUserId(userId)
+                .orElseGet(() -> pointRepository.save(new Point(user)));
+
+        //적립 전 포인트
+        Long currentBalance=point.getPointBalance();
+
+        //포인트 적립 (dirty checking)
+        point.earn(amount);
+
+        //포인트 내역 기록
+        PointHistory history = new PointHistory(
+                currentBalance,
+                amount,
+                point.getPointBalance(),
+                PointType.EARN,
+                Target.SURVEY,
+                surveyAnswerId,
+                "설문 응답 포인트 적립",
+                user
+        );
+
+        pointHistoryRepository.save(history);
+    }
 
 }
