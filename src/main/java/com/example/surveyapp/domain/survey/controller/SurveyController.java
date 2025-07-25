@@ -48,10 +48,11 @@ public class SurveyController {
     //설문 상세정보 수정
     @PatchMapping("/{surveyId}")
     public ResponseEntity<ApiResponse<SurveyResponseDto>> updateSurvey(
+            User user,
             @PathVariable Long surveyId,
             @Valid @RequestBody SurveyUpdateRequestDto requestDto){
 
-        SurveyResponseDto responseDto = surveyService.updateSurvey(surveyId, requestDto);
+        SurveyResponseDto responseDto = surveyService.updateSurvey(user, surveyId, requestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "설문이 수정되었습니다.", responseDto));
     }
@@ -59,11 +60,12 @@ public class SurveyController {
     //설문 상태 변경(NOT_STARTED -> IN_PROGRESS, IN_PROGRESS -> PAUSED, PAUSED -> IN_PROGRESS, IN_PROGRESS -> DONE)
     @PatchMapping("/{surveyId}/status")
     public ResponseEntity<ApiResponse<SurveyStatusResponseDto>> updateSurveyStatus(
+            User user,
             @PathVariable Long surveyId,
             @Valid @RequestBody SurveyStatusUpdateRequestDto requestDto
     ){
 
-        SurveyStatusResponseDto responseDto = surveyService.updateSurveyStatus(surveyId, requestDto);
+        SurveyStatusResponseDto responseDto = surveyService.updateSurveyStatus(user, surveyId, requestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "설문 상태가 변경되었습니다.", responseDto));
     }
@@ -71,10 +73,11 @@ public class SurveyController {
     //설문 삭제
     @DeleteMapping("/{surveyId}")
     public ResponseEntity<ApiResponse<Void>> deleteSurvey(
+            User user,
             @PathVariable Long surveyId
             ){
 
-        surveyService.deleteSurvey(surveyId);
+        surveyService.deleteSurvey(user, surveyId);
 
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "설문이 삭제되었습니다.", null));
     }
