@@ -245,4 +245,29 @@ public class SurveyService {
         });
     }
 
+    @Transactional(readOnly = true)
+    public SurveyeeSurveyListDto getSurveyeeSurveyList() {
+
+        // User 추가시 userId 수정
+        Long userId = 1L;
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        List<SurveyAnswer> surveyAnswerList = surveyAnswerRepository.findAllByUserIdOrderByCreatedAtDesc(user);
+
+        SurveyeeSurveyListDto surveyListDto = new SurveyeeSurveyListDto();
+
+        surveyAnswerList.forEach(surveyAnswer -> {
+            SurveyeeSurveyDto surveyeeSurveyDto = SurveyeeSurveyDto.builder()
+                                                    .surveyId(surveyAnswer.getSurveyId().getId())
+                                                    .title(surveyAnswer.getSurveyId().getTitle())
+                                                    .date(surveyAnswer.getCreatedAt())
+                                                    .build();
+
+            surveyListDto.addSurveyeeSurveyDto(surveyeeSurveyDto);
+        });
+
+        return surveyListDto;
+    }
+
 }

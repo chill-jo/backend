@@ -43,7 +43,7 @@ class AdminServiceTest {
         when(userRepository.findAllBySearch(search, pageable)).thenReturn(userList);
 
         // when
-        Page<UserDto> result = adminService.findUserList(search, pageable);
+        Page<UserDto> result = adminService.getUserList(search, pageable);
 
         // then
         Assertions.assertThat(userList).isEqualTo(result);
@@ -59,7 +59,7 @@ class AdminServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         // when
-        UserDto result = adminService.findUser(userId);
+        UserDto result = adminService.getUser(userId);
 
         // then
         Assertions.assertThat(userDto.getId()).isEqualTo(result.getId());
@@ -75,7 +75,7 @@ class AdminServiceTest {
 
         // when & then
         try {
-            adminService.findUser(userId);
+            adminService.getUser(userId);
         } catch (CustomException e) {
             Assertions.assertThatExceptionOfType(CustomException.class)
             .isThrownBy(() -> { throw new CustomException(e.getErrorCode()); })

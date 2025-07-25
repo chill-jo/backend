@@ -2,6 +2,7 @@ package com.example.surveyapp.domain.product.controller.dto;
 
 import com.example.surveyapp.domain.product.model.Product;
 import com.example.surveyapp.domain.product.model.Status;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter

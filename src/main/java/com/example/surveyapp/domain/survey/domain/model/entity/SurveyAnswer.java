@@ -32,7 +32,7 @@ public class SurveyAnswer {
 
     @CreatedDate
     @Column(updatable = false)
-    private LocalDateTime CreatedAt;
+    private LocalDateTime createdAt;
 
     public SurveyAnswer(Survey surveyId, User userId) {
         this.surveyId = surveyId;

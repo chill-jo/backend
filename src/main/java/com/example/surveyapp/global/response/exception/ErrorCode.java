@@ -21,6 +21,7 @@ public enum ErrorCode {
     //상품
     NOT_FOUND_PRODUCT(HttpStatus.UNAUTHORIZED,"존재하지 않는 상품입니다." ),
     NOT_SAME_PRODUCT_TITLE(HttpStatus.BAD_REQUEST,"동일한 상품명으로 수정이 불가합니다."),
+    NOT_FOUND_PRODUCT_STATUS(HttpStatus.UNAUTHORIZED,"판매중인  상품이 아닙니다." ),
 
     //설문 에러
     SURVEY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 설문입니다."),
@@ -42,6 +43,10 @@ public enum ErrorCode {
     OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 선택지입니다."),
 
     //설문 응답 등록 에러
+
+
+    //포인트 에러
+    POINT_NOT_ENOUGH(HttpStatus.BAD_REQUEST,"포인트가 부족합니다."),
 
 
     // admin
