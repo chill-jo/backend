@@ -46,9 +46,8 @@ public enum ErrorCode {
     NOT_ADMIN_USER_ERROR(HttpStatus.UNAUTHORIZED,"관리자 계정으로 로그인하세요."),
 
 
-    BLACKLIST_BAD_REQUEST1(HttpStatus.BAD_REQUEST, "해당 회원 정보가 없습니다."),
-    BLACKLIST_BAD_REQUEST2(HttpStatus.BAD_REQUEST, "해당 회원은 이미 블랙입니다."),
-    BLACKLIST_BAD_REQUEST3(HttpStatus.BAD_REQUEST, "해당 회원은 블랙이 아닙니다.");
+    IS_BLACKLIST(HttpStatus.BAD_REQUEST, "해당 회원은 이미 블랙입니다."),
+    IS_NOT_BLACKLIST(HttpStatus.BAD_REQUEST, "해당 회원은 블랙이 아닙니다.");
 
     private final HttpStatus status;
     private final String message;
