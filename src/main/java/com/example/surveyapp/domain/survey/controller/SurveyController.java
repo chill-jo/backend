@@ -1,5 +1,6 @@
 package com.example.surveyapp.domain.survey.controller;
 
+import com.example.surveyapp.domain.survey.controller.dto.request.SurveyAnswerRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyCreateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyStatusUpdateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyUpdateRequestDto;
@@ -94,10 +95,24 @@ public class SurveyController {
         return ResponseEntity.ok(ApiResponse.success("설문 조회하였습니다.", surveyService.getSurvey(surveyId)));
     }
 
-    // 설문 시작 시 질문 조회
+    // 설문 시작
     @GetMapping("/{surveyId}/start")
     public ResponseEntity<ApiResponse<SurveyQuestionDto>> startSurvey(@PathVariable Long surveyId) {
 
         return ResponseEntity.ok(ApiResponse.success("설문을 시작합니다.", surveyService.startSurvey(surveyId)));
+    }
+
+    // 설문 응답 제출
+    @PostMapping("/{surveyId}/answer")
+    public ResponseEntity<ApiResponse<Void>> answerSurvey(
+            @PathVariable Long surveyId,
+            @RequestBody @Valid SurveyAnswerRequestDto requestDto
+//            @AuthenticationPrincipal UserDetails user
+    ) {
+
+//        surveyService.saveSurveyAnswer(surveyId, requestDto, user.userId);
+        surveyService.saveSurveyAnswer(surveyId, requestDto);
+
+        return ResponseEntity.ok(ApiResponse.success("설문이 완료되었습니다.", null));
     }
 }

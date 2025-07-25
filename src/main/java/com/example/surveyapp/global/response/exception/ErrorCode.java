@@ -41,6 +41,9 @@ public enum ErrorCode {
     //선택지 에러
     OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 선택지입니다."),
 
+    //설문 응답 등록 에러
+
+
     // admin
 
     NOT_ADMIN_USER_ERROR(HttpStatus.UNAUTHORIZED,"관리자 계정으로 로그인하세요."),

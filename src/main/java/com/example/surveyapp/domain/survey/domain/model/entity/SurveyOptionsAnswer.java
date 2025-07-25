@@ -24,10 +24,12 @@ public class SurveyOptionsAnswer {
     @JoinColumn(name = "question_id", nullable = false)
     private Question questionId;
 
-    @ManyToOne
-    @JoinColumn(name = "option_id", nullable = false)
-    private Options optionId;
-
     @Column(nullable = false)
     private Long number;
+
+    public SurveyOptionsAnswer(SurveyAnswer surveyAnswerId, Question questionId, Long number) {
+        this.surveyAnswerId = surveyAnswerId;
+        this.questionId = questionId;
+        this.number = number;
+    }
 }
