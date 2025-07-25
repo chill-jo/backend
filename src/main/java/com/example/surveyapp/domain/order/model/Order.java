@@ -2,6 +2,7 @@ package com.example.surveyapp.domain.order.model;
 
 import com.example.surveyapp.domain.product.model.Product;
 import com.example.surveyapp.domain.user.domain.model.User;
+import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -16,7 +17,7 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Order {
+public class Order extends BaseEntity {
 
     @Id@GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,8 +33,5 @@ public class Order {
 
     @Column(nullable = false)
     private int price;
-
-    @CreatedDate
-    private LocalDateTime orderAt;
 
 }
