@@ -3,7 +3,6 @@ package com.example.surveyapp.domain.admin.controller;
 import com.example.surveyapp.domain.admin.controller.dto.SurveyeeStatsDto;
 import com.example.surveyapp.domain.admin.controller.dto.UserDto;
 import com.example.surveyapp.domain.admin.service.AdminService;
-import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,7 +12,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
