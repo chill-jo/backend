@@ -40,7 +40,29 @@ public class SurveyService {
     private final SurveyOptionsAnswerRepository surveyOptionsAnswerRepository;
     private final SurveyTextAnswerRepository surveyTextAnswerRepository;
 
+    //유저가 참여자 권한일 때 예외
+    public void isCurrentUserSurveyee(User user, String errorMessage){
+        if(user.isUserRoleSurveyee()){
+            throw new CustomException(ErrorCode.SURVEYEE_NOT_ALLOWED, errorMessage);
+        }
+    }
+    //해당 설문 출제자가 아니거나 관리자가 아닐 시 예외
+    public void currentUserMatchesSurveyCreator(User user, Survey survey, String errorMessage){
+
+        if(!survey.isUserSurveyCreator(user) || user.isUserRoleNotAdmin()){
+            throw new CustomException(ErrorCode.NOT_SURVEY_CREATOR, errorMessage);
+        }
+    }
+    //설문이 진행 전 상태가 아닐 때 예외
+    public void isSurveyNotStarted(Survey survey, String errorMessage){
+        if(!survey.isSurveyStatusNotStarted()){
+            throw new CustomException(ErrorCode.SURVEY_NOT_STARTED, errorMessage);
+        }
+    }
+
     public SurveyResponseDto createSurvey(SurveyCreateRequestDto requestDto, User user){
+
+        isCurrentUserSurveyee(user, "참여자 권한으로는 질문을 생성할 수 없습니다.");
 
         Survey survey = surveyMapper.createSurveyEntity(requestDto, user);
 
@@ -52,6 +74,7 @@ public class SurveyService {
     //삭제되지 않은 설문만
     @Transactional(readOnly = true)
     public PageSurveyResponseDto<SurveyResponseDto> getSurveys(int page, int size){
+
         Pageable pageable = PageRequest.of(page,size);
         Page<Survey> surveyPage = surveyRepository.findAllSurveyPaged(pageable);
 
@@ -61,16 +84,15 @@ public class SurveyService {
     }
 
 
-    public SurveyResponseDto updateSurvey(Long surveyId, SurveyUpdateRequestDto requestDto){
+    public SurveyResponseDto updateSurvey(User user, Long surveyId, SurveyUpdateRequestDto requestDto){
 
         Survey survey = surveyRepository.findByIdAndDeletedFalse(surveyId).orElseThrow(
                 () -> new CustomException(ErrorCode.SURVEY_NOT_FOUND,"삭제되었거나 존재하지 않는 설문입니다.")
         );
 
-        if(!survey.isSurveyStatusNotStarted()){
-            throw new CustomException(ErrorCode.SURVEY_CANNOT_BE_MODIFIED,"설문 상태가 진행 전일 때만 상세정보 수정이 가능합니다.");
-        }
-
+        isCurrentUserSurveyee(user, "참여자 권한으로는 설문을 수정할 수 없습니다.");
+        currentUserMatchesSurveyCreator(user, survey, "설문 출제자와 관리자만 설문 상세정보를 수정할 수 있습니다.");
+        isSurveyNotStarted(survey, "설문이 진행 전 상태일 때만 설문 상세정보를 수정할 수 있습니다.");
         surveyMapper.updateSurvey(requestDto, survey);
 
         surveyRepository.save(survey);
@@ -79,11 +101,14 @@ public class SurveyService {
     }
 
     //설문 상태 변경(NOT_STARTED -> IN_PROGRESS, IN_PROGRESS -> PAUSED, PAUSED -> IN_PROGRESS, IN_PROGRESS -> DONE)
-    public SurveyStatusResponseDto updateSurveyStatus(Long surveyId, SurveyStatusUpdateRequestDto requestDto){
+    public SurveyStatusResponseDto updateSurveyStatus(User user, Long surveyId, SurveyStatusUpdateRequestDto requestDto){
 
         Survey survey = surveyRepository.findByIdAndDeletedFalse(surveyId).orElseThrow(
                 () -> new CustomException(ErrorCode.SURVEY_NOT_FOUND,"삭제되었거나 존재하지 않는 설문입니다.")
         );
+
+        isCurrentUserSurveyee(user, "참여자 권한으로는 설문 상태를 변경할 수 없습니다.");
+        currentUserMatchesSurveyCreator(user, survey, "설문 출제자와 관리자만 설문 상태를 변경할 수 있습니다.");
 
         SurveyStatus currentStatus = survey.getStatus();
         SurveyStatus newStatus = requestDto.getStatus();
@@ -111,11 +136,14 @@ public class SurveyService {
     }
 
     @Transactional
-    public void deleteSurvey(Long surveyId){
+    public void deleteSurvey(User user, Long surveyId){
 
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(
                 () -> new CustomException(ErrorCode.SURVEY_NOT_FOUND, "존재하지 않는 설문입니다.")
         );
+
+        isCurrentUserSurveyee(user, "참여자 권한으로는 설문을 삭제할 수 없습니다.");
+        currentUserMatchesSurveyCreator(user, survey, "설문 출제자와 관리자만 설문을 삭제할 수 있습니다.");
 
         if(survey.isDeleted()){
             throw new CustomException(ErrorCode.SURVEY_ALREADY_DELETED, "이미 삭제된 설문입니다.");
