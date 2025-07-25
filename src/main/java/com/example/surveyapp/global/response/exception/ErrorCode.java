@@ -45,6 +45,10 @@ public enum ErrorCode {
     //설문 응답 등록 에러
 
 
+    //포인트 에러
+    POINT_NOT_ENOUGH(HttpStatus.BAD_REQUEST,"포인트가 부족합니다."),
+
+
     // admin
 
     NOT_ADMIN_USER_ERROR(HttpStatus.UNAUTHORIZED,"관리자 계정으로 로그인하세요."),
