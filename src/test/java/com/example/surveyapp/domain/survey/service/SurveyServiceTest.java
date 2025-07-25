@@ -11,7 +11,6 @@ import com.example.surveyapp.domain.survey.controller.dto.response.PageSurveyRes
 import com.example.surveyapp.domain.survey.controller.dto.response.SurveyResponseDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.SurveyStatusResponseDto;
 import com.example.surveyapp.domain.survey.domain.model.enums.SurveyStatus;
-import com.example.surveyapp.domain.user.config.UserFixtureGenerator;
 import com.example.surveyapp.global.response.exception.CustomException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
