@@ -107,4 +107,43 @@ public class PointService {
         pointHistoryRepository.save(history);
     }
 
+
+    // 상점에서 상품 교환하는 경우 차감
+    @Transactional
+    public void redeem(Long userId, Long amount, Long orderId){
+
+        // 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        // 포인트 조회
+        Point point = pointRepository.findByUserId(userId)
+                .orElseGet(() -> pointRepository.save(new Point(user)));
+
+        //차감 전 포인트
+        Long currentBalance=point.getPointBalance();
+
+        //만약 차감 전 포인트보다 주문 포인트가 더 크면 예외발생
+        if(currentBalance<amount){
+            throw new CustomException(ErrorCode.POINT_NOT_ENOUGH);
+        }
+
+        //포인트 차감 (dirty checking)
+        point.redeem(amount);
+
+        //포인트 내역 기록
+        PointHistory history = new PointHistory(
+                currentBalance,
+                amount,
+                point.getPointBalance(),
+                PointType.USAGE,
+                Target.ORDER,
+                orderId,
+                "상품 교환 포인트 차감",
+                user
+        );
+
+        pointHistoryRepository.save(history);
+    }
+
 }
