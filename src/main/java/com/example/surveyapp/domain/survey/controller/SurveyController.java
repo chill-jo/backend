@@ -4,10 +4,7 @@ import com.example.surveyapp.domain.survey.controller.dto.request.SurveyAnswerRe
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyCreateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyStatusUpdateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyUpdateRequestDto;
-import com.example.surveyapp.domain.survey.controller.dto.response.PageSurveyResponseDto;
-import com.example.surveyapp.domain.survey.controller.dto.response.SurveyQuestionDto;
-import com.example.surveyapp.domain.survey.controller.dto.response.SurveyResponseDto;
-import com.example.surveyapp.domain.survey.controller.dto.response.SurveyStatusResponseDto;
+import com.example.surveyapp.domain.survey.controller.dto.response.*;
 import com.example.surveyapp.domain.survey.service.SurveyService;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.global.response.ApiResponse;
@@ -115,4 +112,13 @@ public class SurveyController {
 
         return ResponseEntity.ok(ApiResponse.success("설문이 완료되었습니다.", null));
     }
+
+    // 참여자 본인 설문 참여 내역 조회
+    @GetMapping("/surveyee")
+    public ResponseEntity<ApiResponse<SurveyeeSurveyListDto>> getSurveyeeSurveyList() {
+
+        return ResponseEntity.ok(ApiResponse.success("참여한 설문조사 내역 조회가 성공하였습니다.", surveyService.getSurveyeeSurveyList()));
+    }
+
+
 }
