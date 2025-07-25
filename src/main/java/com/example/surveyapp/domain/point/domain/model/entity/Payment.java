@@ -3,7 +3,7 @@ package com.example.surveyapp.domain.point.domain.model.entity;
 
 import com.example.surveyapp.domain.point.domain.model.enums.Method;
 import com.example.surveyapp.domain.point.domain.model.enums.TargetType;
-import com.example.surveyapp.domain.product.model.Status;
+import com.example.surveyapp.domain.point.domain.model.enums.Status;
 import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
