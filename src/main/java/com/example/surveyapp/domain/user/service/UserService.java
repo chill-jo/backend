@@ -1,6 +1,7 @@
 package com.example.surveyapp.domain.user.service;
 
 import com.example.surveyapp.domain.user.controller.dto.UserRequestDto;
+import com.example.surveyapp.domain.user.controller.dto.UserResponseDto;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.domain.user.domain.repository.UserRepository;
 import com.example.surveyapp.global.response.exception.CustomException;
@@ -15,14 +16,22 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     private final UserRepository userRepository;
 
-    @Transactional
-    public User getMyInfo(Long userId){
-        return userRepository.findById(userId)
+    @Transactional(readOnly = true)
+    public UserResponseDto getMyInfo(Long userId){
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        return UserResponseDto.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .name(user.getName())
+                .nickname(user.getNickname())
+                .userRole(user.getUserRole())
+                .build();
     }
 
     @Transactional
-    public User updateMyInfo(Long userId, UserRequestDto requestDto){
+    public UserResponseDto updateMyInfo(Long userId, UserRequestDto requestDto){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
@@ -35,7 +44,13 @@ public class UserService {
             String encodedPassword = new BCryptPasswordEncoder().encode(requestDto.getPassword());
             user.updatePassword(encodedPassword);
         }
-        return user;
+        return UserResponseDto.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .name(user.getName())
+                .nickname(user.getNickname())
+                .userRole(user.getUserRole())
+                .build();
     }
 
     private void validateDuplicatedUser(UserRequestDto userRequestDto) {
