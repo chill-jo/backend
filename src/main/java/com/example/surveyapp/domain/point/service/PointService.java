@@ -10,6 +10,8 @@ import com.example.surveyapp.domain.point.domain.repository.PointHistoryReposito
 import com.example.surveyapp.domain.point.domain.repository.PointRepository;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.domain.user.domain.repository.UserRepository;
+import com.example.surveyapp.global.response.exception.CustomException;
+import com.example.surveyapp.global.response.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +36,7 @@ public class PointService {
         
         //사용자 조회
         User user = userRepository.findById(userId)
-                .orElseThrow(()->new IllegalArgumentException("존재하지 않는 사용자입니다"));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
         
         //포인트 조회.
         Point point = pointRepository.findByUserId(userId)
