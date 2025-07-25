@@ -47,4 +47,8 @@ public class Question extends BaseEntity {
     public boolean isFromSurvey(Survey survey){
         return this.survey.equals(survey);
     }
+
+    public static Question of(Survey survey, Long number, String content, QuestionType type) {
+        return new Question(survey, number,content, type);
+    }
 }
