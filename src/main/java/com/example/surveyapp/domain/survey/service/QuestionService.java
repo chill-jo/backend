@@ -40,11 +40,11 @@ public class QuestionService {
         }
     }
 
-    //해당 설문 출제자가 아닐 시 예외
+    //해당 설문 출제자가 아니거나 관리자가 아닐 시 예외
     public void currentUserMatchesSurveyCreator(Long userId, Survey survey, String errorMessage){
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
-        if(survey.isUserSurveyCreator(user)){
+        if(!survey.isUserSurveyCreator(user) || user.isUserRoleNotAdmin()){
             throw new CustomException(ErrorCode.NOT_SURVEY_CREATOR, errorMessage);
         }
     }
@@ -69,7 +69,7 @@ public class QuestionService {
                 .orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
 
         isCurrentUserSurveyee(userId, "참여자 권한으로는 질문을 생성할 수 없습니다.");
-        currentUserMatchesSurveyCreator(userId, survey, "설문 출제자가 아닌 유저는 질문을 생성할 수 없습니다.");
+        currentUserMatchesSurveyCreator(userId, survey, "설문 출제자와 관리자만 질문을 생성할 수 있습니다.");
         isSurveyNotStarted(survey, "설문이 진행 전 상태일 때만 질문을 생성할 수 있습니다.");
 
         Question question = new Question(
@@ -99,7 +99,7 @@ public class QuestionService {
 
         if(!survey.isSurveyStatusInProgress()){
             isCurrentUserSurveyee(userId, "진행 중 상태가 아닌 설문의 질문은 설문 참여자 권한으로 조회할 수 없습니다.");
-            currentUserMatchesSurveyCreator(userId, survey, "설문 출제자가 아닌 유저는 진행 중이 아닌 설문의 질문을 조회할 수 없습니다.");
+            currentUserMatchesSurveyCreator(userId, survey, "설문 출제자와 관리자만 진행 중이 아닌 설문의 질문을 조회할 수 있습니다.");
         }
 
         return new QuestionResponseDto(question.getId(), question.getNumber(), question.getContent(), question.getType());
@@ -116,7 +116,7 @@ public class QuestionService {
 
         if(!survey.isSurveyStatusInProgress()){
             isCurrentUserSurveyee(userId, "진행 중 상태가 아닌 설문의 질문은 설문 참여자 권한으로 조회할 수 없습니다.");
-            currentUserMatchesSurveyCreator(userId, survey, "설문 출제자가 아닌 유저는 진행 중이 아닌 설문의 질문을 조회할 수 없습니다.");
+            currentUserMatchesSurveyCreator(userId, survey, "설문 출제자와 관리자만 진행 중이 아닌 설문의 질문 목록을 조회할 수 있습니다.");
         }
 
         Pageable pageable = PageRequest.of(page, size);
@@ -141,7 +141,7 @@ public class QuestionService {
                 .orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
 
         isCurrentUserSurveyee(userId, "참여자 권한으로는 질문을 수정할 수 없습니다.");
-        currentUserMatchesSurveyCreator(userId, survey, "설문 출제자가 아닌 유저는 질문을 수정할 수 없습니다.");
+        currentUserMatchesSurveyCreator(userId, survey, "설문 출제자와 관리자만 질문을 수정할 수 있습니다.");
         isSurveyNotStarted(survey, "설문이 진행 전 상태일 때만 질문을 수정할 수 있습니다.");
         isQuestionFromSurvey(survey, question);
 
@@ -172,7 +172,7 @@ public class QuestionService {
                 .orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
 
         isCurrentUserSurveyee(userId, "참여자 권한으로는 질문을 삭제할 수 없습니다.");
-        currentUserMatchesSurveyCreator(userId, survey, "설문 출제자가 아닌 유저는 질문을 삭제할 수 없습니다.");
+        currentUserMatchesSurveyCreator(userId, survey, "설문 출제자와 관리자만 질문을 삭제할 수 있습니다.");
         isSurveyNotStarted(survey, "설문이 진행 전 상태일 때만 질문을 삭제할 수 있습니다.");
         isQuestionFromSurvey(survey, question);
 
