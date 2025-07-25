@@ -42,7 +42,6 @@ public class OrderService {
 
         Order order = Order.builder()
                 .id(requestDto.getProductId())
-                .user(user)
                 .title(requestDto.getTitle())
                 .price(requestDto.getPrice())
                 .build();

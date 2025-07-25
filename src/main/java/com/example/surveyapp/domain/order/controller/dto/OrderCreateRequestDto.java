@@ -10,9 +10,6 @@ import lombok.Getter;
 public class OrderCreateRequestDto {
 
     @NotNull
-    private Long userId;
-
-    @NotNull
     private Long productId;
 
     @NotNull

@@ -11,11 +11,17 @@ public class OrderCreateResponseDto {
 
     private Long id;
 
+    private String title;
+
     private Status status;
 
     private int price;
 
     public static OrderCreateResponseDto from(Order order) {
-        return new OrderCreateResponseDto(order);
+        return new OrderCreateResponseDto(
+                order.getId(),
+                order.getTitle(),
+                order.getProduct().getStatus(),
+                order.getPrice());
     }
 }
