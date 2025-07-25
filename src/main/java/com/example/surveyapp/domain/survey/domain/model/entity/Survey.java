@@ -90,6 +90,11 @@ public class Survey extends BaseEntity {
         if (expectedTime != null) this.expectedTime = expectedTime;
     }
 
+    public static Survey of(User user, String title, String description, Long maxSurveyee,
+                            Long pointPerPerson, LocalDateTime deadline, Long expectedTime) {
+        return new Survey(user, title, description, maxSurveyee, pointPerPerson, deadline, expectedTime);
+    }
+
 
 
 }
