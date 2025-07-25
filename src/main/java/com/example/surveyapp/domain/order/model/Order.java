@@ -29,7 +29,7 @@ public class Order extends BaseEntity {
     private Product product;
 
     @Column(nullable = false)
-    private String name;
+    private String title;
 
     @Column(nullable = false)
     private int price;
