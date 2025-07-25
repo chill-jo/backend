@@ -49,7 +49,7 @@ public class SurveyService {
     //해당 설문 출제자가 아니거나 관리자가 아닐 시 예외
     public void currentUserMatchesSurveyCreator(User user, Survey survey, String errorMessage){
 
-        if(!survey.isUserSurveyCreator(user) || user.isUserRoleNotAdmin()){
+        if(!survey.isUserSurveyCreator(user) && user.isUserRoleNotAdmin()){
             throw new CustomException(ErrorCode.NOT_SURVEY_CREATOR, errorMessage);
         }
     }
