@@ -70,4 +70,7 @@ public class User extends BaseEntity {
     public boolean isUserRoleSurveyee(){
         return this.userRole.equals(UserRoleEnum.SURVEYEE);
     }
+    public boolean isUserRoleNotAdmin(){
+        return !this.userRole.equals(UserRoleEnum.ADMIN);
+    }
 }

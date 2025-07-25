@@ -88,6 +88,12 @@ public class Survey extends BaseEntity {
         if (pointPerPerson != null) this.pointPerPerson = pointPerPerson;
         if (deadline != null) this.deadline = deadline;
         if (expectedTime != null) this.expectedTime = expectedTime;
+        this.totalPoint = this.maxSurveyee * this.pointPerPerson;
+    }
+
+    public static Survey of(User user, String title, String description, Long maxSurveyee,
+                            Long pointPerPerson, LocalDateTime deadline, Long expectedTime) {
+        return new Survey(user, title, description, maxSurveyee, pointPerPerson, deadline, expectedTime);
     }
 
 
