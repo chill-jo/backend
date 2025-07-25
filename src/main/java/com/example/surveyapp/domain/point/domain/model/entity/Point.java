@@ -33,4 +33,9 @@ public class Point  extends BaseEntity {
     public void pointCharge(Long amount) {
         this.pointBalance+=amount;
     }
+
+    public void earn(Long amount) {
+        this.pointBalance+=amount;
+    }
+
 }
