@@ -7,6 +7,7 @@ import com.example.surveyapp.domain.product.controller.dto.ProductUpdateRequestD
 import com.example.surveyapp.domain.product.model.Product;
 import com.example.surveyapp.domain.product.model.Status;
 import com.example.surveyapp.domain.product.model.repository.ProductRepository;
+import com.example.surveyapp.domain.product.service.dto.ProductUpdateResponseDto;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
 import com.example.surveyapp.domain.user.domain.repository.UserRepository;
@@ -32,24 +33,29 @@ public class ProductService {
 
 
     /**
-     * @param dto         생성 요청 DTO
+     * @param requestDto         생성 요청 DTO
      * @param userId 인증된 사용자 정보 가져오기(관리자만)
      * @return
      * @PreAuthorize("hashRole('ADMIN')") ADMIN 관리자만 생성 할 수 있도록
      */
     @Transactional
-    public ProductCreateResponseDto createProduct(ProductCreateRequestDto dto, Long userId) {
+    public ProductCreateResponseDto createProduct(ProductCreateRequestDto requestDto, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
         if (user.getUserRole() != UserRoleEnum.ADMIN) {
             throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
         }
+
+        if (productRepository.existsByTitleAndIsDeletedFalse(requestDto.getTitle())){
+            throw new CustomException(ErrorCode.NOT_SAME_PRODUCT_TITLE);
+        }
+
         Product product = Product.builder()
-                .title(dto.getTitle())
-                .content(dto.getContent())
-                .price(dto.getPrice())
-                .status(dto.getStatus())
+                .title(requestDto.getTitle())
+                .content(requestDto.getContent())
+                .price(requestDto.getPrice())
+                .status(requestDto.getStatus())
                 .build();
 
         Product saved = productRepository.save(product);
@@ -85,13 +91,13 @@ public class ProductService {
     }
 
     @Transactional
-    public void updateProduct(Long id, ProductUpdateRequestDto requestDto, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+    public ProductUpdateResponseDto updateProduct(Long id, ProductUpdateRequestDto requestDto) {
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
-        if (user.getUserRole() != UserRoleEnum.ADMIN) {
-            throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
-        }
+//        if (user.getUserRole() != UserRoleEnum.ADMIN) {
+//            throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
+//        }
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PRODUCT));
 
@@ -100,13 +106,24 @@ public class ProductService {
             if (onlyOne){
                 throw new CustomException(ErrorCode.NOT_SAME_PRODUCT_TITLE);
             }
-        }
 
-        product.update(
+            if (requestDto.getStatus() == null) {
+                throw new CustomException(ErrorCode.NOT_FOUND_PRODUCT_STATUS);
+            }
+        }
+         product.update(
                 requestDto.getTitle(),
                 requestDto.getPrice(),
                 requestDto.getContent(),
                 requestDto.getStatus());
+
+        return new ProductUpdateResponseDto(
+                product.getId(),
+                product.getTitle(),
+                product.getContent(),
+                product.getPrice(),
+                product.getStatus()
+        );
 
     }
 
