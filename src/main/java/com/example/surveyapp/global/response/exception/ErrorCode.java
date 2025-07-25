@@ -25,6 +25,8 @@ public enum ErrorCode {
 
     //주문
     NOT_ORDER_USER(HttpStatus.UNAUTHORIZED,"주문이 불가한 계정입니다."),
+    NOT_FOUND_POINT(HttpStatus.UNAUTHORIZED,"포인트가 존재하지 않습니다."),
+    NOT_ENOUGH_POINT(HttpStatus.BAD_REQUEST,"포인트가 부족합니다."),
 
             //설문 에러
     SURVEY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 설문입니다."),
