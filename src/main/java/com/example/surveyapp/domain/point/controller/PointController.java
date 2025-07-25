@@ -16,8 +16,9 @@ public class PointController {
 
     private final PointService pointService;
 
+    //포인트 충전
     @PostMapping("/points")
-    public ResponseEntity<ApiResponse<Void>> create(@Valid @RequestBody PointChargeRequestDto dto,
+    public ResponseEntity<ApiResponse<Void>> charge(@Valid @RequestBody PointChargeRequestDto dto,
                                                                      @RequestParam("userId") Long userId) {
         pointService.charge(userId,dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("결제가 되었습니다.",null));
