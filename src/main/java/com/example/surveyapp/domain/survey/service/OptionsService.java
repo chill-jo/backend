@@ -41,12 +41,12 @@ public class OptionsService {
         }
     }
 
-    //해당 설문 출제자가 아닐 시 예외
+    //해당 설문 출제자가 아니거나 관리자가 아닐 시 예외
     public void currentUserMatchesSurveyCreator(Long userId, Survey survey, String errorMessage){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
-        if(survey.isUserSurveyCreator(user)){
+        if(!survey.isUserSurveyCreator(user) || user.isUserRoleNotAdmin()){
             throw new CustomException(ErrorCode.NOT_SURVEY_CREATOR, errorMessage);
         }
     }
@@ -82,7 +82,7 @@ public class OptionsService {
                 .orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
 
         isCurrentUserSurveyee(userId, "참여자 권한으로는 선택지를 생성할 수 없습니다.");
-        currentUserMatchesSurveyCreator(userId, survey, "설문 출제자가 아닌 유저는 선택지를 생성할 수 없습니다.");
+        currentUserMatchesSurveyCreator(userId, survey, "설문 출제자와 관리자만 선택지를 생성할 수 있습니다.");
         isSurveyNotStarted(survey, "설문이 진행 전 상태일 때만 선택지를 생성할 수 있습니다.");
         isQuestionFromSurvey(survey, question);
 
@@ -109,7 +109,7 @@ public class OptionsService {
         //진행 중 설문이 아닐 때는 참여자, 해당 설문 출제자가 아닌 출제자는 조회 불가.
         if(!survey.isSurveyStatusInProgress()){
             isCurrentUserSurveyee(userId, "진행 중 상태가 아닌 설문의 선택지는 설문 참여자 권한으로 조회할 수 없습니다.");
-            currentUserMatchesSurveyCreator(userId, survey, "설문 출제자가 아닌 출제자는 진행 중이 아닌 설문의 선택지를 조회할 수 없습니다.");
+            currentUserMatchesSurveyCreator(userId, survey, "설문 출제자와 관리자만 진행 중이 아닌 설문의 선택지를 조회할 수 있습니다.");
         }
 
         List<Options> optionsList = optionsRepository.findAllByQuestionId(questionId);
@@ -132,7 +132,7 @@ public class OptionsService {
         Options option = optionsRepository.findById(optionId).orElseThrow(() -> new CustomException(ErrorCode.OPTION_NOT_FOUND));
 
         isCurrentUserSurveyee(userId, "참여자 권한으로는 선택지를 수정할 수 없습니다.");
-        currentUserMatchesSurveyCreator(userId, survey, "설문 출제자가 아닌 출제자는 선택지를 수정할 수 없습니다.");
+        currentUserMatchesSurveyCreator(userId, survey, "설문 출제자와 관리자만 선택지를 수정할 수 있습니다.");
         isSurveyNotStarted(survey, "설문이 진행 전 상태일 때만 선택지를 수정할 수 있습니다.");
         isQuestionFromSurvey(survey, question);
         isOptionFromQuestion(question, option);
@@ -163,7 +163,7 @@ public class OptionsService {
                 .orElseThrow(() -> new CustomException(ErrorCode.OPTION_NOT_FOUND));
 
         isCurrentUserSurveyee(userId, "참여자 권한으로는 선택지를 삭제할 수 없습니다.");
-        currentUserMatchesSurveyCreator(userId, survey, "설문 출제자가 아닌 출제자는 선택지를 삭제할 수 없습니다.");
+        currentUserMatchesSurveyCreator(userId, survey, "설문 출제자와 관리자만 선택지를 삭제할 수 있습니다.");
         isSurveyNotStarted(survey, "설문이 진행 전 상태일 때만 선택지를 삭제할 수 있습니다.");
         isQuestionFromSurvey(survey, question);
         isOptionFromQuestion(question, option);
