@@ -44,7 +44,7 @@ public class QuestionService {
     public void currentUserMatchesSurveyCreator(Long userId, Survey survey, String errorMessage){
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
-        if(!survey.isUserSurveyCreator(user) || user.isUserRoleNotAdmin()){
+        if(!survey.isUserSurveyCreator(user) && user.isUserRoleNotAdmin()){
             throw new CustomException(ErrorCode.NOT_SURVEY_CREATOR, errorMessage);
         }
     }
