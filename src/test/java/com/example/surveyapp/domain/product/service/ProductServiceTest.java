@@ -1,18 +1,18 @@
 package com.example.surveyapp.domain.product.service;
 
+import com.example.surveyapp.config.DataJpaTestBase;
 import com.example.surveyapp.config.ProductFixtureGenerator;
 import com.example.surveyapp.domain.product.controller.dto.ProductCreateRequestDto;
 import com.example.surveyapp.domain.product.controller.dto.ProductCreateResponseDto;
 import com.example.surveyapp.domain.product.controller.dto.ProductResponseDto;
 import com.example.surveyapp.domain.product.controller.dto.ProductUpdateRequestDto;
-import com.example.surveyapp.domain.product.model.Product;
-import com.example.surveyapp.domain.product.model.Status;
-import com.example.surveyapp.domain.product.model.repository.ProductRepository;
+import com.example.surveyapp.domain.product.domain.model.Product;
+import com.example.surveyapp.domain.product.domain.model.Status;
+import com.example.surveyapp.domain.product.domain.model.repository.ProductRepository;
 import com.example.surveyapp.domain.product.service.dto.ProductUpdateResponseDto;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
 import com.example.surveyapp.domain.user.domain.repository.UserRepository;
-import com.example.surveyapp.domain.user.service.UserService;
 import com.example.surveyapp.global.response.exception.CustomException;
 import com.example.surveyapp.global.response.exception.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
@@ -21,19 +21,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.querydsl.QPageRequest;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.awaitility.Awaitility.given;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.willReturn;
@@ -61,13 +58,14 @@ class ProductServiceTest {
         int price = 1800;
         String content = "상품설명";
         Status status =Status.ON_SALE;
-        Product product = ProductFixtureGenerator.generateProductFixture();
 
+        Product product = Product.create(title, price, content, status);
         User adminUser = User.of("test@test.com", "test1234!", "관리자", "도한123", UserRoleEnum.ADMIN);
+        ReflectionTestUtils.setField(adminUser,"id",1L);
 
         ProductCreateRequestDto requestDto = new ProductCreateRequestDto(title, content, price, status);
 
-        when(userRepository.findById(adminUser.getId())).thenReturn(Optional.of(adminUser));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(adminUser));
         when(productRepository.save(any(Product.class))).thenReturn(product);
         // When
         //실행할 행동
@@ -157,11 +155,11 @@ class ProductServiceTest {
         // Given
         //테스트 전제 조건 및 환경 설정
         Product product1 = ProductFixtureGenerator.generateProductFixture();
-        Product product2 = new Product(2L,"상품2",1800,"설명2",Status.ON_SALE,false);
+        Product product2 = Product.create("상품2",1800,"설명2",Status.ON_SALE);
         List<Product> productList = List.of(product1, product2);
 
         int page = 0;
-        int size = 10;
+        int size = 2;
 
         Pageable pageable = PageRequest.of(page, size);
         PageImpl<Product> products = new PageImpl<>(productList, pageable, productList.size());
@@ -175,6 +173,7 @@ class ProductServiceTest {
         //검증 사항
         verify(productRepository,  times(1)).findAllByStatusAndIsDeletedFalse(Status.ON_SALE, pageable);
         assertThat(productService.readAllProduct(page,size));
+        assertThat(productResponseDtos.size()).isEqualTo(productList.size());
 
 
     }
@@ -202,8 +201,6 @@ class ProductServiceTest {
     @Test
     @DisplayName("상품을 수정한다")
     void 상품_수정_가능하다() {
-
-
         // Given
         //테스트 전제 조건 및 환경 설정
         Long id = 1L;
@@ -230,15 +227,26 @@ class ProductServiceTest {
     @Test
     @DisplayName("상품을 삭제한다")
     void 상품_삭제() {
+        // Given
+        //테스트 전제 조건 및 환경 설정
         Long id = 1L;
         Product product = ProductFixtureGenerator.generateProductFixture();
         User adminUser = User.of("test@test.com", "test1234!", "관리자", "도한123", UserRoleEnum.ADMIN);
 
-
         lenient().when(userRepository.findById(adminUser.getId())).thenReturn(Optional.of(adminUser));
         when(productRepository.findByIdAndIsDeletedFalse(id)).thenReturn(Optional.of(product));
 
+        // When
+        //실행할 행동
         productService.deleteProduct(id,adminUser.getId());
+        // Then
+        //검증 사항
+        assertThat(product.isDeleted()).isTrue();
+        verify(productRepository,times(1)).findByIdAndIsDeletedFalse(id);
+
+
+
+
 
 
     }

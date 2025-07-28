@@ -1,4 +1,4 @@
-package com.example.surveyapp.domain.product.model;
+package com.example.surveyapp.domain.product.domain.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
