@@ -1,20 +1,15 @@
 package com.example.surveyapp.domain.order.model;
 
-import com.example.surveyapp.domain.product.model.Product;
+import com.example.surveyapp.domain.product.domain.model.Product;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "orders")
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Builder
 public class Order extends BaseEntity {
 
     @Id@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,4 +29,21 @@ public class Order extends BaseEntity {
     @Column(nullable = false)
     private int price;
 
+    @Builder(access = AccessLevel.PRIVATE)
+    private Order(User user, Product product, String title, int price) {
+        this.user = user;
+        this.product = product;
+        this.title = title;
+        this.price = price;
+    }
+
+    public static Order create(User user, Product product, String  title, int price) {
+
+        return Order.builder()
+                .user(user)
+                .product(product)
+                .title(title)
+                .price(price)
+                .build();
+    }
 }

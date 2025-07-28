@@ -1,6 +1,6 @@
 package com.example.surveyapp.domain.product.controller.dto;
 
-import com.example.surveyapp.domain.product.model.Status;
+import com.example.surveyapp.domain.product.domain.model.Status;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;

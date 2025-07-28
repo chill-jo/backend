@@ -4,8 +4,7 @@ import com.example.surveyapp.domain.product.controller.dto.ProductCreateRequestD
 import com.example.surveyapp.domain.product.controller.dto.ProductCreateResponseDto;
 import com.example.surveyapp.domain.product.controller.dto.ProductResponseDto;
 import com.example.surveyapp.domain.product.controller.dto.ProductUpdateRequestDto;
-import com.example.surveyapp.domain.product.model.Status;
-import com.example.surveyapp.domain.product.model.repository.ProductRepository;
+import com.example.surveyapp.domain.product.domain.model.Status;
 import com.example.surveyapp.domain.product.service.ProductService;
 import com.example.surveyapp.domain.product.service.dto.ProductUpdateResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,6 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -30,7 +30,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ActiveProfiles("test")
-@SpringBootTest
+//@SpringBootTest
+@WebMvcTest(controllers = ProductController.class)
+// 웹계층 테스트에 필요한 Bean들만 등록해주는 Annotations
+// 당연히 데이터 접근 계층에 관련된 JPA와 연관된 Bean은 등록되질 않아야 하는데
+// 왜 JPA 관련된, Audting 관련된 Bean 생성을 시도했을까
 @AutoConfigureMockMvc(addFilters = false) //인증인가 시 변경
 class ProductControllerTest {
 
@@ -42,8 +46,6 @@ class ProductControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
-    private ProductRepository productRepository;
 
     @Test
     @DisplayName("상품을 생성한다")
@@ -72,7 +74,7 @@ class ProductControllerTest {
 
         actions.andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.title").value(title));
+                .andExpect(jsonPath("$.data.title").value(requestDto.getTitle()));
 
     }
 

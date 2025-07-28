@@ -1,7 +1,7 @@
 package com.example.surveyapp.domain.order.controller.dto;
 
 import com.example.surveyapp.domain.order.model.Order;
-import com.example.surveyapp.domain.product.model.Status;
+import com.example.surveyapp.domain.product.domain.model.Status;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

@@ -4,9 +4,9 @@ import com.example.surveyapp.domain.product.controller.dto.ProductCreateRequestD
 import com.example.surveyapp.domain.product.controller.dto.ProductCreateResponseDto;
 import com.example.surveyapp.domain.product.controller.dto.ProductResponseDto;
 import com.example.surveyapp.domain.product.controller.dto.ProductUpdateRequestDto;
-import com.example.surveyapp.domain.product.model.Product;
-import com.example.surveyapp.domain.product.model.Status;
-import com.example.surveyapp.domain.product.model.repository.ProductRepository;
+import com.example.surveyapp.domain.product.domain.model.Product;
+import com.example.surveyapp.domain.product.domain.model.Status;
+import com.example.surveyapp.domain.product.domain.model.repository.ProductRepository;
 import com.example.surveyapp.domain.product.service.dto.ProductUpdateResponseDto;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
@@ -31,7 +31,6 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
 
-
     /**
      * @param requestDto         생성 요청 DTO
      * @param userId 인증된 사용자 정보 가져오기(관리자만)
@@ -51,12 +50,10 @@ public class ProductService {
             throw new CustomException(ErrorCode.NOT_SAME_PRODUCT_TITLE);
         }
 
-        Product product = Product.builder()
-                .title(requestDto.getTitle())
-                .content(requestDto.getContent())
-                .price(requestDto.getPrice())
-                .status(requestDto.getStatus())
-                .build();
+        Product product = Product.create(requestDto.getTitle(),
+                requestDto.getPrice(),
+                requestDto.getContent(),
+                requestDto.getStatus());
 
         Product saved = productRepository.save(product);
         return ProductCreateResponseDto.from(saved);
@@ -101,7 +98,7 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PRODUCT));
 
-        if (!product.getTitle().equals(requestDto.getTitle())) {
+        if (!product.getTitle().equals(requestDto.getTitle())) { //수정하기
             boolean onlyOne = productRepository.existsByTitleAndIsDeletedFalse(requestDto.getTitle());
             if (onlyOne){
                 throw new CustomException(ErrorCode.NOT_SAME_PRODUCT_TITLE);
