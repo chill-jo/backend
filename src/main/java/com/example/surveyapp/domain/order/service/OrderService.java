@@ -73,16 +73,7 @@ public class OrderService {
     public List<OrderResponseDto> readMyOrderList(int page, int size, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
-
-        if (!user.getId().equals(userId) ) {
-            throw new CustomException(ErrorCode.NOT_YOUR_ACCOUNT);
-        }
-        if (!user.isUserRoleSurveyee()) {
-            throw new CustomException(ErrorCode.NOT_SURVEYEE_USER);
-        }
-
         Pageable pageable = PageRequest.of(page,size);
-
         Page<Order> orders = orderRepository.findByUser(user,pageable);
 
         return orders.stream()
