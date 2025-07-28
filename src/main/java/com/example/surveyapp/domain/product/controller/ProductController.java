@@ -7,11 +7,13 @@ import com.example.surveyapp.domain.product.controller.dto.ProductUpdateRequestD
 import com.example.surveyapp.domain.product.service.ProductService;
 import com.example.surveyapp.domain.product.service.dto.ProductUpdateResponseDto;
 import com.example.surveyapp.global.response.ApiResponse;
+import com.example.surveyapp.global.security.jwt.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,7 +28,8 @@ public class ProductController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ApiResponse<ProductCreateResponseDto>> create(@Valid @RequestBody ProductCreateRequestDto dto,
-                                                                        @RequestParam("userId") Long userId) {
+                                                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
         ProductCreateResponseDto product =  productService.createProduct(dto,userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("상품이 생성되었습니다.",product));
     }
@@ -38,7 +41,7 @@ public class ProductController {
      */
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN,SURVEYEE')")
+    @PreAuthorize("hasAnyRole('ADMIN','SURVEYEE')")
     public ResponseEntity<ApiResponse<List<ProductResponseDto>>> getReadAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size){
@@ -48,7 +51,7 @@ public class ProductController {
     }
 
     @GetMapping("{id}")
-    @PreAuthorize("hasRole('ADMIN,SURVEYEE')")
+    @PreAuthorize("hasAnyRole('ADMIN','SURVEYEE')")
     public ResponseEntity<ApiResponse<ProductResponseDto>> getReadOne(@PathVariable Long id) {
        ProductResponseDto product = productService.readOneProduct(id);
        return ResponseEntity.status(HttpStatus.OK)
@@ -78,8 +81,9 @@ public class ProductController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> delete(@PathVariable Long id,
-                                    @RequestParam("userId") Long userId) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id,
+                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
         productService.deleteProduct(id,userId);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success( "상품이 삭제 됐습니다.",null));
