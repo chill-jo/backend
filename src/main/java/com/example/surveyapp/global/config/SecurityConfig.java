@@ -39,9 +39,9 @@ public class SecurityConfig {
                         // 비회원 허용
                         .requestMatchers(
                                 "/api/register",
-                                "/api/auth/login",
-                                "/api/auth/logout",
-                                "/api/auth/refresh",
+                                "/api/login",
+                                "/api/logout",
+                                "/api/refresh",
                                 "/error"
                         ).permitAll()
 

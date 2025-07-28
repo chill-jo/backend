@@ -1,6 +1,6 @@
 package com.example.surveyapp.domain.product.service.dto;
 
-import com.example.surveyapp.domain.product.model.Status;
+import com.example.surveyapp.domain.product.domain.model.Status;
 import lombok.Getter;
 
 @Getter

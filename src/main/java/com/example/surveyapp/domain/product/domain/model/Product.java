@@ -1,7 +1,5 @@
-package com.example.surveyapp.domain.product.model;
+package com.example.surveyapp.domain.product.domain.model;
 
-import com.example.surveyapp.domain.product.controller.dto.ProductResponseDto;
-import com.example.surveyapp.domain.product.service.dto.ProductUpdateResponseDto;
 import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,9 +7,7 @@ import lombok.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @Table(name = "product")
-@Builder
 public class Product extends BaseEntity {
 
     @Id
@@ -32,8 +28,24 @@ public class Product extends BaseEntity {
     private Status status;
 
     @Column(nullable = false)
-    @Builder.Default
     private boolean isDeleted = false;
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private Product(String title, int price, String content, Status status) {
+        this.title = title;
+        this.price = price;
+        this.content = content;
+        this.status = status;
+    }
+
+    public static Product create(String title, int price, String content, Status status) {
+        return Product.builder()
+                .title(title)
+                .price(price)
+                .content(content)
+                .status(status)
+                .build();
+    }
 
     public void delete() {
         this.isDeleted = true;

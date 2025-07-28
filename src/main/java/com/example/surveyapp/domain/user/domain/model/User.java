@@ -53,7 +53,7 @@ public class User extends BaseEntity {
                 .build();
     }
 
-    private void delete(){
+    public void softDelete(){
         this.isDeleted = true;
     }
 

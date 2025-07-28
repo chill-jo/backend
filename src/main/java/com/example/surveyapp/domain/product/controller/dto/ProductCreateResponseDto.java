@@ -1,8 +1,7 @@
 package com.example.surveyapp.domain.product.controller.dto;
 
-import com.example.surveyapp.domain.product.model.Product;
-import com.example.surveyapp.domain.product.model.Status;
-import lombok.AllArgsConstructor;
+import com.example.surveyapp.domain.product.domain.model.Product;
+import com.example.surveyapp.domain.product.domain.model.Status;
 import lombok.Getter;
 
 @Getter
