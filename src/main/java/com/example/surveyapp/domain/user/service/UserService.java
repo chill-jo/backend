@@ -1,13 +1,16 @@
 package com.example.surveyapp.domain.user.service;
 
+import com.example.surveyapp.domain.user.controller.dto.RegisterRequestDto;
 import com.example.surveyapp.domain.user.controller.dto.UserRequestDto;
 import com.example.surveyapp.domain.user.controller.dto.UserResponseDto;
 import com.example.surveyapp.domain.user.domain.model.User;
+import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
 import com.example.surveyapp.domain.user.domain.repository.UserRepository;
 import com.example.surveyapp.global.response.exception.CustomException;
 import com.example.surveyapp.global.response.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +18,34 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @Transactional
+    public void register(RegisterRequestDto requestDto) {
+        if (userRepository.existsByEmail(requestDto.getEmail())) {
+            throw new CustomException(ErrorCode.EXISTS_EMAIL);
+        }
+
+        if (userRepository.existsByNickname(requestDto.getNickname())) {
+            throw new CustomException(ErrorCode.EXISTS_NICKNAME);
+        }
+
+        if (!requestDto.getPassword().equals(requestDto.getConfirmPassword())) {
+            throw new CustomException(ErrorCode.NOT_MATCH_PASSWORD);
+        }
+
+        String encodedPassword = passwordEncoder.encode(requestDto.getPassword());
+
+        User user = User.of(
+                requestDto.getEmail(),
+                encodedPassword,
+                requestDto.getName(),
+                requestDto.getNickname(),
+                UserRoleEnum.SURVEYEE
+        );
+
+        userRepository.save(user);
+    }
 
     @Transactional(readOnly = true)
     public UserResponseDto getMyInfo(Long userId){
