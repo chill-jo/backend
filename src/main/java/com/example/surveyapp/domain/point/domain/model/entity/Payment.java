@@ -6,14 +6,12 @@ import com.example.surveyapp.domain.point.domain.model.enums.TargetType;
 import com.example.surveyapp.domain.point.domain.model.enums.PointStatus;
 import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.util.UUID;
 @Getter
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
 public class Payment extends BaseEntity {
 
     @Id

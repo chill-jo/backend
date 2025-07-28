@@ -6,13 +6,11 @@ import com.example.surveyapp.domain.point.domain.model.enums.Target;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
 
 public class PointHistory extends BaseEntity {

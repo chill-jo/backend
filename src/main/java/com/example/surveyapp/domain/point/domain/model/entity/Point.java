@@ -2,9 +2,7 @@ package com.example.surveyapp.domain.point.domain.model.entity;
 
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.global.config.entity.BaseEntity;
-import com.example.surveyapp.global.response.exception.CustomException;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -12,7 +10,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
 public class Point  extends BaseEntity {
 
     @Id
