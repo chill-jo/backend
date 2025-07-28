@@ -64,7 +64,7 @@ public class PointService {
         Payment payment = new Payment(
                 history,
                 price,
-                Status.DONE,
+                PointStatus.DONE,
                 Method.KAKAO_PAY,
                 TargetType.POINT_CHARGE
         );

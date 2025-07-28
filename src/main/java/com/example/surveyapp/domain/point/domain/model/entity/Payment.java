@@ -3,7 +3,7 @@ package com.example.surveyapp.domain.point.domain.model.entity;
 
 import com.example.surveyapp.domain.point.domain.model.enums.Method;
 import com.example.surveyapp.domain.point.domain.model.enums.TargetType;
-import com.example.surveyapp.domain.point.domain.model.enums.Status;
+import com.example.surveyapp.domain.point.domain.model.enums.PointStatus;
 import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -32,7 +32,7 @@ public class Payment extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Status status;
+    private PointStatus pointStatus;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -42,11 +42,11 @@ public class Payment extends BaseEntity {
     @Column(nullable = false)
     private TargetType targetType;
 
-    public Payment(PointHistory history, Long amount, Status status, Method method, TargetType targetType) {
+    public Payment(PointHistory history, Long amount, PointStatus pointStatus, Method method, TargetType targetType) {
         this.pointHistory=history;
         this.amount=amount;
         this.paymentKey=UUID.randomUUID();
-        this.status=status;
+        this.pointStatus = pointStatus;
         this.method=method;
         this.targetType=targetType;
     }
