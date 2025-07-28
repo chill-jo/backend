@@ -121,10 +121,6 @@ public class PointService {
         //차감 전 포인트
         Long currentBalance=point.getPointBalance();
 
-        //만약 차감 전 포인트보다 주문 포인트가 더 크면 예외발생
-        if(currentBalance<amount){
-            throw new CustomException(ErrorCode.POINT_NOT_ENOUGH);
-        }
 
         //포인트 차감 (dirty checking)
         point.redeem(amount);
