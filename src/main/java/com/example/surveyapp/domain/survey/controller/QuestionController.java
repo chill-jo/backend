@@ -6,6 +6,7 @@ import com.example.surveyapp.domain.survey.controller.dto.response.PageQuestionR
 import com.example.surveyapp.domain.survey.controller.dto.response.QuestionResponseDto;
 import com.example.surveyapp.domain.survey.domain.model.entity.Question;
 import com.example.surveyapp.domain.survey.service.QuestionService;
+import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +25,11 @@ public class QuestionController {
     //***인증인가 추가 후 userId 부분 수정***
     @PostMapping("/{surveyId}")
     public ResponseEntity<ApiResponse<QuestionResponseDto>> createQuestion(
-            Long userId,
+            User user,
             @PathVariable Long surveyId,
             @Valid @RequestBody QuestionCreateRequestDto requestDto
     ){
-        QuestionResponseDto responseDto = questionService.createQuestion(userId, surveyId, requestDto);
+        QuestionResponseDto responseDto = questionService.createQuestion(user, surveyId, requestDto);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -40,11 +41,11 @@ public class QuestionController {
     public ResponseEntity<ApiResponse<PageQuestionResponseDto<QuestionResponseDto>>> getQuestions(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            Long userId,
+            User user,
             @PathVariable Long surveyId
     ){
 
-        PageQuestionResponseDto<QuestionResponseDto> responseDto = questionService.getQuestions(page, size, userId, surveyId);
+        PageQuestionResponseDto<QuestionResponseDto> responseDto = questionService.getQuestions(page, size, user, surveyId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -54,11 +55,11 @@ public class QuestionController {
     //질문 단건 조회
     @GetMapping("/{surveyId}/question/{questionId}")
     public ResponseEntity<ApiResponse<QuestionResponseDto>> getQuestion(
-            Long userId,
+            User user,
             @PathVariable Long surveyId,
             @PathVariable Long questionId
     ){
-        QuestionResponseDto responseDto = questionService.getQuestion(userId, surveyId, questionId);
+        QuestionResponseDto responseDto = questionService.getQuestion(user, surveyId, questionId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -68,12 +69,12 @@ public class QuestionController {
     //***인증인가 추가 후 userId 부분 수정***
     @PatchMapping("/{surveyId}/question/{questionId}")
     public ResponseEntity<ApiResponse<QuestionResponseDto>> updateQuestion(
-            Long userId,
+            User user,
             @PathVariable Long surveyId,
             @PathVariable Long questionId,
             @Valid @RequestBody QuestionUpdateRequestDto requestDto
             ){
-        QuestionResponseDto responseDto = questionService.updateQuestion(userId, surveyId, questionId, requestDto);
+        QuestionResponseDto responseDto = questionService.updateQuestion(user, surveyId, questionId, requestDto);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -83,11 +84,11 @@ public class QuestionController {
     //***인증인가 추가 후 userId 부분 수정***
     @DeleteMapping("/{surveyId}/question/{questionId}")
     public ResponseEntity<ApiResponse<Void>> deleteQuestion(
-            Long userId,
+            User user,
             @PathVariable Long surveyId,
             @PathVariable Long questionId
     ){
-        questionService.deleteQuestion(userId, surveyId, questionId);
+        questionService.deleteQuestion(user, surveyId, questionId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

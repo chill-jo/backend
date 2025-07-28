@@ -53,7 +53,7 @@ public class User extends BaseEntity {
                 .build();
     }
 
-    private void delete(){
+    public void softDelete(){
         this.isDeleted = true;
     }
 
@@ -69,5 +69,8 @@ public class User extends BaseEntity {
 
     public boolean isUserRoleSurveyee(){
         return this.userRole.equals(UserRoleEnum.SURVEYEE);
+    }
+    public boolean isUserRoleNotAdmin(){
+        return !this.userRole.equals(UserRoleEnum.ADMIN);
     }
 }

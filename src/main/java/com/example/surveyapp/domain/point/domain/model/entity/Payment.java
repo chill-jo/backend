@@ -41,4 +41,13 @@ public class Payment extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TargetType targetType;
+
+    public Payment(PointHistory history, Long amount, Status status, Method method, TargetType targetType) {
+        this.pointHistory=history;
+        this.amount=amount;
+        this.paymentKey=UUID.randomUUID();
+        this.status=status;
+        this.method=method;
+        this.targetType=targetType;
+    }
 }

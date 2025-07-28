@@ -13,6 +13,8 @@ public class SurveyResponseDto {
 
     private String title;
 
+    private String description;
+
     private Long maxSurveyee;
 
     private Long pointPerPerson;

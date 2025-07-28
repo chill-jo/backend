@@ -38,7 +38,6 @@ public class PointHistory extends BaseEntity {
     @Column(nullable = false)
     private Target target;
 
-    @Column(nullable = false)
     private Long targetId;
 
     @Column(length = 255, nullable = false)
@@ -50,4 +49,21 @@ public class PointHistory extends BaseEntity {
 
     @OneToOne(mappedBy = "pointHistory")
     private Payment payment;
+
+    public PointHistory(Long currentBalance, Long amount, Long afterBalance, PointType type, Target target, Long targetId, String description, User user){
+        this.currentBalance=currentBalance;
+        this.amount=amount;
+        this.afterBalance=afterBalance;
+        this.type=type;
+        this.target=target;
+        this.targetId=targetId;
+        this.description=description;
+        this.user=user;
+    }
+
+    public void updateTargetId(Long targetId){
+        this.targetId=targetId;
+    }
+
+
 }
