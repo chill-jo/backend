@@ -6,6 +6,8 @@ import com.example.surveyapp.domain.point.domain.model.enums.TargetType;
 import com.example.surveyapp.domain.point.domain.model.enums.PointStatus;
 import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.util.UUID;
@@ -40,12 +42,22 @@ public class Payment extends BaseEntity {
     @Column(nullable = false)
     private TargetType targetType;
 
-    public Payment(PointHistory history, Long amount, PointStatus pointStatus, Method method, TargetType targetType) {
+    @Builder(access = AccessLevel.PRIVATE)
+    private Payment(PointHistory history, Long amount, PointStatus pointStatus, Method method, TargetType targetType) {
         this.pointHistory=history;
         this.amount=amount;
         this.paymentKey=UUID.randomUUID();
         this.pointStatus = pointStatus;
         this.method=method;
         this.targetType=targetType;
+    }
+
+    public static Payment of(PointHistory history, Long amount, PointStatus pointStatus, Method method, TargetType targetType){
+        return Payment.builder()
+                .amount(amount)
+                .pointStatus(pointStatus)
+                .method(method)
+                .targetType(targetType)
+                .build();
     }
 }

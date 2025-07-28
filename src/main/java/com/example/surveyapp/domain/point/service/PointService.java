@@ -40,7 +40,7 @@ public class PointService {
         
         //포인트 조회
         Point point = pointRepository.findByUserId(userId)
-                .orElseGet(() -> pointRepository.save(new Point(user)));
+                .orElseThrow(() -> new CustomException(ErrorCode.POINT_NOT_FOUND));
 
         //충전 전 금액
         Long currentBalance=point.getPointBalance();
@@ -48,7 +48,7 @@ public class PointService {
         //포인트 충전. (dirty checking)
         point.pointCharge(price);
 
-        PointHistory history = new PointHistory(
+        PointHistory history = PointHistory.of(
                 currentBalance,
                 price,
                 point.getPointBalance(),
@@ -61,7 +61,7 @@ public class PointService {
 
         pointHistoryRepository.save(history);
 
-        Payment payment = new Payment(
+        Payment payment = Payment.of(
                 history,
                 price,
                 PointStatus.DONE,
@@ -84,7 +84,7 @@ public class PointService {
 
         // 포인트 조회
         Point point = pointRepository.findByUserId(userId)
-                .orElseGet(() -> pointRepository.save(new Point(user)));
+                .orElseThrow(() -> new CustomException(ErrorCode.POINT_NOT_FOUND));
 
         //적립 전 포인트
         Long currentBalance=point.getPointBalance();
@@ -93,7 +93,7 @@ public class PointService {
         point.earn(amount);
 
         //포인트 내역 기록
-        PointHistory history = new PointHistory(
+        PointHistory history = PointHistory.of(
                 currentBalance,
                 amount,
                 point.getPointBalance(),
@@ -118,7 +118,7 @@ public class PointService {
 
         // 포인트 조회
         Point point = pointRepository.findByUserId(userId)
-                .orElseGet(() -> pointRepository.save(new Point(user)));
+                .orElseThrow(() -> new CustomException(ErrorCode.POINT_NOT_FOUND));
 
         //차감 전 포인트
         Long currentBalance=point.getPointBalance();
@@ -132,7 +132,7 @@ public class PointService {
         point.redeem(amount);
 
         //포인트 내역 기록
-        PointHistory history = new PointHistory(
+        PointHistory history = PointHistory.of(
                 currentBalance,
                 amount,
                 point.getPointBalance(),

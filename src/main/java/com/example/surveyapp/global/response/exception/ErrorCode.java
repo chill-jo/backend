@@ -48,6 +48,7 @@ public enum ErrorCode {
 
     //포인트 에러
     POINT_NOT_ENOUGH(HttpStatus.BAD_REQUEST,"포인트가 부족합니다."),
+    POINT_NOT_FOUND(HttpStatus.NOT_FOUND, "포인트가 존재하지 않습니다."),
 
 
     // admin

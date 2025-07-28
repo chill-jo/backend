@@ -6,6 +6,8 @@ import com.example.surveyapp.domain.point.domain.model.enums.Target;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -48,7 +50,9 @@ public class PointHistory extends BaseEntity {
     @OneToOne(mappedBy = "pointHistory")
     private Payment payment;
 
-    public PointHistory(Long currentBalance, Long amount, Long afterBalance, PointType type, Target target, Long targetId, String description, User user){
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private PointHistory (Long currentBalance, Long amount, Long afterBalance, PointType type, Target target, Long targetId, String description, User user){
         this.currentBalance=currentBalance;
         this.amount=amount;
         this.afterBalance=afterBalance;
@@ -57,6 +61,19 @@ public class PointHistory extends BaseEntity {
         this.targetId=targetId;
         this.description=description;
         this.user=user;
+    }
+
+    public static PointHistory of(Long currentBalance, Long amount, Long afterBalance, PointType type, Target target, Long targetId, String description, User user){
+        return PointHistory.builder()
+                .currentBalance(currentBalance)
+                .amount(amount)
+                .afterBalance(afterBalance)
+                .type(type)
+                .target(target)
+                .targetId(targetId)
+                .description(description)
+                .user(user)
+                .build();
     }
 
     public void updateTargetId(Long targetId){
