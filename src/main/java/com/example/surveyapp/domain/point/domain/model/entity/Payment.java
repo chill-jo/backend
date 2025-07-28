@@ -20,10 +20,6 @@ public class Payment extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(optional = false)
-    @JoinColumn(name = "point_history_id", nullable = false)
-    private PointHistory pointHistory;
-
     @Column(nullable = false)
     private Long amount;
 
@@ -43,8 +39,7 @@ public class Payment extends BaseEntity {
     private TargetType targetType;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Payment(PointHistory history, Long amount, PointStatus pointStatus, Method method, TargetType targetType) {
-        this.pointHistory=history;
+    private Payment(Long amount, PointStatus pointStatus, Method method, TargetType targetType) {
         this.amount=amount;
         this.paymentKey=UUID.randomUUID();
         this.pointStatus = pointStatus;
@@ -52,7 +47,7 @@ public class Payment extends BaseEntity {
         this.targetType=targetType;
     }
 
-    public static Payment of(PointHistory history, Long amount, PointStatus pointStatus, Method method, TargetType targetType){
+    public static Payment of(Long amount, PointStatus pointStatus, Method method, TargetType targetType){
         return Payment.builder()
                 .amount(amount)
                 .pointStatus(pointStatus)

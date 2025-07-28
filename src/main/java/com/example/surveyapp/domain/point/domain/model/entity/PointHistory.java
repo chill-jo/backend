@@ -38,6 +38,7 @@ public class PointHistory extends BaseEntity {
     @Column(nullable = false)
     private Target target;
 
+    @Column(nullable = false)
     private Long targetId;
 
     @Column(length = 255, nullable = false)
@@ -47,12 +48,13 @@ public class PointHistory extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToOne(mappedBy = "pointHistory")
-    private Payment payment;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "point_id")
+    private Point point;
 
 
     @Builder(access = AccessLevel.PRIVATE)
-    private PointHistory (Long currentBalance, Long amount, Long afterBalance, PointType type, Target target, Long targetId, String description, User user){
+    private PointHistory (Long currentBalance, Long amount, Long afterBalance, PointType type, Target target, Long targetId, String description, User user, Point point){
         this.currentBalance=currentBalance;
         this.amount=amount;
         this.afterBalance=afterBalance;
@@ -61,9 +63,10 @@ public class PointHistory extends BaseEntity {
         this.targetId=targetId;
         this.description=description;
         this.user=user;
+        this.point=point;
     }
 
-    public static PointHistory of(Long currentBalance, Long amount, Long afterBalance, PointType type, Target target, Long targetId, String description, User user){
+    public static PointHistory of(Long currentBalance, Long amount, Long afterBalance, PointType type, Target target, Long targetId, String description, User user, Point point){
         return PointHistory.builder()
                 .currentBalance(currentBalance)
                 .amount(amount)
@@ -73,12 +76,7 @@ public class PointHistory extends BaseEntity {
                 .targetId(targetId)
                 .description(description)
                 .user(user)
+                .point(point)
                 .build();
     }
-
-    public void updateTargetId(Long targetId){
-        this.targetId=targetId;
-    }
-
-
 }

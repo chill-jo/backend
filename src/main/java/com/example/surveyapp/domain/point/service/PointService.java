@@ -56,22 +56,19 @@ public class PointService {
                 Target.PAYMENTS,
                 null,
                 "포인트 충전",
-                user
+                user,
+                point
         );
 
         pointHistoryRepository.save(history);
 
         Payment payment = Payment.of(
-                history,
                 price,
                 PointStatus.DONE,
                 Method.KAKAO_PAY,
                 TargetType.POINT_CHARGE
         );
         paymentRepository.save(payment);
-
-        //dirty checking
-        history.updateTargetId(payment.getId());
     }
 
     // 설문 응답하는 경우 적립
@@ -101,7 +98,8 @@ public class PointService {
                 Target.SURVEY,
                 surveyAnswerId,
                 "설문 응답 포인트 적립",
-                user
+                user,
+                point
         );
 
         pointHistoryRepository.save(history);
@@ -140,7 +138,8 @@ public class PointService {
                 Target.ORDER,
                 orderId,
                 "상품 교환 포인트 차감",
-                user
+                user,
+                point
         );
 
         pointHistoryRepository.save(history);
