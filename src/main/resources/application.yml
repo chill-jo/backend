@@ -36,4 +36,4 @@ jwt:
     key: ${JWT_SECRET_KEY}
   access-token:
       expiration:
-        mills: 1000
+        mills: 1800000

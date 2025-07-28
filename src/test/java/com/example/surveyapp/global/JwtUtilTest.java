@@ -26,7 +26,7 @@ public class JwtUtilTest {
     public void jjwtCreateTokenTest() {
         String jwt = Jwts.builder()
                 .subject("1L")
-                .claim("roel", "USER")
+                .claim("role", "USER")
                 .issuedAt(new Date())
                 .expiration(new Date())
                 .compact();
