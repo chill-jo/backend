@@ -1,5 +1,6 @@
 package com.example.surveyapp.domain.user.controller;
 
+import com.example.surveyapp.domain.user.controller.dto.RegisterRequestDto;
 import com.example.surveyapp.domain.user.controller.dto.UserRequestDto;
 import com.example.surveyapp.domain.user.controller.dto.UserResponseDto;
 import com.example.surveyapp.domain.user.domain.model.User;
@@ -36,5 +37,14 @@ public class UserController {
     ) {
         UserResponseDto updatedResponseDto = userService.updateMyInfo(userId, requestDto);
         return ResponseEntity.ok(ApiResponse.success("회원 정보 수정 성공", updatedResponseDto));
+    }
+
+    //회원가입
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse<Void>> register(
+            @RequestBody @Valid RegisterRequestDto requestDto
+    ) {
+        userService.register(requestDto);
+        return ResponseEntity.ok(ApiResponse.success("회원가입 성공", null));
     }
 }
