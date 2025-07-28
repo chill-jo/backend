@@ -1,6 +1,9 @@
 package com.example.surveyapp.domain.user.controller;
 
 import com.example.surveyapp.domain.user.controller.dto.*;
+import com.example.surveyapp.domain.user.controller.dto.RegisterRequestDto;
+import com.example.surveyapp.domain.user.controller.dto.UserRequestDto;
+import com.example.surveyapp.domain.user.controller.dto.UserResponseDto;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.domain.user.service.UserService;
 import com.example.surveyapp.global.response.ApiResponse;
