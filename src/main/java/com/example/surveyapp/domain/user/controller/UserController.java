@@ -1,11 +1,10 @@
 package com.example.surveyapp.domain.user.controller;
 
-import com.example.surveyapp.domain.user.controller.dto.RegisterRequestDto;
-import com.example.surveyapp.domain.user.controller.dto.UserRequestDto;
-import com.example.surveyapp.domain.user.controller.dto.UserResponseDto;
+import com.example.surveyapp.domain.user.controller.dto.*;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.domain.user.service.UserService;
 import com.example.surveyapp.global.response.ApiResponse;
+import com.example.surveyapp.global.security.jwt.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -47,4 +46,24 @@ public class UserController {
         userService.register(requestDto);
         return ResponseEntity.ok(ApiResponse.success("회원가입 성공", null));
     }
+
+    //로그인
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<LoginResponseDto>> login(
+            @RequestBody @Valid LoginRequestDto requestDto
+    ) {
+        LoginResponseDto response = userService.login(requestDto);
+        return ResponseEntity.ok(ApiResponse.success("로그인 성공", response));
+    }
+
+    //회원탈퇴
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<ApiResponse<Void>> withdraw(
+            @AuthenticationPrincipal CustomUserDetails userDetails, // 로그인 유저 정보
+            @RequestBody @Valid WithdrawRequestDto requestDto
+    ) {
+        userService.withdraw(userDetails.getId(), requestDto);
+        return ResponseEntity.ok(ApiResponse.success("회원 탈퇴 완료", null));
+    }
+
 }

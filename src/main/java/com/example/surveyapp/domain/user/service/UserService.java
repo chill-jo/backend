@@ -1,13 +1,12 @@
 package com.example.surveyapp.domain.user.service;
 
-import com.example.surveyapp.domain.user.controller.dto.RegisterRequestDto;
-import com.example.surveyapp.domain.user.controller.dto.UserRequestDto;
-import com.example.surveyapp.domain.user.controller.dto.UserResponseDto;
+import com.example.surveyapp.domain.user.controller.dto.*;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
 import com.example.surveyapp.domain.user.domain.repository.UserRepository;
 import com.example.surveyapp.global.response.exception.CustomException;
 import com.example.surveyapp.global.response.exception.ErrorCode;
+import com.example.surveyapp.global.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     @Transactional
     public void register(RegisterRequestDto requestDto) {
@@ -45,6 +45,36 @@ public class UserService {
         );
 
         userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    public LoginResponseDto login(LoginRequestDto requestDto) {
+        User user = userRepository.findByEmailAndIsDeletedFalse(requestDto.getEmail())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
+            throw new CustomException(ErrorCode.NOT_MATCH_PASSWORD);
+        }
+
+        String accessToken = jwtUtil.createAccessToken(user.getId(), user.getUserRole());
+
+        return LoginResponseDto.builder()
+                .id(String.valueOf(user.getId()))
+                .name(user.getName())
+                .token(accessToken)
+                .build();
+    }
+
+    @Transactional
+    public void withdraw(Long userId, WithdrawRequestDto requestDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
+            throw new CustomException(ErrorCode.NOT_MATCH_PASSWORD);
+        }
+
+        user.softDelete();
     }
 
     @Transactional(readOnly = true)
