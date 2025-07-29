@@ -4,7 +4,6 @@ import com.example.surveyapp.domain.user.controller.dto.*;
 import com.example.surveyapp.domain.user.controller.dto.RegisterRequestDto;
 import com.example.surveyapp.domain.user.controller.dto.UserRequestDto;
 import com.example.surveyapp.domain.user.controller.dto.UserResponseDto;
-import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.domain.user.service.UserService;
 import com.example.surveyapp.global.response.ApiResponse;
 import com.example.surveyapp.global.security.jwt.CustomUserDetails;
@@ -14,8 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -76,9 +73,24 @@ public class UserController {
 
     // 참여자 기초 정보 등록 선택지 보기
     @GetMapping("/surveyee/base-data-info")
-    public ResponseEntity<ApiResponse<BaseDataInfoResponseDto>> getBaseDataInfo(@AuthenticationPrincipal CustomUserDetails user) {
-        return ResponseEntity.ok(ApiResponse.success("기초 정보를 입력하세요.", userService.getBaseDataInfo(user)));
+    public ResponseEntity<ApiResponse<BaseDataInfoResponseDto>> getBaseDataInfo() {
+        return ResponseEntity.ok(ApiResponse.success("선택지 중 해당하는 번호를 선택하여 입력해주세요.", userService.getBaseDataInfo()));
     }
 
+    // 참여자 기초 정보 C,U
+    @PostMapping("/surveyee/base-datas")
+    public ResponseEntity<ApiResponse<Void>> saveBaseDatas(
+            @AuthenticationPrincipal CustomUserDetails user,
+            @Valid @RequestBody BaseDataListRequestDto requestDto
+    ) {
+        userService.saveBaseDatas(user.getId(), requestDto);
+        return ResponseEntity.ok(ApiResponse.success("기초 정보가 저장되었습니다.", null));
+    }
+
+    // 참여자 기초 정보 R
+    @GetMapping("/surveyee/base-datas")
+    public ResponseEntity<ApiResponse<BaseDataListResponseDto>> getBaseDatas(@AuthenticationPrincipal CustomUserDetails user) {
+        return ResponseEntity.ok(ApiResponse.success("기초 정보를 조회하였습니다.", userService.getBaseDatas(user.getId())));
+    }
 
 }

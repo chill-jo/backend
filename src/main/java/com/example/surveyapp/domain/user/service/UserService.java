@@ -6,6 +6,7 @@ import com.example.surveyapp.domain.user.controller.dto.*;
 import com.example.surveyapp.domain.user.controller.dto.RegisterRequestDto;
 import com.example.surveyapp.domain.user.controller.dto.UserRequestDto;
 import com.example.surveyapp.domain.user.controller.dto.UserResponseDto;
+import com.example.surveyapp.domain.user.domain.model.CategoryEnum;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.domain.user.domain.model.UserBaseData;
 import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
@@ -13,14 +14,13 @@ import com.example.surveyapp.domain.user.domain.repository.UserBaseDataRepositor
 import com.example.surveyapp.domain.user.domain.repository.UserRepository;
 import com.example.surveyapp.global.response.exception.CustomException;
 import com.example.surveyapp.global.response.exception.ErrorCode;
-import com.example.surveyapp.global.security.jwt.CustomUserDetails;
 import com.example.surveyapp.global.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -125,24 +125,63 @@ public class UserService {
     }
 
 
+    // 참여자 로그인 시 기초 정보 체크하여 없을 경우 기초정보 입력 메서드 호출
     // 참여자 기초 정보 작성 선택지 보여주는 메서드
     @Transactional(readOnly = true)
-    public BaseDataInfoResponseDto getBaseDataInfo(CustomUserDetails userDetails) {
-
-        User user = userRepository.findById(userDetails.getId()).orElseThrow(
-                () -> new CustomException(ErrorCode.NOT_FOUND_USER)
-        );
-
-        List<UserBaseData> userBaseDataList = userBaseDataRepository.findAllByUserId(user);
-
-        if (userBaseDataList.get(0).getId() != null) {
-            throw new CustomException(ErrorCode.EXISTS_BASE_DATA);
-        }
+    public BaseDataInfoResponseDto getBaseDataInfo() {
 
         return new BaseDataInfoResponseDto();
     }
 
-    // 참여자 로그인 시 기초 정보 체크하여 없을 경우 기초정보 입력 메서드 호출
+    // 참여자 기초 정보 C,U
+    @Transactional
+    public void saveBaseDatas(Long userId, BaseDataListRequestDto requestDto) {
+
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_USER)
+        );
+
+        if (CategoryEnum.values().length != requestDto.getList().size()) {
+            throw new CustomException(ErrorCode.MISSING_BASE_DATA_CATEGORIES);
+        }
+
+        requestDto.getList().forEach(
+                item -> {
+                    UserBaseData existingData = userBaseDataRepository.findByUserIdAndCategory(user, item.getCategory())
+                            .orElse(null);
+
+                    if (existingData != null) {
+                        existingData.update(item.getAnswer());
+                    } else {
+                        UserBaseData userBaseData = UserBaseData.of(user, item.getCategory(), item.getAnswer());
+                        userBaseDataRepository.save(userBaseData);
+                    }
+                }
+        );
+
+    }
+
+    // 참여자 기초 정보 R
+    @Transactional(readOnly = true)
+    public BaseDataListResponseDto getBaseDatas(Long userId) {
+
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_USER)
+        );
+
+        List<UserBaseData> userBaseDataList = userBaseDataRepository.findAllByUserId(user);
+        List<BaseDataResponseDto> baseDataResponseDtoList = new ArrayList<>();
+        userBaseDataList.forEach(
+                userBaseData -> {
+                    BaseDataResponseDto baseDataResponseDto = new BaseDataResponseDto(userBaseData.getCategory(), userBaseData.getData());
+                    baseDataResponseDtoList.add(baseDataResponseDto);
+                }
+        );
+
+        return new BaseDataListResponseDto(baseDataResponseDtoList);
+
+    }
+
     // 참여자 기초 정보 가져오는 메서드
 //    private UserBaseData getUserBaseData(CustomUserDetails user) {
 //

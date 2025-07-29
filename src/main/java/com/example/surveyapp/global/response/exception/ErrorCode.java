@@ -64,6 +64,8 @@ public enum ErrorCode {
     //회원 기초 정보 관련 에러
     NOT_FOUNT_BASE_DATA(HttpStatus.NOT_FOUND, "기초 정보가 존재하지 않습니다."),
     EXISTS_BASE_DATA(HttpStatus.NOT_FOUND, "기초 정보가 존재합니다."),
+    MISSING_BASE_DATA_CATEGORIES(HttpStatus.BAD_REQUEST, "모든 기초 정보 항목을 입력해주세요."),
+
 
     //관리자
     NOT_ADMIN_USER_ERROR(HttpStatus.UNAUTHORIZED,"관리자 계정으로 로그인하세요."),
