@@ -14,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static com.example.surveyapp.domain.user.config.UserFixtureGenerator.*;
+import static com.example.surveyapp.config.UserFixtureGenerator.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 

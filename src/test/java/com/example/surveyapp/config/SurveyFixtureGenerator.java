@@ -1,8 +1,6 @@
 package com.example.surveyapp.config;
 
 import com.example.surveyapp.domain.survey.domain.model.entity.Survey;
-import com.example.surveyapp.domain.survey.domain.model.enums.SurveyStatus;
-import com.example.surveyapp.domain.user.config.UserFixtureGenerator;
 import com.example.surveyapp.domain.user.domain.model.User;
 import org.springframework.test.util.ReflectionTestUtils;
 
