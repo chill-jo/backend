@@ -171,8 +171,4 @@ public class OptionsService {
         optionsRepository.delete(option);
 
     }
-
-
-
-
 }

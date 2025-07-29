@@ -2,9 +2,7 @@ package com.example.surveyapp.domain.survey.domain.model.entity;
 
 import com.example.surveyapp.domain.user.domain.model.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -13,7 +11,6 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Table(name = "survey_answer")
-@AllArgsConstructor
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class SurveyAnswer {
@@ -34,8 +31,16 @@ public class SurveyAnswer {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    public SurveyAnswer(Survey surveyId, User userId) {
+    @Builder(access = AccessLevel.PRIVATE)
+    private SurveyAnswer(Survey surveyId, User userId) {
         this.surveyId = surveyId;
         this.userId = userId;
+    }
+
+    public static SurveyAnswer of(Survey surveyId, User userId) {
+        return SurveyAnswer.builder()
+                .surveyId(surveyId)
+                .userId(userId)
+                .build();
     }
 }
