@@ -1,5 +1,6 @@
 package com.example.surveyapp.global.config;
 
+import com.example.surveyapp.domain.point.controller.dto.response.PointHistoryResponseDto;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
 

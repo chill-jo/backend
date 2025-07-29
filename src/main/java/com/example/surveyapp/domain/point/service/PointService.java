@@ -131,11 +131,11 @@ public class PointService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<PointHistoryResponseDto> getHistories(Long userId, Pageable pageable){
+    public Page<PointHistoryResponseDto> getHistories(Long userId, Pageable pageable){
         User user = getUser(userId);
-        Page<PointHistoryResponseDto> result=pointHistoryRepository.findByPoint_User(user, pageable)
+
+        return pointHistoryRepository.findByPoint_User(user, pageable)
                 .map(PointHistoryResponseDto::from);
-        return new PageResponse<>(result);
     }
 
     /**
