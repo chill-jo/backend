@@ -3,6 +3,7 @@ package com.example.surveyapp.domain.point.controller;
 import com.example.surveyapp.domain.point.controller.dto.request.PointChargeRequestDto;
 import com.example.surveyapp.domain.point.controller.dto.response.PointHistoryResponseDto;
 import com.example.surveyapp.domain.point.service.PointService;
+import com.example.surveyapp.global.config.PageResponse;
 import com.example.surveyapp.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,11 +30,11 @@ public class PointController {
     }
 
     //포인트 조회
-    @GetMapping()
-    public ResponseEntity<ApiResponse<Page<PointHistoryResponseDto>>> getHistories(
+    @GetMapping
+    public ResponseEntity<ApiResponse<PageResponse<PointHistoryResponseDto>>> getHistories(
             @RequestParam("userId") Long userId, Pageable pageable){
         Page<PointHistoryResponseDto> page = pointService.getHistories(userId,pageable);
-        return ResponseEntity.ok(ApiResponse.success("포인트 내역이 조회되었습니다.",page));
+        return ResponseEntity.ok(ApiResponse.success("포인트 내역이 조회되었습니다.",new PageResponse<>(page)));
     }
 
 
