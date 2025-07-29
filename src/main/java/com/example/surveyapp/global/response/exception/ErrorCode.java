@@ -55,7 +55,10 @@ public enum ErrorCode {
 
     //포인트 에러
     POINT_NOT_ENOUGH(HttpStatus.BAD_REQUEST,"포인트가 부족합니다."),
-
+    POINT_NOT_FOUND(HttpStatus.NOT_FOUND, "포인트가 존재하지 않습니다."),
+    POINT_INVALID_AMOUNT(HttpStatus.BAD_REQUEST,"5000원부터 충전 가능합니다."),
+    POINT_EARN_FAILED(HttpStatus.BAD_REQUEST,"포인트 지급에 실패했습니다."),
+    POINT_MINIMUM_AMOUNT(HttpStatus.BAD_REQUEST,"포인트가 존재하지 않습니다."),
 
     // admin
 

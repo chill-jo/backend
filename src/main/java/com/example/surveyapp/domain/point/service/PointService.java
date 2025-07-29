@@ -33,14 +33,8 @@ public class PointService {
         //요청받은 금액
         Long price=dto.getPrice();
 
-        
-        //사용자 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
-        
-        //포인트 조회
-        Point point = pointRepository.findByUserId(userId)
-                .orElseGet(() -> pointRepository.save(new Point(user)));
+        User user = getUser(userId);
+        Point point = getPoint(userId);
 
         //충전 전 금액
         Long currentBalance=point.getPointBalance();
@@ -48,43 +42,37 @@ public class PointService {
         //포인트 충전. (dirty checking)
         point.pointCharge(price);
 
-        PointHistory history = new PointHistory(
-                currentBalance,
+        Payment payment = Payment.of(
                 price,
-                point.getPointBalance(),
-                PointType.CHARGE,
-                Target.PAYMENTS,
-                null,
-                "포인트 충전",
-                user
-        );
-
-        pointHistoryRepository.save(history);
-
-        Payment payment = new Payment(
-                history,
-                price,
-                Status.DONE,
+                PointStatus.DONE,
                 Method.KAKAO_PAY,
                 TargetType.POINT_CHARGE
         );
         paymentRepository.save(payment);
 
-        //dirty checking
-        history.updateTargetId(payment.getId());
+        PointHistory history = PointHistory.of(
+                currentBalance,
+                price,
+                point.getPointBalance(),
+                PointType.CHARGE,
+                Target.PAYMENTS,
+                payment.getId(),
+                "포인트 충전",
+                user,
+                point
+        );
+
+        pointHistoryRepository.save(history);
+
+
     }
 
     // 설문 응답하는 경우 적립
     @Transactional
     public void earn(Long userId, Long amount, Long surveyAnswerId){
 
-        // 사용자 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
-
-        // 포인트 조회
-        Point point = pointRepository.findByUserId(userId)
-                .orElseGet(() -> pointRepository.save(new Point(user)));
+        User user = getUser(userId);
+        Point point = getPoint(userId);
 
         //적립 전 포인트
         Long currentBalance=point.getPointBalance();
@@ -93,7 +81,7 @@ public class PointService {
         point.earn(amount);
 
         //포인트 내역 기록
-        PointHistory history = new PointHistory(
+        PointHistory history = PointHistory.of(
                 currentBalance,
                 amount,
                 point.getPointBalance(),
@@ -101,7 +89,8 @@ public class PointService {
                 Target.SURVEY,
                 surveyAnswerId,
                 "설문 응답 포인트 적립",
-                user
+                user,
+                point
         );
 
         pointHistoryRepository.save(history);
@@ -112,27 +101,17 @@ public class PointService {
     @Transactional
     public void redeem(Long userId, Long amount, Long orderId){
 
-        // 사용자 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
-
-        // 포인트 조회
-        Point point = pointRepository.findByUserId(userId)
-                .orElseGet(() -> pointRepository.save(new Point(user)));
+        User user = getUser(userId);
+        Point point = getPoint(userId);
 
         //차감 전 포인트
         Long currentBalance=point.getPointBalance();
-
-        //만약 차감 전 포인트보다 주문 포인트가 더 크면 예외발생
-        if(currentBalance<amount){
-            throw new CustomException(ErrorCode.POINT_NOT_ENOUGH);
-        }
 
         //포인트 차감 (dirty checking)
         point.redeem(amount);
 
         //포인트 내역 기록
-        PointHistory history = new PointHistory(
+        PointHistory history = PointHistory.of(
                 currentBalance,
                 amount,
                 point.getPointBalance(),
@@ -140,10 +119,37 @@ public class PointService {
                 Target.ORDER,
                 orderId,
                 "상품 교환 포인트 차감",
-                user
+                user,
+                point
         );
 
         pointHistoryRepository.save(history);
+    }
+
+    /**
+     * 공통되는 로직을 메서드로 분리
+     * 해당하는 userId로 회원을 조회한다.
+     * 조회하지 못하는 경우 CustomException 발생
+     * @param userId
+     * @return
+     */
+
+    private User getUser(Long userId){
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+    }
+
+
+    /**
+     * 공통되는 로직을 메서드로 분리
+     * 해당하는 userId로 포인트를 조회한다.
+     * 조회하지 못하는 경우 CustomException 발생
+     * @param userId
+     * @return
+     */
+    private Point getPoint(Long userId){
+        return pointRepository.findByUserId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.POINT_NOT_FOUND));
     }
 
 }
