@@ -1,4 +1,4 @@
-package com.example.surveyapp.domain.user.config;
+package com.example.surveyapp.config;
 
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
@@ -12,6 +12,8 @@ public class UserFixtureGenerator {
     public static final UserRoleEnum ROLE = UserRoleEnum.SURVEYEE;
 
     public static User generateUserFixture() {
-        return User.of(EMAIL, PASSWORD, NAME, NICKNAME, ROLE);
+        User user = User.of(EMAIL, PASSWORD, NAME, NICKNAME, ROLE);
+        user.updateId(ID);
+        return user;
     }
 }

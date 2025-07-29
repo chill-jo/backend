@@ -1,73 +1,67 @@
 package com.example.surveyapp.domain.user.controller;
 
+import com.example.surveyapp.config.WebMvcTestBase;
+import com.example.surveyapp.config.UserFixtureGenerator;
 import com.example.surveyapp.domain.user.controller.dto.UserRequestDto;
 import com.example.surveyapp.domain.user.controller.dto.UserResponseDto;
+import com.example.surveyapp.domain.user.domain.model.User;
+import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
 import com.example.surveyapp.domain.user.service.UserService;
-import com.example.surveyapp.global.filter.JwtFilter;
-import com.example.surveyapp.global.security.jwt.JwtUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.surveyapp.config.customMockUser.WithCustomMockUser;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static com.example.surveyapp.domain.user.config.UserFixtureGenerator.*;
+import static com.example.surveyapp.config.UserFixtureGenerator.ID;
+import static com.example.surveyapp.config.UserFixtureGenerator.ROLE;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ActiveProfiles("test")
-@WebMvcTest(controllers = UserController.class)
-@AutoConfigureMockMvc
-public class UserControllerTest {
-    @Autowired
-    private MockMvc mockMvc;
-
+@DisplayName("Controller:User")
+public class UserControllerTest extends WebMvcTestBase {
     @MockitoBean
     private UserService userService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final User user = UserFixtureGenerator.generateUserFixture();
+    UserResponseDto responseDto = UserResponseDto.from(user);
 
     @Test
+    @WithCustomMockUser(id = 1, role = UserRoleEnum.SURVEYEE)
     public void User_조회_API를_호출하면_회원이_조회된다() throws Exception {
         // Given
-        UserResponseDto responseDto = UserResponseDto.builder()
-                .id(ID)
-                .email(EMAIL)
-                .name(NAME)
-                .nickname(NICKNAME)
-                .userRole(ROLE)
-                .build();
-
         when(userService.getMyInfo(ID)).thenReturn(responseDto);
 
         // When
         ResultActions resultActions = mockMvc.perform(get("/api/my-page")
-                .param("userId", ID.toString())
-                .contentType(MediaType.APPLICATION_JSON));
+                .contentType(MediaType.APPLICATION_JSON)
+        );
 
         // Then
         verify(userService, times(1)).getMyInfo(ID);
 
         resultActions.andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.email").value(EMAIL))
-                .andExpect(jsonPath("$.data.name").value(NAME))
-                .andExpect(jsonPath("$.data.nickname").value(NICKNAME))
-                .andExpect(jsonPath("$.data.role").value(ROLE.name()));
+                .andExpect(jsonPath("$.data.email").value(user.getEmail()))
+                .andExpect(jsonPath("$.data.name").value(user.getName()))
+                .andExpect(jsonPath("$.data.nickname").value(user.getNickname()))
+                .andExpect(jsonPath("$.data.userRole").value(user.getUserRole().name()));
     }
 
     @Test
-    public void User_수정_API를_호출하면_회원정보가_수정된다() throws Exception{
+    @WithCustomMockUser(id = 1, role = UserRoleEnum.SURVEYEE)
+    public void User_수정_API를_호출하면_회원정보가_수정된다() throws Exception {
         // Given
-        UserRequestDto dto = new UserRequestDto("newEmail@example.com", "newPassword", "newName", "newNickname");
+        UserRequestDto dto = new UserRequestDto(
+                "new@example.com",
+                "newPw123!",
+                "newName",
+                "newNick");
 
         UserResponseDto updatedDto = UserResponseDto.builder()
                 .id(ID)
@@ -81,7 +75,6 @@ public class UserControllerTest {
 
         // When
         ResultActions resultActions = mockMvc.perform(patch("/api/my-page")
-                .param("userId", ID.toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)));
 
@@ -93,7 +86,6 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.data.email").value(dto.getEmail()))
                 .andExpect(jsonPath("$.data.name").value(dto.getName()))
                 .andExpect(jsonPath("$.data.nickname").value(dto.getNickname()))
-                .andExpect(jsonPath("$.data.role").value(ROLE.name()));
+                .andExpect(jsonPath("$.data.userRole").value(ROLE.name()));
     }
-
 }

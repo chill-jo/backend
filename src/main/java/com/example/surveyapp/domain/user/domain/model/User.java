@@ -2,10 +2,7 @@ package com.example.surveyapp.domain.user.domain.model;
 
 import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
@@ -56,6 +53,10 @@ public class User extends BaseEntity {
 
     public void softDelete(){
         this.isDeleted = true;
+    }
+
+    public void updateId(Long id){
+        this.id = id;
     }
 
     public void updateInfo(String email, String name, String nickname, String rawPassword, PasswordEncoder passwordEncoder) {
