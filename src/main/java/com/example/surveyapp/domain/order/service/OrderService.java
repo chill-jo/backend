@@ -88,7 +88,7 @@ public class OrderService {
                 throw  new CustomException(ErrorCode.NOT_FOUND_USER);
         }
 
-        Order order = orderRepository.findByOrderIdAndDeleteFalse(id)
+        Order order = orderRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ORDER));
 
         order.delete();
