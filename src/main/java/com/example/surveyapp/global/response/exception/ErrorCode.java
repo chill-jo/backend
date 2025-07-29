@@ -60,11 +60,12 @@ public enum ErrorCode {
     POINT_EARN_FAILED(HttpStatus.BAD_REQUEST,"포인트 지급에 실패했습니다."),
     POINT_MINIMUM_AMOUNT(HttpStatus.BAD_REQUEST,"포인트가 존재하지 않습니다."),
 
-    // admin
+    //회원 기초 정보 관련 에러
+    NOT_FOUNT_BASE_DATA(HttpStatus.NOT_FOUND, "기초 정보가 존재하지 않습니다."),
+    EXISTS_BASE_DATA(HttpStatus.NOT_FOUND, "기초 정보가 존재합니다."),
 
+    //관리자
     NOT_ADMIN_USER_ERROR(HttpStatus.UNAUTHORIZED,"관리자 계정으로 로그인하세요."),
-
-
     IS_BLACKLIST(HttpStatus.BAD_REQUEST, "해당 회원은 이미 블랙입니다."),
     IS_NOT_BLACKLIST(HttpStatus.BAD_REQUEST, "해당 회원은 블랙이 아닙니다.");
 

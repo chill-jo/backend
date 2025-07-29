@@ -69,4 +69,12 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("회원 탈퇴 완료", null));
     }
 
+
+    // 참여자 기초 정보 등록 선택지 보기
+    @GetMapping("/surveyee/base-data-info")
+    public ResponseEntity<ApiResponse<BaseDataInfoResponseDto>> getBaseDataInfo(@AuthenticationPrincipal CustomUserDetails user) {
+        return ResponseEntity.ok(ApiResponse.success("기초 정보를 입력하세요.", userService.getBaseDataInfo(user)));
+    }
+
+
 }

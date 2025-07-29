@@ -2,10 +2,7 @@ package com.example.surveyapp.domain.user.domain.model;
 
 import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
