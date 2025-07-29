@@ -47,7 +47,7 @@ public class UserService {
                 encodedPassword,
                 requestDto.getName(),
                 requestDto.getNickname(),
-                requestDto.getUserRoleEnum()
+                UserRoleEnum.SURVEYEE
         );
 
         userRepository.save(user);

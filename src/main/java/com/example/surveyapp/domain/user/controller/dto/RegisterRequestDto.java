@@ -33,6 +33,4 @@ public class RegisterRequestDto {
     @Size(min = 1, max = 10, message = "별명은 1~10자여야 합니다.")
     private String nickname;
 
-    @NotNull
-    private UserRoleEnum userRoleEnum;
 }
