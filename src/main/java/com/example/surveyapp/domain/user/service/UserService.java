@@ -82,39 +82,19 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserResponseDto getMyInfo(Long userId){
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
-
-        return UserResponseDto.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .nickname(user.getNickname())
-                .userRole(user.getUserRole())
-                .build();
+        User user = findUser(userId);
+        return UserResponseDto.from(user);
     }
 
     @Transactional
     public UserResponseDto updateMyInfo(Long userId, UserRequestDto requestDto){
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+        User user = findUser(userId);
 
         validateDuplicatedUser(requestDto);
 
-        user.updateInfo(requestDto.getEmail(), requestDto.getName(), requestDto.getNickname());
+        user.updateInfo(requestDto.getEmail(), requestDto.getName(), requestDto.getNickname(), requestDto.getPassword(), passwordEncoder);
 
-        // 추후 passwordEncoder로 변경
-        if(requestDto.getPassword() != null && !requestDto.getPassword().isEmpty()){
-            String encodedPassword = new BCryptPasswordEncoder().encode(requestDto.getPassword());
-            user.updatePassword(encodedPassword);
-        }
-        return UserResponseDto.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .nickname(user.getNickname())
-                .userRole(user.getUserRole())
-                .build();
+        return UserResponseDto.from(user);
     }
 
     private void validateDuplicatedUser(UserRequestDto userRequestDto) {
@@ -125,5 +105,10 @@ public class UserService {
         if (userRepository.existsByNickname(userRequestDto.getNickname())) {
             throw new CustomException(ErrorCode.EXISTS_NICKNAME);
         }
+    }
+
+    private User findUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
     }
 }
