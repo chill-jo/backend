@@ -3,6 +3,7 @@ package com.example.surveyapp.domain.user.domain.model;
 import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
 @Getter
@@ -54,14 +55,18 @@ public class User extends BaseEntity {
         this.isDeleted = true;
     }
 
-    public void updateInfo(String email, String name, String nickname) {
+    public void updateId(Long id){
+        this.id = id;
+    }
+
+    public void updateInfo(String email, String name, String nickname, String rawPassword, PasswordEncoder passwordEncoder) {
         this.email = email;
         this.name = name;
         this.nickname = nickname;
-    }
 
-    public void updatePassword(String password) {
-        this.password = password;
+        if (rawPassword != null && !rawPassword.isBlank()) {
+            this.password = passwordEncoder.encode(rawPassword);
+        }
     }
 
     public boolean isUserRoleSurveyee(){

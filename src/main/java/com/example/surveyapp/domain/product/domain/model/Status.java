@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum Status {
     ON_SALE("판매중"),
-    STOPED_SALE("판매 중단");
+    STOPPED_SALE("판매 중단");
 
     private String status;
 }

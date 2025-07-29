@@ -89,12 +89,6 @@ public class ProductService {
 
     @Transactional
     public ProductUpdateResponseDto updateProduct(Long id, ProductUpdateRequestDto requestDto) {
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
-
-//        if (user.getUserRole() != UserRoleEnum.ADMIN) {
-//            throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
-//        }
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PRODUCT));
 

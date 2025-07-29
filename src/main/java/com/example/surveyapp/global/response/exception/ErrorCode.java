@@ -30,6 +30,7 @@ public enum ErrorCode {
     NOT_ENOUGH_POINT(HttpStatus.BAD_REQUEST,"포인트가 부족합니다."),
     NOT_SURVEYEE_USER(HttpStatus.UNAUTHORIZED,"참여자 계정만 주문이 가능합니다." ),
     NOT_YOUR_ACCOUNT(HttpStatus.BAD_REQUEST,"본인이 아닌 다른 계정 조회는 불가능합니다." ),
+    NOT_FOUND_ORDER(HttpStatus.UNAUTHORIZED,"해당 주문을 찾을 수 없습니다." ),
 
     //설문 에러
     SURVEY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 설문입니다."),

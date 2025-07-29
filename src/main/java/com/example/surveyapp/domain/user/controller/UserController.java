@@ -10,34 +10,38 @@ import com.example.surveyapp.global.response.ApiResponse;
 import com.example.surveyapp.global.security.jwt.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
 public class UserController {
     private final UserService userService;
 
-    // 인증인가 도입 후 AuthenticationPrincipal로 변경
+    // 회원 정보 조회
     @GetMapping("/my-page")
     public ResponseEntity<ApiResponse<UserResponseDto>> getMyInfo(
-            @RequestParam("userId") Long userId
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        UserResponseDto getResponseDto = userService.getMyInfo(userId);
+        log.info(String.valueOf(userDetails.getId()));
+        UserResponseDto getResponseDto = userService.getMyInfo(userDetails.getId());
         return ResponseEntity.ok(ApiResponse.success("회원 정보 조회 성공", getResponseDto));
     }
 
-    // "
+    // 회원 정보 수정
     @PatchMapping("/my-page")
     public ResponseEntity<ApiResponse<UserResponseDto>> updateMyInfo(
-            @RequestParam("userId") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody UserRequestDto requestDto
     ) {
-        UserResponseDto updatedResponseDto = userService.updateMyInfo(userId, requestDto);
+        log.info(String.valueOf(userDetails.getId()));
+        UserResponseDto updatedResponseDto = userService.updateMyInfo(userDetails.getId(), requestDto);
         return ResponseEntity.ok(ApiResponse.success("회원 정보 수정 성공", updatedResponseDto));
     }
 

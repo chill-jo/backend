@@ -29,6 +29,13 @@ public class Order extends BaseEntity {
     @Column(nullable = false)
     private int price;
 
+    @Column(nullable = false)
+    private boolean isDeleted = false;
+
+    public void delete(){
+        this.isDeleted = true;
+    }
+
     @Builder(access = AccessLevel.PRIVATE)
     private Order(User user, Product product, String title, int price) {
         this.user = user;

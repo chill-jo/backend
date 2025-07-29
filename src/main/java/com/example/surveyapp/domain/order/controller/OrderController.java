@@ -5,11 +5,13 @@ import com.example.surveyapp.domain.order.controller.dto.OrderCreateResponseDto;
 import com.example.surveyapp.domain.order.controller.dto.OrderResponseDto;
 import com.example.surveyapp.domain.order.service.OrderService;
 import com.example.surveyapp.global.response.ApiResponse;
+import com.example.surveyapp.global.security.jwt.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,8 +26,8 @@ public class OrderController {
     @PostMapping
     @PreAuthorize("hasRole('SURVEYEE')")
     public ResponseEntity<ApiResponse<OrderCreateResponseDto>> create(@Valid@RequestBody OrderCreateRequestDto requestDto,
-                                                                      @RequestParam("userId")Long userId) {
-
+                                                                      @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
         OrderCreateResponseDto order = orderService.createOrder(requestDto,userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("주문이 완료되었습니다.",order));
     }
@@ -45,9 +47,22 @@ public class OrderController {
     public ResponseEntity<ApiResponse<List<OrderResponseDto>>> readMyOrders(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam("userId")Long userId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
+        Long userId = userDetails.getId();
         List<OrderResponseDto> myOrderList = orderService.readMyOrderList(page,size,userId);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("내 주문 목록 조회 하였습니다.",myOrderList));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('SURVEYEE')")
+    public ResponseEntity<ApiResponse<Void>> delete(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ){
+        Long userId = userDetails.getId();
+        orderService.deleteOrder(id,userId);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("주문 내역이 삭제되었습니다.",null));
+
     }
 }
