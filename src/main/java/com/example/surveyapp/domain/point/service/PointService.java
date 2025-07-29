@@ -11,6 +11,7 @@ import com.example.surveyapp.domain.point.domain.repository.PointHistoryReposito
 import com.example.surveyapp.domain.point.domain.repository.PointRepository;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.domain.user.domain.repository.UserRepository;
+import com.example.surveyapp.global.config.PageResponse;
 import com.example.surveyapp.global.response.exception.CustomException;
 import com.example.surveyapp.global.response.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -130,10 +131,11 @@ public class PointService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PointHistoryResponseDto> getHistories(Long userId, Pageable pageable){
+    public PageResponse<PointHistoryResponseDto> getHistories(Long userId, Pageable pageable){
         User user = getUser(userId);
-        return pointHistoryRepository.findByPoint_User(user, pageable)
+        Page<PointHistoryResponseDto> result=pointHistoryRepository.findByPoint_User(user, pageable)
                 .map(PointHistoryResponseDto::from);
+        return new PageResponse<>(result);
     }
 
     /**
