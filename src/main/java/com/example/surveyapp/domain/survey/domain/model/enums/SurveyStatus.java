@@ -1,6 +1,7 @@
 package com.example.surveyapp.domain.survey.domain.model.enums;
 
 import lombok.Getter;
+import org.springframework.security.core.parameters.P;
 
 import java.util.Arrays;
 
@@ -22,5 +23,21 @@ public enum SurveyStatus {
                 .filter(s -> s.name().equalsIgnoreCase(input))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("설문 상태 오류"));
+    }
+
+    public boolean isNotStarted(){
+        return this == NOT_STARTED;
+    }
+
+    public boolean isInProgress(){
+        return this == IN_PROGRESS;
+    }
+
+    public boolean isDone(){
+        return this == DONE;
+    }
+
+    public boolean isPaused(){
+        return this == PAUSED;
     }
 }

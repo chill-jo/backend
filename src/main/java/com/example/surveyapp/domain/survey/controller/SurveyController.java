@@ -8,10 +8,13 @@ import com.example.surveyapp.domain.survey.controller.dto.response.*;
 import com.example.surveyapp.domain.survey.service.SurveyService;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.global.response.ApiResponse;
+import com.example.surveyapp.global.security.jwt.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,10 +25,14 @@ public class SurveyController {
     private final SurveyService surveyService;
 
     //설문 생성
-    //***User 부분 인증인가 추가 후 수정해야함!!***
     @PostMapping
-    public ResponseEntity<ApiResponse<SurveyResponseDto>> createSurvey(@RequestBody @Valid SurveyCreateRequestDto requestDto, User user){
-        SurveyResponseDto responseDto = surveyService.createSurvey(requestDto, user);
+    @PreAuthorize("hasAnyRole('ADMIN','SURVEYOR')")
+    public ResponseEntity<ApiResponse<SurveyResponseDto>> createSurvey(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody @Valid SurveyCreateRequestDto requestDto
+    ){
+        Long userId = userDetails.getId();
+        SurveyResponseDto responseDto = surveyService.createSurvey(userId, requestDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, "설문이 생성되었습니다.", responseDto));
     }
@@ -36,7 +43,6 @@ public class SurveyController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
-
         PageSurveyResponseDto<SurveyResponseDto> pagedSurveys = surveyService.getSurveys(page, size);
 
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "설문 목록을 조회했습니다.", pagedSurveys));
@@ -44,37 +50,41 @@ public class SurveyController {
 
     //설문 상세정보 수정
     @PatchMapping("/{surveyId}")
+    @PreAuthorize("hasAnyRole('ADMIN','SURVEYOR')")
     public ResponseEntity<ApiResponse<SurveyResponseDto>> updateSurvey(
-            User user,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long surveyId,
-            @Valid @RequestBody SurveyUpdateRequestDto requestDto){
-
-        SurveyResponseDto responseDto = surveyService.updateSurvey(user, surveyId, requestDto);
+            @Valid @RequestBody SurveyUpdateRequestDto requestDto
+    ){
+        Long userId = userDetails.getId();
+        SurveyResponseDto responseDto = surveyService.updateSurvey(userId, surveyId, requestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "설문이 수정되었습니다.", responseDto));
     }
 
     //설문 상태 변경(NOT_STARTED -> IN_PROGRESS, IN_PROGRESS -> PAUSED, PAUSED -> IN_PROGRESS, IN_PROGRESS -> DONE)
     @PatchMapping("/{surveyId}/status")
+    @PreAuthorize("hasAnyRole('ADMIN','SURVEYOR')")
     public ResponseEntity<ApiResponse<SurveyStatusResponseDto>> updateSurveyStatus(
-            User user,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long surveyId,
             @Valid @RequestBody SurveyStatusUpdateRequestDto requestDto
     ){
-
-        SurveyStatusResponseDto responseDto = surveyService.updateSurveyStatus(user, surveyId, requestDto);
+        Long userId = userDetails.getId();
+        SurveyStatusResponseDto responseDto = surveyService.updateSurveyStatus(userId, surveyId, requestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "설문 상태가 변경되었습니다.", responseDto));
     }
 
     //설문 삭제
     @DeleteMapping("/{surveyId}")
+    @PreAuthorize("hasAnyRole('ADMIN','SURVEYOR')")
     public ResponseEntity<ApiResponse<Void>> deleteSurvey(
-            User user,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long surveyId
-            ){
-
-        surveyService.deleteSurvey(user, surveyId);
+    ){
+        Long userId = userDetails.getId();
+        surveyService.deleteSurvey(userId, surveyId);
 
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, "설문이 삭제되었습니다.", null));
     }
