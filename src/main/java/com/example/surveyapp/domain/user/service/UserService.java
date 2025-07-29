@@ -1,5 +1,7 @@
 package com.example.surveyapp.domain.user.service;
 
+import com.example.surveyapp.domain.point.domain.model.entity.Point;
+import com.example.surveyapp.domain.point.domain.repository.PointRepository;
 import com.example.surveyapp.domain.user.controller.dto.*;
 import com.example.surveyapp.domain.user.controller.dto.RegisterRequestDto;
 import com.example.surveyapp.domain.user.controller.dto.UserRequestDto;
@@ -22,6 +24,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final PointRepository pointRepository;
 
     @Transactional
     public void register(RegisterRequestDto requestDto) {
@@ -48,6 +51,9 @@ public class UserService {
         );
 
         userRepository.save(user);
+
+        Point point = Point.of(user);
+        pointRepository.save(point);
     }
 
     @Transactional(readOnly = true)
