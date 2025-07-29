@@ -20,4 +20,15 @@ public class UserResponseDto {
     private String name;
     private String nickname;
     private UserRoleEnum userRole;
+
+    public static UserResponseDto from(User user) {
+        return UserResponseDto.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .name(user.getName())
+                .nickname(user.getNickname())
+                .userRole(user.getUserRole())
+                .build();
+    }
 }
+

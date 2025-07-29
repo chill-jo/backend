@@ -6,13 +6,13 @@ import com.example.surveyapp.domain.point.domain.model.enums.Target;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
 
 public class PointHistory extends BaseEntity {
@@ -38,6 +38,7 @@ public class PointHistory extends BaseEntity {
     @Column(nullable = false)
     private Target target;
 
+    @Column(nullable = false)
     private Long targetId;
 
     @Column(length = 255, nullable = false)
@@ -47,10 +48,13 @@ public class PointHistory extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToOne(mappedBy = "pointHistory")
-    private Payment payment;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "point_id")
+    private Point point;
 
-    public PointHistory(Long currentBalance, Long amount, Long afterBalance, PointType type, Target target, Long targetId, String description, User user){
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private PointHistory (Long currentBalance, Long amount, Long afterBalance, PointType type, Target target, Long targetId, String description, User user, Point point){
         this.currentBalance=currentBalance;
         this.amount=amount;
         this.afterBalance=afterBalance;
@@ -59,11 +63,20 @@ public class PointHistory extends BaseEntity {
         this.targetId=targetId;
         this.description=description;
         this.user=user;
+        this.point=point;
     }
 
-    public void updateTargetId(Long targetId){
-        this.targetId=targetId;
+    public static PointHistory of(Long currentBalance, Long amount, Long afterBalance, PointType type, Target target, Long targetId, String description, User user, Point point){
+        return PointHistory.builder()
+                .currentBalance(currentBalance)
+                .amount(amount)
+                .afterBalance(afterBalance)
+                .type(type)
+                .target(target)
+                .targetId(targetId)
+                .description(description)
+                .user(user)
+                .point(point)
+                .build();
     }
-
-
 }
