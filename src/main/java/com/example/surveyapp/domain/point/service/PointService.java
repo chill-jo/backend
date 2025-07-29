@@ -1,6 +1,7 @@
 package com.example.surveyapp.domain.point.service;
 
 import com.example.surveyapp.domain.point.controller.dto.request.PointChargeRequestDto;
+import com.example.surveyapp.domain.point.controller.dto.response.PointHistoryResponseDto;
 import com.example.surveyapp.domain.point.domain.model.entity.Payment;
 import com.example.surveyapp.domain.point.domain.model.entity.Point;
 import com.example.surveyapp.domain.point.domain.model.entity.PointHistory;
@@ -13,6 +14,8 @@ import com.example.surveyapp.domain.user.domain.repository.UserRepository;
 import com.example.surveyapp.global.response.exception.CustomException;
 import com.example.surveyapp.global.response.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -124,6 +127,13 @@ public class PointService {
         );
 
         pointHistoryRepository.save(history);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PointHistoryResponseDto> getHistories(Long userId, Pageable pageable){
+        User user = getUser(userId);
+        return pointHistoryRepository.findByPoint_User(user, pageable)
+                .map(PointHistoryResponseDto::from);
     }
 
     /**
