@@ -1,5 +1,7 @@
 package com.example.surveyapp.domain.user.service;
 
+import com.example.surveyapp.domain.point.domain.model.entity.Point;
+import com.example.surveyapp.domain.point.domain.repository.PointRepository;
 import com.example.surveyapp.domain.user.controller.dto.*;
 import com.example.surveyapp.domain.user.controller.dto.RegisterRequestDto;
 import com.example.surveyapp.domain.user.controller.dto.UserRequestDto;
@@ -22,6 +24,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final PointRepository pointRepository;
 
     @Transactional
     public void register(RegisterRequestDto requestDto) {
@@ -48,6 +51,9 @@ public class UserService {
         );
 
         userRepository.save(user);
+
+        Point point = Point.of(user);
+        pointRepository.save(point);
     }
 
     @Transactional(readOnly = true)
@@ -82,39 +88,19 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserResponseDto getMyInfo(Long userId){
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
-
-        return UserResponseDto.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .nickname(user.getNickname())
-                .userRole(user.getUserRole())
-                .build();
+        User user = findUser(userId);
+        return UserResponseDto.from(user);
     }
 
     @Transactional
     public UserResponseDto updateMyInfo(Long userId, UserRequestDto requestDto){
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+        User user = findUser(userId);
 
         validateDuplicatedUser(requestDto);
 
-        user.updateInfo(requestDto.getEmail(), requestDto.getName(), requestDto.getNickname());
+        user.updateInfo(requestDto.getEmail(), requestDto.getName(), requestDto.getNickname(), requestDto.getPassword(), passwordEncoder);
 
-        // 추후 passwordEncoder로 변경
-        if(requestDto.getPassword() != null && !requestDto.getPassword().isEmpty()){
-            String encodedPassword = new BCryptPasswordEncoder().encode(requestDto.getPassword());
-            user.updatePassword(encodedPassword);
-        }
-        return UserResponseDto.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .nickname(user.getNickname())
-                .userRole(user.getUserRole())
-                .build();
+        return UserResponseDto.from(user);
     }
 
     private void validateDuplicatedUser(UserRequestDto userRequestDto) {
@@ -125,5 +111,10 @@ public class UserService {
         if (userRepository.existsByNickname(userRequestDto.getNickname())) {
             throw new CustomException(ErrorCode.EXISTS_NICKNAME);
         }
+    }
+
+    private User findUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
     }
 }

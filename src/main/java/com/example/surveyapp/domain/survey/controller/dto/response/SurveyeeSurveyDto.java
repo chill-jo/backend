@@ -1,5 +1,6 @@
 package com.example.surveyapp.domain.survey.controller.dto.response;
 
+import com.example.surveyapp.domain.survey.domain.model.entity.SurveyAnswer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,4 +17,12 @@ public class SurveyeeSurveyDto {
     private String title;
 
     private LocalDateTime date;
+
+    public static SurveyeeSurveyDto of(SurveyAnswer surveyAnswer){
+        return SurveyeeSurveyDto.builder()
+                .surveyId(surveyAnswer.getSurveyId().getId())
+                .title(surveyAnswer.getSurveyId().getTitle())
+                .date(surveyAnswer.getCreatedAt())
+                .build();
+    }
 }

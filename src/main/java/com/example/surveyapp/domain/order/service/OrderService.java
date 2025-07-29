@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -80,4 +81,17 @@ public class OrderService {
                 .map(OrderResponseDto::from)
                 .toList();
         }
+
+    @Transactional
+    public void deleteOrder(Long id, Long userId) {
+        if (userId == null) {
+                throw  new CustomException(ErrorCode.NOT_FOUND_USER);
+        }
+
+        Order order = orderRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ORDER));
+
+        order.delete();
+
+    }
 }

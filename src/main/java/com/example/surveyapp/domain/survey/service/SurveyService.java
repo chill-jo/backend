@@ -6,9 +6,15 @@ import com.example.surveyapp.domain.survey.controller.dto.request.SurveyCreateRe
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyStatusUpdateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyUpdateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.*;
-import com.example.surveyapp.domain.survey.domain.model.entity.*;
+import com.example.surveyapp.domain.survey.domain.model.entity.Question;
+import com.example.surveyapp.domain.survey.domain.model.entity.Survey;
+import com.example.surveyapp.domain.survey.domain.model.entity.SurveyAnswer;
 import com.example.surveyapp.domain.survey.domain.model.enums.SurveyStatus;
-import com.example.surveyapp.domain.survey.domain.repository.*;
+import com.example.surveyapp.domain.survey.domain.repository.OptionsRepository;
+import com.example.surveyapp.domain.survey.domain.repository.QuestionRepository;
+import com.example.surveyapp.domain.survey.domain.repository.SurveyAnswerRepository;
+import com.example.surveyapp.domain.survey.domain.repository.SurveyRepository;
+import com.example.surveyapp.domain.survey.service.strategy.SurveyQuestionStrategy;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.domain.user.domain.repository.UserRepository;
 import com.example.surveyapp.global.response.exception.CustomException;
@@ -20,12 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-
-import static com.example.surveyapp.domain.survey.domain.model.enums.QuestionType.SINGLE_CHOICE;
-import static com.example.surveyapp.domain.survey.domain.model.enums.QuestionType.SUBJECTIVE;
 
 @Service
 @RequiredArgsConstructor
@@ -37,30 +38,30 @@ public class SurveyService {
     private final OptionsRepository optionsRepository;
     private final SurveyAnswerRepository surveyAnswerRepository;
     private final UserRepository userRepository;
-    private final SurveyOptionsAnswerRepository surveyOptionsAnswerRepository;
-    private final SurveyTextAnswerRepository surveyTextAnswerRepository;
+    private final List<SurveyQuestionStrategy> surveyQuestionStrategies;
 
     //유저가 참여자 권한일 때 예외
-    public void isCurrentUserSurveyee(User user, String errorMessage){
-        if(user.isUserRoleSurveyee()){
+    public void isCurrentUserSurveyee(User user, String errorMessage) {
+        if (user.isUserRoleSurveyee()) {
             throw new CustomException(ErrorCode.SURVEYEE_NOT_ALLOWED, errorMessage);
         }
     }
-    //해당 설문 출제자가 아니거나 관리자가 아닐 시 예외
-    public void currentUserMatchesSurveyCreator(User user, Survey survey, String errorMessage){
 
-        if(!survey.isUserSurveyCreator(user) && user.isUserRoleNotAdmin()){
+    //해당 설문 출제자가 아니거나 관리자가 아닐 시 예외
+    public void currentUserMatchesSurveyCreator(User user, Survey survey, String errorMessage) {
+        if (!survey.isUserSurveyCreator(user) && user.isUserRoleNotAdmin()) {
             throw new CustomException(ErrorCode.NOT_SURVEY_CREATOR, errorMessage);
         }
     }
+
     //설문이 진행 전 상태가 아닐 때 예외
-    public void isSurveyNotStarted(Survey survey, String errorMessage){
-        if(!survey.isSurveyStatusNotStarted()){
+    public void isSurveyNotStarted(Survey survey, String errorMessage) {
+        if (!survey.isSurveyStatusNotStarted()) {
             throw new CustomException(ErrorCode.SURVEY_NOT_STARTED, errorMessage);
         }
     }
 
-    public SurveyResponseDto createSurvey(SurveyCreateRequestDto requestDto, User user){
+    public SurveyResponseDto createSurvey(SurveyCreateRequestDto requestDto, User user) {
 
         isCurrentUserSurveyee(user, "참여자 권한으로는 질문을 생성할 수 없습니다.");
 
@@ -73,9 +74,9 @@ public class SurveyService {
 
     //삭제되지 않은 설문만
     @Transactional(readOnly = true)
-    public PageSurveyResponseDto<SurveyResponseDto> getSurveys(int page, int size){
+    public PageSurveyResponseDto<SurveyResponseDto> getSurveys(int page, int size) {
 
-        Pageable pageable = PageRequest.of(page,size);
+        Pageable pageable = PageRequest.of(page, size);
         Page<Survey> surveyPage = surveyRepository.findAllSurveyPaged(pageable);
 
         Page<SurveyResponseDto> surveyResponseDtoPage = surveyPage.map(surveyMapper::toResponseDto);
@@ -84,10 +85,10 @@ public class SurveyService {
     }
 
 
-    public SurveyResponseDto updateSurvey(User user, Long surveyId, SurveyUpdateRequestDto requestDto){
+    public SurveyResponseDto updateSurvey(User user, Long surveyId, SurveyUpdateRequestDto requestDto) {
 
         Survey survey = surveyRepository.findByIdAndDeletedFalse(surveyId).orElseThrow(
-                () -> new CustomException(ErrorCode.SURVEY_NOT_FOUND,"삭제되었거나 존재하지 않는 설문입니다.")
+                () -> new CustomException(ErrorCode.SURVEY_NOT_FOUND, "삭제되었거나 존재하지 않는 설문입니다.")
         );
 
         isCurrentUserSurveyee(user, "참여자 권한으로는 설문을 수정할 수 없습니다.");
@@ -101,10 +102,10 @@ public class SurveyService {
     }
 
     //설문 상태 변경(NOT_STARTED -> IN_PROGRESS, IN_PROGRESS -> PAUSED, PAUSED -> IN_PROGRESS, IN_PROGRESS -> DONE)
-    public SurveyStatusResponseDto updateSurveyStatus(User user, Long surveyId, SurveyStatusUpdateRequestDto requestDto){
+    public SurveyStatusResponseDto updateSurveyStatus(User user, Long surveyId, SurveyStatusUpdateRequestDto requestDto) {
 
         Survey survey = surveyRepository.findByIdAndDeletedFalse(surveyId).orElseThrow(
-                () -> new CustomException(ErrorCode.SURVEY_NOT_FOUND,"삭제되었거나 존재하지 않는 설문입니다.")
+                () -> new CustomException(ErrorCode.SURVEY_NOT_FOUND, "삭제되었거나 존재하지 않는 설문입니다.")
         );
 
         isCurrentUserSurveyee(user, "참여자 권한으로는 설문 상태를 변경할 수 없습니다.");
@@ -113,20 +114,20 @@ public class SurveyService {
         SurveyStatus currentStatus = survey.getStatus();
         SurveyStatus newStatus = requestDto.getStatus();
 
-        if(currentStatus.equals(newStatus)){
+        if (currentStatus.equals(newStatus)) {
             throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION, "현재 설문 상태와 다른 상태로 변경해야 합니다.");
         }
-        if(newStatus.equals(SurveyStatus.NOT_STARTED)){
+        if (newStatus.equals(SurveyStatus.NOT_STARTED)) {
             throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION, "설문은 진행 전 상태로 변경할 수 없습니다.");
         }
-        if(newStatus.equals(SurveyStatus.IN_PROGRESS) && currentStatus.equals(SurveyStatus.DONE)){
-                throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION, "마감된 설문은 진행 중 상태로 변경할 수 없습니다.");
+        if (newStatus.equals(SurveyStatus.IN_PROGRESS) && currentStatus.equals(SurveyStatus.DONE)) {
+            throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION, "마감된 설문은 진행 중 상태로 변경할 수 없습니다.");
         }
-        if(newStatus.equals(SurveyStatus.PAUSED) && !currentStatus.equals(SurveyStatus.IN_PROGRESS)){
-                throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION, "설문이 진행 중일 때만 일시정지 상태로 변경할 수 있습니다.");
+        if (newStatus.equals(SurveyStatus.PAUSED) && !currentStatus.equals(SurveyStatus.IN_PROGRESS)) {
+            throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION, "설문이 진행 중일 때만 일시정지 상태로 변경할 수 있습니다.");
         }
-        if(newStatus.equals(SurveyStatus.DONE) && currentStatus.equals(SurveyStatus.NOT_STARTED)){
-                throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION, "진행 전 설문은 마감 상태로 변경할 수 없습니다.");
+        if (newStatus.equals(SurveyStatus.DONE) && currentStatus.equals(SurveyStatus.NOT_STARTED)) {
+            throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION, "진행 전 설문은 마감 상태로 변경할 수 없습니다.");
         }
 
         survey.changeSurveyStatus(newStatus);
@@ -136,7 +137,7 @@ public class SurveyService {
     }
 
     @Transactional
-    public void deleteSurvey(User user, Long surveyId){
+    public void deleteSurvey(User user, Long surveyId) {
 
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(
                 () -> new CustomException(ErrorCode.SURVEY_NOT_FOUND, "존재하지 않는 설문입니다.")
@@ -145,11 +146,11 @@ public class SurveyService {
         isCurrentUserSurveyee(user, "참여자 권한으로는 설문을 삭제할 수 없습니다.");
         currentUserMatchesSurveyCreator(user, survey, "설문 출제자와 관리자만 설문을 삭제할 수 있습니다.");
 
-        if(survey.isDeleted()){
+        if (survey.isDeleted()) {
             throw new CustomException(ErrorCode.SURVEY_ALREADY_DELETED, "이미 삭제된 설문입니다.");
         }
 
-        if(survey.isSurveyStatusInProgress()){
+        if (survey.isSurveyStatusInProgress()) {
             throw new CustomException(ErrorCode.SURVEY_CANNOT_BE_DELETED, "진행 중 설문은 삭제할 수 없습니다.");
         }
 
@@ -160,8 +161,7 @@ public class SurveyService {
     // 참여자 API
     // 삭제 되지 않은 설문만 설문 상세 조회
     @Transactional
-    public SurveyResponseDto getSurvey(Long surveyId){
-
+    public SurveyResponseDto getSurvey(Long surveyId) {
         Survey survey = surveyRepository.findByIdAndDeletedFalse(surveyId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
 
@@ -171,34 +171,17 @@ public class SurveyService {
     // 설문 시작
     // survey_answer 테이블 생기면 기참여자 재참여 못하게 막는 로직 추가해야함
     @Transactional(readOnly = true)
-    public SurveyQuestionDto startSurvey(Long surveyId){
-
+    public SurveyQuestionDto startSurvey(Long surveyId) {
         Survey survey = surveyRepository.findByIdAndDeletedFalse(surveyId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
 
-        SurveyQuestionDto surveyQuestionDto = new SurveyQuestionDto(
-                survey.getId(),
-                survey.getTitle(),
-                survey.getDescription(),
-                survey.getMaxSurveyee(),
-                survey.getPointPerPerson(),
-                survey.getTotalPoint(),
-                survey.getDeadline(),
-                survey.getExpectedTime(),
-                new ArrayList<>()
-        );
+        SurveyQuestionDto surveyQuestionDto = SurveyQuestionDto.of(survey);
 
         List<Question> questions = questionRepository.findAllBySurveyIdOrderByNumberASC(surveyId);
 
         questions.forEach(question -> {
             List<OptionResponseDto> options = optionsRepository.findAllByQuestionIdOrderByNumberAsc(question.getId());
-            QuestionOptionsDto questionOptionsDto = new QuestionOptionsDto(
-                    question.getId(),
-                    question.getNumber(),
-                    question.getContent(),
-                    question.getType(),
-                    options
-            );
+            QuestionOptionsDto questionOptionsDto = QuestionOptionsDto.of(question, options);
 
             surveyQuestionDto.addQuestion(questionOptionsDto);
         });
@@ -208,9 +191,7 @@ public class SurveyService {
     }
 
     @Transactional
-//    public void saveSurveyAnswer(Long surveyId, SurveyAnswerRequestDto requestDto, Long userId){
-    public void saveSurveyAnswer(Long surveyId, SurveyAnswerRequestDto requestDto){
-
+    public void saveSurveyAnswer(Long surveyId, SurveyAnswerRequestDto requestDto) {
         Survey survey = surveyRepository.findByIdAndDeletedFalse(surveyId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
 
@@ -218,30 +199,19 @@ public class SurveyService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
-        SurveyAnswer surveyAnswer = surveyAnswerRepository.save(new SurveyAnswer(survey, user));
+        SurveyAnswer surveyAnswer = surveyAnswerRepository.save(SurveyAnswer.of(survey, user));
 
         requestDto.getAnswers().forEach(questionAnswer -> {
             Question question = questionRepository.findById(questionAnswer.getNumber()).orElseThrow(
                     () -> new CustomException(ErrorCode.QUESTION_NOT_FOUND)
             );
 
-            if(question.getType().equals(SUBJECTIVE)) {
-                surveyTextAnswerRepository.save(new SurveyTextAnswer(surveyAnswer, question, (String)questionAnswer.getAnswer()));
-            } else if(question.getType().equals(SINGLE_CHOICE)) {
-                Number answer = (Number)questionAnswer.getAnswer();
-                surveyOptionsAnswerRepository.save(new SurveyOptionsAnswer(surveyAnswer, question, answer.longValue()));
-            } else {
-                String str = (String) questionAnswer.getAnswer();
-                String[] split = str.split(",");
-                for (String s : split) {
-                    try {
-                        Long number = Long.parseLong(s);
-                        surveyOptionsAnswerRepository.save(new SurveyOptionsAnswer(surveyAnswer, question, number));
-                    } catch (NumberFormatException e) {
-                        throw new CustomException(ErrorCode.VALIDATION_ERROR);
-                    }
-                }
-            }
+            // TODO 질문 타입에 따라 각 질문 응답을 처리할 수 있는 전략을 별도로 구성해서 처리하면 어떨까
+            surveyQuestionStrategies.stream()
+                    .filter(it -> it.isSupport(question.getType()))
+                    .findFirst()
+                    .orElseThrow()
+                    .doSave(questionAnswer, surveyAnswer, question);
         });
     }
 
@@ -258,16 +228,11 @@ public class SurveyService {
         SurveyeeSurveyListDto surveyListDto = new SurveyeeSurveyListDto();
 
         surveyAnswerList.forEach(surveyAnswer -> {
-            SurveyeeSurveyDto surveyeeSurveyDto = SurveyeeSurveyDto.builder()
-                                                    .surveyId(surveyAnswer.getSurveyId().getId())
-                                                    .title(surveyAnswer.getSurveyId().getTitle())
-                                                    .date(surveyAnswer.getCreatedAt())
-                                                    .build();
+            SurveyeeSurveyDto surveyeeSurveyDto = SurveyeeSurveyDto.of(surveyAnswer);
 
             surveyListDto.addSurveyeeSurveyDto(surveyeeSurveyDto);
         });
 
         return surveyListDto;
     }
-
 }
