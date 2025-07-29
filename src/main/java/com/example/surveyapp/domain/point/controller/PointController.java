@@ -14,14 +14,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Pageable;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/points")
 @RequiredArgsConstructor
 public class PointController {
 
     private final PointService pointService;
 
     //포인트 충전
-    @PostMapping("/points/charge")
+    @PostMapping("/charge")
     public ResponseEntity<ApiResponse<Void>> charge(@Valid @RequestBody PointChargeRequestDto dto,
                                                                      @RequestParam("userId") Long userId) {
         pointService.charge(userId,dto);
@@ -29,11 +29,11 @@ public class PointController {
     }
 
     //포인트 조회
-    @GetMapping("/points")
+    @GetMapping()
     public ResponseEntity<ApiResponse<Page<PointHistoryResponseDto>>> getHistories(
             @RequestParam("userId") Long userId, Pageable pageable){
         Page<PointHistoryResponseDto> page = pointService.getHistories(userId,pageable);
-        return ResponseEntity.ok(ApiResponse.success("포인트 내역 조회 성공",page));
+        return ResponseEntity.ok(ApiResponse.success("포인트 내역이 조회되었습니다.",page));
     }
 
 
