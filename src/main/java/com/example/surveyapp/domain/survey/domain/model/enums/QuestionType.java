@@ -20,4 +20,16 @@ public enum QuestionType {
                 .orElseThrow(() -> new RuntimeException("질문 종류 오류"));
     }
 
+
+    public boolean isSubjective() {
+        return this == SUBJECTIVE;
+    }
+
+    public boolean isSingleChoice() {
+        return this == SINGLE_CHOICE;
+    }
+
+    public boolean isMultiChoice() {
+        return this == MULTIPLE_CHOICE;
+    }
 }
