@@ -118,6 +118,8 @@ public class SurveyService {
     @Transactional
     public void deleteSurvey(Long userId, Long surveyId) {
 
+        User user = userFacade.findUser(userId);
+
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(
                 () -> new CustomException(ErrorCode.SURVEY_NOT_FOUND, "존재하지 않는 설문입니다.")
         );
@@ -171,7 +173,7 @@ public class SurveyService {
 
     @Transactional
     public void saveSurveyAnswer(Long surveyId, SurveyAnswerRequestDto requestDto) {
-        Survey survey = surveyRepository.findByIdAndDeletedFalse(surveyId)
+        Survey survey = surveyRepository.findByIdAndIsDeletedFalse(surveyId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
 
         Long userId = 1L;
