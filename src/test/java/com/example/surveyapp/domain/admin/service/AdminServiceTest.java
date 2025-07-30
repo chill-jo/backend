@@ -1,6 +1,8 @@
 package com.example.surveyapp.domain.admin.service;
 
 import com.example.surveyapp.domain.admin.controller.dto.UserDto;
+import com.example.surveyapp.domain.admin.domain.model.BlackList;
+import com.example.surveyapp.domain.admin.domain.repository.BlackListRepository;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.domain.user.domain.repository.UserRepository;
 import com.example.surveyapp.global.response.exception.CustomException;
@@ -30,8 +32,15 @@ class AdminServiceTest {
     @Mock
     private User user;
 
+    @Mock
+    private BlackListRepository blackListRepository;
+
+    @Mock
+    private BlackList blackList;
+
     @InjectMocks
     private AdminService adminService;
+
 
     @Test
     void 검색어를_조건으로_전체_회원을_조회한다() {
@@ -80,6 +89,110 @@ class AdminServiceTest {
             Assertions.assertThatExceptionOfType(CustomException.class)
             .isThrownBy(() -> { throw new CustomException(e.getErrorCode()); })
                     .withMessageContaining("사용자를 찾을 수 없습니다.");
+        }
+
+    }
+
+
+    @Test
+    void 블랙리스트에_등록한다() {
+
+        // given
+        Long userId = 1L;
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        // when
+        User result = adminService.addBlackList(userId);
+
+        // then
+        Assertions.assertThat(user).isEqualTo(result);
+
+    }
+
+    @Test
+    void 블랙리스트_등록을_실패한다1() {
+
+        // given
+        Long userId = 1L;
+
+        // when & then
+        try {
+            adminService.addBlackList(userId);
+        } catch (CustomException e) {
+            Assertions.assertThatExceptionOfType(CustomException.class)
+                    .isThrownBy(() -> { throw new CustomException(e.getErrorCode()); })
+                    .withMessageContaining("사용자를 찾을 수 없습니다.");
+        }
+
+    }
+
+    @Test
+    void 블랙리스트_등록을_실패한다2() {
+
+        // given
+        Long userId = 1L;
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        // when & then
+        try {
+            adminService.addBlackList(userId);
+        } catch (CustomException e) {
+            Assertions.assertThatExceptionOfType(CustomException.class)
+                    .isThrownBy(() -> { throw new CustomException(e.getErrorCode()); })
+                    .withMessageContaining("해당 회원은 이미 블랙입니다.");
+        }
+
+    }
+
+
+    @Test
+    void 블랙리스트에서_삭제한다() {
+
+        // given
+        Long userId = 1L;
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(blackListRepository.findByUserId(user)).thenReturn(Optional.of(blackList));
+
+        // when
+        User result = adminService.deleteBlackList(userId);
+
+
+        // then
+        Assertions.assertThat(user).isEqualTo(result);
+
+    }
+
+    @Test
+    void 블랙리스트_삭제를_실패한다1() {
+
+        // given
+        Long userId = 1L;
+
+        // when & then
+        try {
+            adminService.deleteBlackList(userId);
+        } catch (CustomException e) {
+            Assertions.assertThatExceptionOfType(CustomException.class)
+                    .isThrownBy(() -> { throw new CustomException(e.getErrorCode()); })
+                    .withMessageContaining("사용자를 찾을 수 없습니다.");
+        }
+
+    }
+
+    @Test
+    void 블랙리스트_삭제를_실패한다2() {
+
+        // given
+        Long userId = 1L;
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        // when & then
+        try {
+            adminService.deleteBlackList(userId);
+        } catch (CustomException e) {
+            Assertions.assertThatExceptionOfType(CustomException.class)
+                    .isThrownBy(() -> { throw new CustomException(e.getErrorCode()); })
+                    .withMessageContaining("해당 회원은 블랙이 아닙니다.");
         }
 
     }

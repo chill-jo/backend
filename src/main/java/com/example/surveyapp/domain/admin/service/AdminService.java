@@ -3,6 +3,8 @@ package com.example.surveyapp.domain.admin.service;
 import com.example.surveyapp.domain.admin.controller.dto.StatsDto;
 import com.example.surveyapp.domain.admin.controller.dto.SurveyeeStatsDto;
 import com.example.surveyapp.domain.admin.controller.dto.UserDto;
+import com.example.surveyapp.domain.admin.domain.model.BlackList;
+import com.example.surveyapp.domain.admin.domain.repository.BlackListRepository;
 import com.example.surveyapp.domain.survey.domain.model.entity.Options;
 import com.example.surveyapp.domain.survey.domain.model.entity.Question;
 import com.example.surveyapp.domain.survey.domain.model.entity.Survey;
@@ -36,6 +38,7 @@ public class AdminService {
     private final QuestionRepository questionRepository;
     private final SurveyRepository surveyRepository;
     private final OptionsRepository optionsRepository;
+    private final BlackListRepository blackListRepository;
 
     @Transactional(readOnly = true)
     public Page<UserDto> getUserList(String search, Pageable pageable) {
@@ -79,6 +82,39 @@ public class AdminService {
         });
 
         return surveyeeStatsDtoList;
+    }
+
+    @Transactional
+    public User addBlackList(Long userId) {
+
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_USER)
+        );
+
+        if (blackListRepository.findByUserId(user).isPresent()) {
+            throw new CustomException(ErrorCode.IS_BLACKLIST);
+        }
+
+        blackListRepository.save(new BlackList(user));
+
+        return user;
+    }
+
+
+    @Transactional
+    public User deleteBlackList(Long userId) {
+
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_USER)
+        );
+
+        BlackList blackList = blackListRepository.findByUserId(user).orElseThrow(
+                () -> new CustomException(ErrorCode.IS_NOT_BLACKLIST)
+        );
+
+        blackListRepository.delete(blackList);
+
+        return user;
     }
 
 }

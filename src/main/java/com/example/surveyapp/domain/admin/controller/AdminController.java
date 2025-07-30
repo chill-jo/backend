@@ -3,6 +3,7 @@ package com.example.surveyapp.domain.admin.controller;
 import com.example.surveyapp.domain.admin.controller.dto.SurveyeeStatsDto;
 import com.example.surveyapp.domain.admin.controller.dto.UserDto;
 import com.example.surveyapp.domain.admin.service.AdminService;
+import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -54,5 +55,19 @@ public class AdminController {
 
         return ResponseEntity.ok(ApiResponse.success("분류별 참여자 통계 조회하였습니다.", adminService.getSurveyeeStats(startDateLocal, endDateLocal)));
 
+    }
+
+
+    // 블랙리스트 등록
+    @PostMapping("/black/{userId}")
+    public ResponseEntity<ApiResponse<User>> addBlackList(@PathVariable Long userId) {
+        return ResponseEntity.ok(ApiResponse.success("블랙리스트에 등록되었습니다.", adminService.addBlackList(userId)));
+    }
+
+
+    // 블랙리스트 삭제
+    @DeleteMapping("/black/{userId}")
+    public ResponseEntity<ApiResponse<User>> deleteBlackList(@PathVariable Long userId) {
+        return ResponseEntity.ok(ApiResponse.success("블랙리스트에서 삭제되었습니다.", adminService.deleteBlackList(userId)));
     }
 }
