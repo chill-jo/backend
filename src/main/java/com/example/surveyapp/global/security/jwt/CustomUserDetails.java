@@ -1,6 +1,7 @@
 package com.example.surveyapp.global.security.jwt;
 
 import com.example.surveyapp.domain.user.domain.model.User;
+import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.ToString;
@@ -22,6 +23,7 @@ public class CustomUserDetails implements UserDetails {
 
     @JsonIgnore
     private final String password;
+    private final UserRoleEnum userRole;
     private final Collection<? extends GrantedAuthority> authorities;
 
     public CustomUserDetails(User user) {
@@ -30,6 +32,7 @@ public class CustomUserDetails implements UserDetails {
         this.nickname = user.getNickname();
         this.email = user.getEmail();
         this.password = user.getPassword();
+        this.userRole = user.getUserRole();
         this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getUserRole().name()));
     }
 

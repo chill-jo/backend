@@ -1,5 +1,6 @@
 package com.example.surveyapp.domain.user.domain.model;
 
+import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -7,7 +8,7 @@ import lombok.*;
 @Getter
 @Table(name = "user_base_data")
 @NoArgsConstructor
-public class UserBaseData {
+public class UserBaseData extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
