@@ -4,6 +4,7 @@ import com.example.surveyapp.domain.admin.controller.dto.UserDto;
 import com.example.surveyapp.domain.admin.domain.model.BlackList;
 import com.example.surveyapp.domain.admin.domain.repository.BlackListRepository;
 import com.example.surveyapp.domain.user.domain.model.User;
+import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
 import com.example.surveyapp.domain.user.domain.repository.UserRepository;
 import com.example.surveyapp.global.response.exception.CustomException;
 import org.assertj.core.api.Assertions;
@@ -46,16 +47,38 @@ class AdminServiceTest {
     void 검색어를_조건으로_전체_회원을_조회한다() {
 
         // given
+        UserRoleEnum userRole = UserRoleEnum.ADMIN;
         String search = "test";
         Pageable pageable = Pageable.unpaged();
         Page<UserDto> userList = Page.empty();
         when(userRepository.findAllBySearch(search, pageable)).thenReturn(userList);
 
         // when
-        Page<UserDto> result = adminService.getUserList(search, pageable);
+        Page<UserDto> result = adminService.getUserList(userRole, search, pageable);
 
         // then
         Assertions.assertThat(userList).isEqualTo(result);
+
+    }
+
+    @Test
+    void 권한이_없어서_전체_회원_조회를_실패한다() {
+
+        // given
+        UserRoleEnum userRole = UserRoleEnum.SURVEYEE;
+        String search = "test";
+        Pageable pageable = Pageable.unpaged();
+        Page<UserDto> userList = Page.empty();
+        when(userRepository.findAllBySearch(search, pageable)).thenReturn(userList);
+
+        // when & then
+        try {
+            adminService.getUserList(userRole, search, pageable);
+        } catch (CustomException e) {
+            Assertions.assertThatExceptionOfType(CustomException.class)
+                    .isThrownBy(() -> { throw new CustomException(e.getErrorCode()); })
+                    .withMessageContaining("관리자 계정으로 로그인하세요.");
+        }
 
     }
 
@@ -64,27 +87,46 @@ class AdminServiceTest {
     void 단일_회원을_조회한다() {
 
         // given
+        UserRoleEnum userRole = UserRoleEnum.ADMIN;
         Long userId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         // when
-        UserDto result = adminService.getUser(userId);
+        UserDto result = adminService.getUser(userRole, userId);
 
         // then
         Assertions.assertThat(userDto.getId()).isEqualTo(result.getId());
 
     }
 
-
     @Test
-    void 단일_회원을_조회를_실패한다() {
+    void 권한이_없어서_단일_회원_조회를_실패한다() {
 
         // given
+        UserRoleEnum userRole = UserRoleEnum.SURVEYEE;
         Long userId = 1L;
 
         // when & then
         try {
-            adminService.getUser(userId);
+            adminService.getUser(userRole, userId);
+        } catch (CustomException e) {
+            Assertions.assertThatExceptionOfType(CustomException.class)
+                    .isThrownBy(() -> { throw new CustomException(e.getErrorCode()); })
+                    .withMessageContaining("관리자 계정으로 로그인하세요.");
+        }
+
+    }
+
+    @Test
+    void 회원이_없어서_단일_회원을조회를_실패한다() {
+
+        // given
+        UserRoleEnum userRole = UserRoleEnum.ADMIN;
+        Long userId = 1L;
+
+        // when & then
+        try {
+            adminService.getUser(userRole, userId);
         } catch (CustomException e) {
             Assertions.assertThatExceptionOfType(CustomException.class)
             .isThrownBy(() -> { throw new CustomException(e.getErrorCode()); })

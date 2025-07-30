@@ -1,19 +1,14 @@
 package com.example.surveyapp.domain.admin.service;
 
-import com.example.surveyapp.domain.admin.controller.dto.StatsDto;
-import com.example.surveyapp.domain.admin.controller.dto.SurveyeeStatsDto;
+import com.example.surveyapp.domain.admin.controller.dto.StatDto;
+import com.example.surveyapp.domain.admin.controller.dto.StatsListDto;
 import com.example.surveyapp.domain.admin.controller.dto.UserDto;
 import com.example.surveyapp.domain.admin.domain.model.BlackList;
 import com.example.surveyapp.domain.admin.domain.repository.BlackListRepository;
-import com.example.surveyapp.domain.survey.domain.model.entity.Options;
-import com.example.surveyapp.domain.survey.domain.model.entity.Question;
-import com.example.surveyapp.domain.survey.domain.model.entity.Survey;
-import com.example.surveyapp.domain.survey.domain.model.entity.SurveyOptionsAnswer;
-import com.example.surveyapp.domain.survey.domain.repository.OptionsRepository;
-import com.example.surveyapp.domain.survey.domain.repository.QuestionRepository;
-import com.example.surveyapp.domain.survey.domain.repository.SurveyOptionsAnswerRepository;
-import com.example.surveyapp.domain.survey.domain.repository.SurveyRepository;
+import com.example.surveyapp.domain.user.domain.model.CategoryEnum;
 import com.example.surveyapp.domain.user.domain.model.User;
+import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
+import com.example.surveyapp.domain.user.domain.repository.UserBaseDataRepository;
 import com.example.surveyapp.domain.user.domain.repository.UserRepository;
 import com.example.surveyapp.global.response.exception.CustomException;
 import com.example.surveyapp.global.response.exception.ErrorCode;
@@ -23,65 +18,59 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class AdminService {
 
     private final UserRepository userRepository;
-    private final SurveyOptionsAnswerRepository surveyOptionsAnswerRepository;
-    private final QuestionRepository questionRepository;
-    private final SurveyRepository surveyRepository;
-    private final OptionsRepository optionsRepository;
+    private final UserBaseDataRepository userBaseDataRepository;
     private final BlackListRepository blackListRepository;
 
     @Transactional(readOnly = true)
-    public Page<UserDto> getUserList(String search, Pageable pageable) {
+    public Page<UserDto> getUserList(UserRoleEnum userRole, String search, Pageable pageable) {
+        if (!userRole.equals(UserRoleEnum.ADMIN)) {
+            throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
+        }
+
         return userRepository.findAllBySearch(search, pageable);
     }
 
     @Transactional(readOnly = true)
-    public UserDto getUser(Long userId) {
+    public UserDto getUser(UserRoleEnum userRole, Long userId) {
+        if (!userRole.equals(UserRoleEnum.ADMIN)) {
+            throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
         return UserDto.from(user);
     }
 
     @Transactional(readOnly = true)
-    public List<SurveyeeStatsDto> getSurveyeeStats(LocalDateTime startDateLocal, LocalDateTime endDateLocal) {
-        List<SurveyeeStatsDto> surveyeeStatsDtoList = new ArrayList<>();
+    public List<StatsListDto> getStats(UserRoleEnum userRole, LocalDateTime startDateLocal, LocalDateTime endDateLocal) {
+        if (!userRole.equals(UserRoleEnum.ADMIN)) {
+            throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
+        }
 
-        Long surveyId = 1L;
-        Survey survey = surveyRepository.findById(surveyId)
-                .orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
+        List<CategoryEnum> categoryEnumList = Arrays.stream(CategoryEnum.values()).toList();
 
-        List<Question> questionList = questionRepository.findAllBySurveyIdOrderByNumberASC(survey.getId());
+        return categoryEnumList.stream().map(
+                categoryEnum -> {
+                    StatsListDto statsListDto = StatsListDto.of(categoryEnum.getCategory());
+                    for (Long i = 1L; i <= categoryEnum.getOptionMaxNum(); i++) {
+                        Long count = userBaseDataRepository.countByCategoryAndDataAndStartDateAndEndDate(categoryEnum, i, startDateLocal, endDateLocal);
+                        StatDto statDto = StatDto.of(i, count);
+                        statsListDto.addStat(statDto);
+                    }
+                    return statsListDto;
+                }
+        ).toList();
 
-        questionList.forEach(question -> {
-            SurveyeeStatsDto surveyeeStatsDto = new SurveyeeStatsDto(question.getContent());
-
-            List<Options> options = optionsRepository.findAllByQuestionId(question.getId());
-
-            options.forEach(option -> {
-                Long count = surveyOptionsAnswerRepository.countByQuestionIdAndNumberAndStartDateAndEndDate(
-                        question, option.getNumber(), startDateLocal, endDateLocal
-                );
-
-                StatsDto statsDto = new StatsDto(option.getContent(), count);
-
-                surveyeeStatsDto.addOptions(statsDto);
-            });
-
-            surveyeeStatsDtoList.add(surveyeeStatsDto);
-
-        });
-
-        return surveyeeStatsDtoList;
     }
 
     @Transactional
