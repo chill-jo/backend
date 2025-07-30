@@ -5,9 +5,11 @@ import com.example.surveyapp.domain.survey.controller.dto.request.QuestionUpdate
 import com.example.surveyapp.domain.survey.controller.dto.response.PageQuestionResponseDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.PageSurveyResponseDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.QuestionResponseDto;
+import com.example.surveyapp.domain.survey.domain.model.entity.Options;
 import com.example.surveyapp.domain.survey.domain.model.entity.Question;
 import com.example.surveyapp.domain.survey.domain.model.entity.Survey;
 import com.example.surveyapp.domain.survey.domain.model.enums.SurveyStatus;
+import com.example.surveyapp.domain.survey.domain.repository.OptionsRepository;
 import com.example.surveyapp.domain.survey.domain.repository.QuestionRepository;
 import com.example.surveyapp.domain.survey.domain.repository.SurveyRepository;
 import com.example.surveyapp.domain.survey.facade.UserFacade;
@@ -23,6 +25,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class QuestionService {
@@ -30,6 +34,7 @@ public class QuestionService {
     private final QuestionRepository questionRepository;
     private final SurveyRepository surveyRepository;
     private final UserFacade userFacade;
+    private final OptionsRepository optionsRepository;
 
     public QuestionResponseDto createQuestion(Long userId, Long surveyId, QuestionCreateRequestDto requestDto){
 
@@ -150,6 +155,8 @@ public class QuestionService {
         currentUserMatchesSurveyCreatorOrAdmin(user, survey);
         isSurveyNotStarted(survey);
         isQuestionFromSurvey(survey, question);
+
+        optionsRepository.deleteAllByQuestion(question);
 
         questionRepository.delete(question);
     }
