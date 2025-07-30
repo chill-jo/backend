@@ -7,7 +7,6 @@ import com.example.surveyapp.domain.admin.domain.model.BlackList;
 import com.example.surveyapp.domain.admin.domain.repository.BlackListRepository;
 import com.example.surveyapp.domain.user.domain.model.CategoryEnum;
 import com.example.surveyapp.domain.user.domain.model.User;
-import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
 import com.example.surveyapp.domain.user.domain.repository.UserBaseDataRepository;
 import com.example.surveyapp.domain.user.domain.repository.UserRepository;
 import com.example.surveyapp.global.response.exception.CustomException;
@@ -31,19 +30,13 @@ public class AdminService {
     private final BlackListRepository blackListRepository;
 
     @Transactional(readOnly = true)
-    public Page<UserDto> getUserList(UserRoleEnum userRole, String search, Pageable pageable) {
-        if (!userRole.equals(UserRoleEnum.ADMIN)) {
-            throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
-        }
+    public Page<UserDto> getUserList(String search, Pageable pageable) {
 
         return userRepository.findAllBySearch(search, pageable);
     }
 
     @Transactional(readOnly = true)
-    public UserDto getUser(UserRoleEnum userRole, Long userId) {
-        if (!userRole.equals(UserRoleEnum.ADMIN)) {
-            throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
-        }
+    public UserDto getUser(Long userId) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
@@ -52,10 +45,7 @@ public class AdminService {
     }
 
     @Transactional(readOnly = true)
-    public List<StatsListDto> getStats(UserRoleEnum userRole, LocalDateTime startDateLocal, LocalDateTime endDateLocal) {
-        if (!userRole.equals(UserRoleEnum.ADMIN)) {
-            throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
-        }
+    public List<StatsListDto> getStats(LocalDateTime startDateLocal, LocalDateTime endDateLocal) {
 
         List<CategoryEnum> categoryEnumList = Arrays.stream(CategoryEnum.values()).toList();
 
@@ -74,10 +64,7 @@ public class AdminService {
     }
 
     @Transactional
-    public User addBlackList(UserRoleEnum userRole, Long userId) {
-        if (!userRole.equals(UserRoleEnum.ADMIN)) {
-            throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
-        }
+    public User addBlackList(Long userId) {
 
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_USER)
@@ -94,10 +81,7 @@ public class AdminService {
 
 
     @Transactional
-    public User deleteBlackList(UserRoleEnum userRole, Long userId) {
-        if (!userRole.equals(UserRoleEnum.ADMIN)) {
-            throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
-        }
+    public User deleteBlackList(Long userId) {
 
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_USER)
