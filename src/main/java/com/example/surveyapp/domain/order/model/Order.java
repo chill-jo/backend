@@ -27,7 +27,7 @@ public class Order extends BaseEntity {
     private String title;
 
     @Column(nullable = false)
-    private int price;
+    private Long price;
 
     @Column(nullable = false)
     private boolean isDeleted = false;
@@ -37,20 +37,20 @@ public class Order extends BaseEntity {
     }
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Order(User user, Product product, String title, int price) {
+    private Order(User user, Product product, String title, Long price) {
         this.user = user;
         this.product = product;
         this.title = title;
         this.price = price;
     }
 
-    public static Order create(User user, Product product, String  title, int price) {
+    public static Order create(User user, Product product, String  title, Long price) {
 
         return Order.builder()
                 .user(user)
                 .product(product)
-                .title(title)
-                .price(price)
+                .title(product.getTitle())
+                .price(product.getPrice())
                 .build();
     }
 }

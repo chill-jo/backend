@@ -16,5 +16,5 @@ public class OrderCreateRequestDto {
     private String title;
 
     @NotNull
-    private int price;
+    private Long price;
  }

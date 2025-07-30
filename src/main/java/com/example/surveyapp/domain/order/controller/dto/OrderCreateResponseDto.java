@@ -15,7 +15,7 @@ public class OrderCreateResponseDto {
 
     private Status status;
 
-    private int price;
+    private Long price;
 
     public static OrderCreateResponseDto from(Order order) {
         return new OrderCreateResponseDto(

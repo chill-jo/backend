@@ -20,7 +20,7 @@ public class OrderResponseDto {
 
     private Status status;
 
-    private int price;
+    private Long price;
 
     public static OrderResponseDto from(Order order) {
     return new OrderResponseDto(
