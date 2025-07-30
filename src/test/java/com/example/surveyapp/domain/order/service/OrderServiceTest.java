@@ -130,6 +130,28 @@ class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("관리자가 주문 단건을 조회한다.")
+    void 관리자_주문_단건_조회하기() {
+        // Given
+        //테스트 전제 조건 및 환경 설정
+        User user = UserFixtureGenerator.generateUserFixture();
+        Product product = ProductFixtureGenerator.generateProductFixture();
+        Order order = OrderFixtureGenerator.generateOrderFixture(user,product);
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        // When
+        //실행할 행동
+        OrderResponseDto orderResponseDto = orderService.readOneOrder(order.getId());
+
+        // Then
+        //검증 사항
+        verify(orderRepository).findById(order.getId());
+        assertThat(orderResponseDto.getOrderId()).isEqualTo(orderResponseDto.getOrderId());
+        assertThat(orderResponseDto.getOrderNumber()).isEqualTo(orderResponseDto.getOrderNumber());
+
+    }
+
+    @Test
     @DisplayName("본인의 주문 이력은 본인만 확인 할 수 있다.")
     void 본인_주문내역_확인하기() {
         // Given

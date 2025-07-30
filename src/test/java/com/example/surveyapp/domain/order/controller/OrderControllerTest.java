@@ -171,4 +171,28 @@ public class OrderControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").isEmpty());
     }
+
+    @Test
+    @DisplayName("관리자는 주문 단건을 조회할 수  있다.")
+    @WithCustomMockUser(id = 1,role = UserRoleEnum.ADMIN)
+    void 관리자_주문_단건_조회() throws Exception {
+        // Given
+        //테스트 전제 조건 및 환경 설정
+        OrderResponseDto orderResponseDto = new OrderResponseDto(1L, "uuid1", 3L, "dohan1", "치킨", 2500L, Status.ON_SALE, LocalDateTime.now());
+
+        when(orderService.readOneOrder(orderResponseDto.getOrderId())).thenReturn(orderResponseDto);
+        // When
+        //실행할 행동
+        ResultActions actions = mockMvc.perform(get("/api/orders/{id}", orderResponseDto.getOrderId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orderResponseDto)));
+
+        // Then
+        //검증 사항
+        verify(orderService, times(1)).readOneOrder(orderResponseDto.getOrderId());
+
+        actions.andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.orderNumber").value(orderResponseDto.getOrderNumber()));
+    }
 }
