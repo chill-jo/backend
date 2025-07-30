@@ -7,6 +7,7 @@ import com.example.surveyapp.domain.order.model.Order;
 import com.example.surveyapp.domain.order.model.repository.OrderRepository;
 import com.example.surveyapp.domain.point.domain.model.entity.Point;
 import com.example.surveyapp.domain.point.domain.repository.PointRepository;
+import com.example.surveyapp.domain.point.service.PointService;
 import com.example.surveyapp.domain.product.domain.model.Product;
 import com.example.surveyapp.domain.product.domain.model.repository.ProductRepository;
 import com.example.surveyapp.domain.user.domain.model.User;
@@ -21,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +32,7 @@ public class OrderService {
     private final UserRepository userRepository;
     private final PointRepository pointRepository;
     private final ProductRepository productRepository;
+    private final PointService pointService;
 
 
     @Transactional
@@ -49,15 +50,15 @@ public class OrderService {
         }
 
         Order order = Order.create(user,
-                product,
-                requestDto.getTitle(),
-                requestDto.getPrice());
+                product
+                );
 
-        //포인트 차감 로직 추가 예정
+        Order saveOrder = orderRepository.save(order);
 
-        Order saved = orderRepository.save(order);
+        //포인트 차감 로직
+        pointService.redeem(user.getId(),product.getPrice(), saveOrder.getId());
 
-        return OrderCreateResponseDto.from(saved);
+        return OrderCreateResponseDto.from(saveOrder);
     }
 
     public List<OrderResponseDto> readAllOrder(int page, int size) {

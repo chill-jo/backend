@@ -9,11 +9,11 @@ import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
 
 public class OrderFixtureGenerator {
 
-    public static Order generateOrderFixture(User user) {
+    public static Order generateOrderFixture(User user,Product product) {
 
-        Product product = Product.create("상품명",2500,"상품설명",Status.ON_SALE);
-
-        return Order.create(user,product, product.getTitle(), product.getPrice());
+        Order order = Order.create(user, product);
+        order.updateId(1L);
+        return order;
 
     }
 }
