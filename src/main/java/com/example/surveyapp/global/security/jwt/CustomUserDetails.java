@@ -20,6 +20,7 @@ public class CustomUserDetails implements UserDetails {
     private final String name;
     private final String nickname;
     private final String email;
+    private final UserRoleEnum userRole;
 
     @JsonIgnore
     private final String password;

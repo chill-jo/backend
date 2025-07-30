@@ -39,7 +39,7 @@ public enum ErrorCode {
     INVALID_SURVEY_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "설문 상태를 변경할 수 없습니다."),
     SURVEY_CANNOT_BE_MODIFIED(HttpStatus.CONFLICT, "설문 상세정보를 수정할 수 없습니다."),
     SURVEYEE_NOT_ALLOWED(HttpStatus.UNAUTHORIZED, "참여자 권한으로는 요청이 불가합니다."),
-    SURVEY_NOT_STARTED(HttpStatus.FORBIDDEN, "설문이 시작 전일 때는 요청이 불가합니다."),
+    SURVEY_STARTED(HttpStatus.FORBIDDEN, "설문 참여가 시작되었을 때는 요청이 불가합니다."),
 
 
     //질문 에러

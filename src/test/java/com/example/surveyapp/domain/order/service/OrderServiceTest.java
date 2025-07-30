@@ -63,14 +63,14 @@ class OrderServiceTest {
         Long productId = 1L;
         Order order = OrderFixtureGenerator.generateOrderFixture(user);
 
-        Point point = new Point(1L, user, 3000L);
+        //Point point = new Point(1L, user, 3000L);
 
         OrderCreateRequestDto requestDto = new OrderCreateRequestDto(1L, "상품명", 2500);
         // When
         //실행할 행동
         when(orderRepository.save(any(Order.class))).thenReturn(order);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(pointRepository.findByUser(user)).thenReturn(Optional.of(point));
+        //when(pointRepository.findByUser(user)).thenReturn(Optional.of(point));
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
 
         OrderCreateResponseDto responseDto = orderService.createOrder(requestDto, userId);

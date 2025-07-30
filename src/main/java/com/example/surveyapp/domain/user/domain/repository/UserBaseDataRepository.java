@@ -1,6 +1,5 @@
 package com.example.surveyapp.domain.user.domain.repository;
 
-import com.example.surveyapp.domain.survey.domain.model.entity.Question;
 import com.example.surveyapp.domain.user.domain.model.CategoryEnum;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.domain.user.domain.model.UserBaseData;
