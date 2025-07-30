@@ -129,6 +129,32 @@ public class PointService {
         pointHistoryRepository.save(history);
     }
 
+    @Transactional
+    public void surveyorRedeem(Long userId, Long amount, Long surveyId){
+
+        User user = getUser(userId);
+        Point point = getPoint(userId);
+
+        Long currentBalance = point.getPointBalance();
+
+        point.redeem(amount);
+
+        PointHistory history = PointHistory.of(
+                currentBalance,
+                amount,
+                point.getPointBalance(),
+                PointType.USAGE,
+                Target.SURVEY,
+                surveyId,
+                "설문 생성 포인트 차감",
+                user,
+                point
+        );
+
+        pointHistoryRepository.save(history);
+
+    }
+
     @Transactional(readOnly = true)
     public Page<PointHistoryResponseDto> getHistories(Long userId, Pageable pageable){
         User user = getUser(userId);
