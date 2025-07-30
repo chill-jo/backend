@@ -1,5 +1,6 @@
 package com.example.surveyapp.global.config;
 
+import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
 import com.example.surveyapp.global.filter.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -20,12 +21,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final JwtFilter jwtFilter;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-    private final JwtFilter jwtFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -46,10 +47,13 @@ public class SecurityConfig {
                         ).permitAll()
 
                         // 관리자 권한 필요
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole(UserRoleEnum.ADMIN.getRole())
 
-                        // 유저 권한 필요
-                        .requestMatchers("/api/user/**").hasRole("USER")
+                        // 유저 권한 필요 (설문 참여자, 출제자 모두 허용)
+                        .requestMatchers("/api/user/**").hasAnyRole(
+                                UserRoleEnum.SURVEYEE.getRole(),
+                                UserRoleEnum.SURVEYOR.getRole()
+                        )
 
                         // 나머지 인증 필요
                         .anyRequest().authenticated()
