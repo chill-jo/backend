@@ -8,8 +8,10 @@ import com.example.surveyapp.domain.survey.controller.dto.response.QuestionRespo
 import com.example.surveyapp.domain.survey.domain.model.entity.Question;
 import com.example.surveyapp.domain.survey.domain.model.entity.Survey;
 import com.example.surveyapp.domain.survey.domain.model.enums.QuestionType;
+import com.example.surveyapp.domain.survey.domain.repository.OptionsRepository;
 import com.example.surveyapp.domain.survey.domain.repository.QuestionRepository;
 import com.example.surveyapp.domain.survey.domain.repository.SurveyRepository;
+import com.example.surveyapp.domain.survey.facade.UserFacade;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.domain.user.domain.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -38,6 +40,12 @@ public class QuestionServiceTest {
     private UserRepository userRepository;
 
     @Mock
+    private OptionsRepository optionsRepository;
+
+    @Mock
+    private UserFacade userFacade;
+
+    @Mock
     private SurveyRepository surveyRepository;
 
     @InjectMocks
@@ -58,8 +66,9 @@ public class QuestionServiceTest {
 
         QuestionCreateRequestDto requestDto = new QuestionCreateRequestDto(number, content, type);
 
-        when(surveyRepository.findById(surveyId)).thenReturn(Optional.of(surveyMock));
-        when(userMock.isUserRoleSurveyee()).thenReturn(false);
+        when(userFacade.findUser(userId)).thenReturn(userMock);
+        when(surveyRepository.findByIdAndIsDeletedFalse(surveyId)).thenReturn(Optional.of(surveyMock));
+
         when(surveyMock.isUserSurveyCreator(userMock)).thenReturn(true);
         when(surveyMock.isNotStarted()).thenReturn(true);
 
@@ -87,8 +96,7 @@ public class QuestionServiceTest {
         assertThat(responseDto.getNumber()).isEqualTo(number);
         assertThat(responseDto.getContent()).isEqualTo(content);
         assertThat(responseDto.getType()).isEqualTo(type);
-        verify(surveyRepository).findById(surveyId);
-        verify(userMock).isUserRoleSurveyee();
+        verify(surveyRepository).findByIdAndIsDeletedFalse(surveyId);
         verify(surveyMock).isUserSurveyCreator(userMock);
         verify(surveyMock).isNotStarted();
         verify(questionRepository).save(any(Question.class));
@@ -108,13 +116,14 @@ public class QuestionServiceTest {
         User userMock = mock(User.class);
         Question questionMock = mock(Question.class);
 
-        when(surveyRepository.findById(surveyId)).thenReturn(Optional.of(surveyMock));
+        when(userFacade.findUser(userId)).thenReturn(userMock);
+
+        when(surveyRepository.findByIdAndIsDeletedFalse(surveyId)).thenReturn(Optional.of(surveyMock));
         when(questionRepository.findById(questionId)).thenReturn(Optional.of(questionMock));
 
         when(questionMock.isFromSurvey(surveyMock)).thenReturn(true);
 
         when(surveyMock.isInProgress()).thenReturn(false);
-        when(userMock.isUserRoleSurveyee()).thenReturn(false);
         when(surveyMock.isUserSurveyCreator(userMock)).thenReturn(true);
         when(questionMock.getId()).thenReturn(questionId);
         when(questionMock.getNumber()).thenReturn(number);
@@ -130,60 +139,64 @@ public class QuestionServiceTest {
         assertThat(responseDto.getContent()).isEqualTo(content);
         assertThat(responseDto.getType()).isEqualTo(type);
 
-        verify(surveyRepository).findById(surveyId);
+        verify(surveyRepository).findByIdAndIsDeletedFalse(surveyId);
         verify(questionRepository).findById(questionId);
         verify(questionMock).isFromSurvey(surveyMock);
         verify(surveyMock).isInProgress();
-        verify(userMock).isUserRoleSurveyee();
         verify(surveyMock).isUserSurveyCreator(userMock);
 
     }
 
     @Test
-    void 관리자가_질문을_수정한다(){
-        User userMock = mock(User.class);
+    void 관리자가_질문을_주관식으로_수정한다(){
+
         Long userId = 1L;
         Long surveyId = 1L;
         Long questionId = 1L;
         Long number = 2L;
         String content = "테스트질문내용수정";
+        QuestionType type = QuestionType.SUBJECTIVE;
 
+        User userMock = mock(User.class);
         Survey surveyMock = mock(Survey.class);
-
-        Question questionMock = QuestionFixtureGenerator.generateQuestionFixture();
+        Question questionMock = mock(Question.class);
         ReflectionTestUtils.setField(questionMock, "survey", surveyMock);
 
-        QuestionUpdateRequestDto requestDto = new QuestionUpdateRequestDto(number, content, null);
+        QuestionUpdateRequestDto requestDto = new QuestionUpdateRequestDto(number, content, type);
 
-        when(surveyRepository.findById(surveyId)).thenReturn(Optional.of(surveyMock));
+        when(userFacade.findUser(userId)).thenReturn(userMock);
+        when(surveyRepository.findByIdAndIsDeletedFalse(surveyId)).thenReturn(Optional.of(surveyMock));
         when(questionRepository.findById(questionId)).thenReturn(Optional.of(questionMock));
 
-        when(userMock.isUserRoleSurveyee()).thenReturn(false);
         when(surveyMock.isUserSurveyCreator(userMock)).thenReturn(false);
         when(userMock.isUserRoleNotAdmin()).thenReturn(false);
         when(surveyMock.isNotStarted()).thenReturn(true);
+        when(questionMock.isSubjective()).thenReturn(true);
+        when(questionMock.isFromSurvey(surveyMock)).thenReturn(true);
 
-//
-//        doNothing().when(questionMock).changeNumber(requestDto.getNumber());
-//        doNothing().when(questionMock).changeContent(requestDto.getContent());
-
-        when(questionRepository.save(any(Question.class))).thenReturn(questionMock);
+        when(questionMock.getId()).thenReturn(questionId);
+        when(questionMock.getNumber()).thenReturn(number);
+        when(questionMock.getContent()).thenReturn(content);
+        when(questionMock.getType()).thenReturn(type);
 
         //when
         QuestionResponseDto responseDto = questionService.updateQuestion(userId, surveyId, questionId, requestDto);
 
         //then
+        verify(surveyRepository).findByIdAndIsDeletedFalse(surveyId);
+        verify(questionRepository).findById(questionId);
+        verify(userMock).isUserRoleNotAdmin();
+        verify(surveyMock).isUserSurveyCreator(userMock);
+        verify(surveyMock).isNotStarted();
+        verify(questionMock).changeNumber(number);
+        verify(questionMock).changeContent(content);
+        verify(questionMock).changeQuestionType(type);
+        verify(optionsRepository).deleteAllByQuestion(questionMock);
 
         assertThat(responseDto.getNumber()).isEqualTo(number);
         assertThat(responseDto.getContent()).isEqualTo(content);
         assertThat(responseDto.getType()).isEqualTo(questionMock.getType());
-        verify(surveyRepository).findById(surveyId);
-        verify(questionRepository).findById(questionId);
-        verify(userMock).isUserRoleSurveyee();
-        verify(userMock).isUserRoleNotAdmin();
-        verify(surveyMock).isUserSurveyCreator(userMock);
-        verify(surveyMock).isNotStarted();
-        verify(questionRepository).save(any(Question.class));
+
     }
 
     @Test
@@ -194,15 +207,16 @@ public class QuestionServiceTest {
 
         User userMock = mock(User.class);
         Survey surveyMock = mock(Survey.class);
-
-        Question questionMock = QuestionFixtureGenerator.generateQuestionFixture();
+        Question questionMock = mock(Question.class);
         ReflectionTestUtils.setField(questionMock, "survey", surveyMock);
 
-        when(surveyRepository.findById(surveyId)).thenReturn(Optional.of(surveyMock));
+        when(userFacade.findUser(userId)).thenReturn(userMock);
+        when(surveyRepository.findByIdAndIsDeletedFalse(surveyId)).thenReturn(Optional.of(surveyMock));
         when(questionRepository.findById(questionId)).thenReturn(Optional.of(questionMock));
-        when(userMock.isUserRoleSurveyee()).thenReturn(false);
+
         when(surveyMock.isUserSurveyCreator(userMock)).thenReturn(true);
         when(surveyMock.isNotStarted()).thenReturn(true);
+        when(questionMock.isFromSurvey(surveyMock)).thenReturn(true);
 
         doNothing().when(questionRepository).delete(questionMock);
 
@@ -210,11 +224,11 @@ public class QuestionServiceTest {
         questionService.deleteQuestion(userId, surveyId, questionId);
 
         //then
-        verify(surveyRepository).findById(surveyId);
+        verify(surveyRepository).findByIdAndIsDeletedFalse(surveyId);
         verify(questionRepository).findById(questionId);
-        verify(userMock).isUserRoleSurveyee();
         verify(surveyMock).isUserSurveyCreator(userMock);
         verify(surveyMock).isNotStarted();
+        verify(optionsRepository).deleteAllByQuestion(questionMock);
         verify(questionRepository).delete(questionMock);
     }
 }
