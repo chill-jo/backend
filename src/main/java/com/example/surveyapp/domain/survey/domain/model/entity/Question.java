@@ -51,4 +51,8 @@ public class Question extends BaseEntity {
     public static Question of(Survey survey, Long number, String content, QuestionType type) {
         return new Question(survey, number,content, type);
     }
+
+    public boolean isSubjective(){
+        return type.isSubjective();
+    }
 }
