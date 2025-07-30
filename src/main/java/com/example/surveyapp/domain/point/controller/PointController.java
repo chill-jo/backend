@@ -5,11 +5,13 @@ import com.example.surveyapp.domain.point.controller.dto.response.PointHistoryRe
 import com.example.surveyapp.domain.point.service.PointService;
 import com.example.surveyapp.global.response.PageResponse;
 import com.example.surveyapp.global.response.ApiResponse;
+import com.example.surveyapp.global.security.jwt.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.data.domain.Pageable;
@@ -24,8 +26,8 @@ public class PointController {
     //포인트 충전
     @PostMapping("/charge")
     public ResponseEntity<ApiResponse<Void>> charge(@Valid @RequestBody PointChargeRequestDto dto,
-                                                                     @RequestParam("userId") Long userId) {
-        pointService.charge(userId,dto);
+                                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
+        pointService.charge(userDetails.getId(), dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("결제가 되었습니다.",null));
     }
 
