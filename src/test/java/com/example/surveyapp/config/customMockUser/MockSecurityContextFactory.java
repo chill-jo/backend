@@ -18,7 +18,7 @@ public class MockSecurityContextFactory implements WithSecurityContextFactory<Wi
                 annotation.nickname(),
                 annotation.role()
         );
-        ReflectionTestUtils.getField(annotation.id(), "mockUser");
+        ReflectionTestUtils.setField(mockUser, "id", annotation.id());
 
         CustomUserDetails userDetails = new CustomUserDetails(mockUser);
 

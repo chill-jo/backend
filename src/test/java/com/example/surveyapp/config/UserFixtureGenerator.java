@@ -13,7 +13,6 @@ public class UserFixtureGenerator {
 
     public static User generateUserFixture() {
         User user = User.of(EMAIL, PASSWORD, NAME, NICKNAME, ROLE);
-        user.updateId(ID);
         return user;
     }
 }
