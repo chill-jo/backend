@@ -3,13 +3,10 @@ package com.example.surveyapp.domain.admin.service;
 import com.example.surveyapp.domain.admin.controller.dto.StatDto;
 import com.example.surveyapp.domain.admin.controller.dto.StatsListDto;
 import com.example.surveyapp.domain.admin.controller.dto.UserDto;
-import com.example.surveyapp.domain.survey.domain.repository.OptionsRepository;
-import com.example.surveyapp.domain.survey.domain.repository.QuestionRepository;
-import com.example.surveyapp.domain.survey.domain.repository.SurveyOptionsAnswerRepository;
-import com.example.surveyapp.domain.survey.domain.repository.SurveyRepository;
+import com.example.surveyapp.domain.admin.domain.model.BlackList;
+import com.example.surveyapp.domain.admin.domain.repository.BlackListRepository;
 import com.example.surveyapp.domain.user.domain.model.CategoryEnum;
 import com.example.surveyapp.domain.user.domain.model.User;
-import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
 import com.example.surveyapp.domain.user.domain.repository.UserBaseDataRepository;
 import com.example.surveyapp.domain.user.domain.repository.UserRepository;
 import com.example.surveyapp.global.response.exception.CustomException;
@@ -21,10 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,21 +27,16 @@ public class AdminService {
 
     private final UserRepository userRepository;
     private final UserBaseDataRepository userBaseDataRepository;
+    private final BlackListRepository blackListRepository;
 
     @Transactional(readOnly = true)
-    public Page<UserDto> getUserList(UserRoleEnum userRole, String search, Pageable pageable) {
-        if (!userRole.equals(UserRoleEnum.ADMIN)) {
-            throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
-        }
+    public Page<UserDto> getUserList(String search, Pageable pageable) {
 
         return userRepository.findAllBySearch(search, pageable);
     }
 
     @Transactional(readOnly = true)
-    public UserDto getUser(UserRoleEnum userRole, Long userId) {
-        if (!userRole.equals(UserRoleEnum.ADMIN)) {
-            throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
-        }
+    public UserDto getUser(Long userId) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
@@ -55,10 +45,7 @@ public class AdminService {
     }
 
     @Transactional(readOnly = true)
-    public List<StatsListDto> getStats(UserRoleEnum userRole, LocalDateTime startDateLocal, LocalDateTime endDateLocal) {
-        if (!userRole.equals(UserRoleEnum.ADMIN)) {
-            throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
-        }
+    public List<StatsListDto> getStats(LocalDateTime startDateLocal, LocalDateTime endDateLocal) {
 
         List<CategoryEnum> categoryEnumList = Arrays.stream(CategoryEnum.values()).toList();
 
@@ -74,6 +61,39 @@ public class AdminService {
                 }
         ).toList();
 
+    }
+
+    @Transactional
+    public User addBlackList(Long userId) {
+
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_USER)
+        );
+
+        if (blackListRepository.findByUserId(user).isPresent()) {
+            throw new CustomException(ErrorCode.IS_BLACKLIST);
+        }
+
+        blackListRepository.save(new BlackList(user));
+
+        return user;
+    }
+
+
+    @Transactional
+    public User deleteBlackList(Long userId) {
+
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_USER)
+        );
+
+        BlackList blackList = blackListRepository.findByUserId(user).orElseThrow(
+                () -> new CustomException(ErrorCode.IS_NOT_BLACKLIST)
+        );
+
+        blackListRepository.delete(blackList);
+
+        return user;
     }
 
 }
