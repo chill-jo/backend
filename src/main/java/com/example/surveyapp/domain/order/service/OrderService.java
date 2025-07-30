@@ -51,7 +51,8 @@ public class OrderService {
         Order order = Order.create(user,
                 product,
                 requestDto.getTitle(),
-                requestDto.getPrice());
+                requestDto.getPrice()
+                );
 
         //포인트 차감 로직 추가 예정
 

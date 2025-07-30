@@ -6,6 +6,8 @@ import com.example.surveyapp.global.config.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "orders")
 @Getter
@@ -14,6 +16,9 @@ public class Order extends BaseEntity {
 
     @Id@GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "order_number", nullable = false, unique = true, length = 36)
+    private String orderNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -37,11 +42,12 @@ public class Order extends BaseEntity {
     }
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Order(User user, Product product, String title, int price) {
+    private Order(User user, Product product, String title, int price, String orderNumber) {
         this.user = user;
         this.product = product;
         this.title = title;
         this.price = price;
+        this.orderNumber = orderNumber;
     }
 
     public static Order create(User user, Product product, String  title, int price) {
@@ -51,6 +57,7 @@ public class Order extends BaseEntity {
                 .product(product)
                 .title(title)
                 .price(price)
+                .orderNumber(UUID.randomUUID().toString())
                 .build();
     }
 }
