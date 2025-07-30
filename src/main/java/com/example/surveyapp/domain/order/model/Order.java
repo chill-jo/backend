@@ -36,6 +36,11 @@ public class Order extends BaseEntity {
         this.isDeleted = true;
     }
 
+
+    public void updateId(Long id){
+        this.id = id;
+
+    }
     @Builder(access = AccessLevel.PRIVATE)
     private Order(User user, Product product, String title, Long price) {
         this.user = user;
@@ -44,7 +49,7 @@ public class Order extends BaseEntity {
         this.price = price;
     }
 
-    public static Order create(User user, Product product, String  title, Long price) {
+    public static Order create(User user, Product product) {
 
         return Order.builder()
                 .user(user)

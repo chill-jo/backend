@@ -51,17 +51,15 @@ public class OrderService {
         }
 
         Order order = Order.create(user,
-                product,
-                product.getTitle(),
-                product.getPrice()
+                product
                 );
 
-        Order saved = orderRepository.save(order);
+        Order saveOrder = orderRepository.save(order);
 
         //포인트 차감 로직
-        pointService.redeem(user.getId(),product.getPrice(), order.getId());
+        pointService.redeem(user.getId(),product.getPrice(), saveOrder.getId());
 
-        return OrderCreateResponseDto.from(saved);
+        return OrderCreateResponseDto.from(saveOrder);
     }
 
     public List<OrderResponseDto> readAllOrder(int page, int size) {

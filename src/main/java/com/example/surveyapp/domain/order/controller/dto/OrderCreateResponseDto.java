@@ -19,7 +19,7 @@ public class OrderCreateResponseDto {
 
     public static OrderCreateResponseDto from(Order order) {
         return new OrderCreateResponseDto(
-                order.getId(),
+                order.getUser().getId(),
                 order.getTitle(),
                 order.getProduct().getStatus(),
                 order.getPrice());
