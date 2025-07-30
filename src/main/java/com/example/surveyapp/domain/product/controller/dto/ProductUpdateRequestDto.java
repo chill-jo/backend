@@ -10,7 +10,7 @@ public class ProductUpdateRequestDto {
 
     private String title;
 
-    private int price;
+    private Long price;
 
     private String content;
 

@@ -1,8 +1,9 @@
 package com.example.surveyapp.domain.admin.controller;
 
-import com.example.surveyapp.domain.admin.controller.dto.SurveyeeStatsDto;
+import com.example.surveyapp.domain.admin.controller.dto.StatsListDto;
 import com.example.surveyapp.domain.admin.controller.dto.UserDto;
 import com.example.surveyapp.domain.admin.service.AdminService;
+import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -25,6 +27,7 @@ public class AdminController {
     private final AdminService adminService;
 
     // 전체 회원 조회(검색)
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/users")
     public ResponseEntity<ApiResponse<Page<UserDto>>> getUserList(
             @RequestParam(required = false) String search,
@@ -37,14 +40,18 @@ public class AdminController {
     }
 
     // 단일 회원 조회
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/users/{userId}")
-    public ResponseEntity<ApiResponse<UserDto>> getUser(@PathVariable Long userId) {
+    public ResponseEntity<ApiResponse<UserDto>> getUser(
+            @PathVariable Long userId
+    ) {
         return ResponseEntity.ok(ApiResponse.success("회원 조회되었습니다.", adminService.getUser(userId)));
     }
 
     // 분류별 참여자 통계 조회
-    @GetMapping("/stats/users")
-    public ResponseEntity<ApiResponse<List<SurveyeeStatsDto>>> getSurveyeeStats(
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @GetMapping("/stats")
+    public ResponseEntity<ApiResponse<List<StatsListDto>>> getStats(
             @RequestParam(required = false, defaultValue = "1999-01-01 00:00:00") String startDate,
             @RequestParam(required = false, defaultValue = "2999-01-01 00:00:00") String endDate
     ) {
@@ -52,7 +59,27 @@ public class AdminController {
         LocalDateTime startDateLocal = LocalDateTime.parse(startDate, formatter);
         LocalDateTime endDateLocal = LocalDateTime.parse(endDate, formatter);
 
-        return ResponseEntity.ok(ApiResponse.success("분류별 참여자 통계 조회하였습니다.", adminService.getSurveyeeStats(startDateLocal, endDateLocal)));
+        return ResponseEntity.ok(ApiResponse.success("분류별 참여자 통계 조회하였습니다.", adminService.getStats(startDateLocal, endDateLocal)));
 
+    }
+
+
+    // 블랙리스트 등록
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PostMapping("/black/{userId}")
+    public ResponseEntity<ApiResponse<User>> addBlackList(
+            @PathVariable Long userId
+    ) {
+        return ResponseEntity.ok(ApiResponse.success("블랙리스트에 등록되었습니다.", adminService.addBlackList(userId)));
+    }
+
+
+    // 블랙리스트 삭제
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @DeleteMapping("/black/{userId}")
+    public ResponseEntity<ApiResponse<User>> deleteBlackList(
+            @PathVariable Long userId
+    ) {
+        return ResponseEntity.ok(ApiResponse.success("블랙리스트에서 삭제되었습니다.", adminService.deleteBlackList(userId)));
     }
 }

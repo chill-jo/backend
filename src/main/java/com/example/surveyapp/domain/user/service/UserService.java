@@ -53,7 +53,7 @@ public class UserService {
                 encodedPassword,
                 requestDto.getName(),
                 requestDto.getNickname(),
-                UserRoleEnum.SURVEYEE
+                requestDto.getUserRole()
         );
 
         userRepository.save(user);
