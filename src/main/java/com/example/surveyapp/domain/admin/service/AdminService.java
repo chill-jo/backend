@@ -74,7 +74,10 @@ public class AdminService {
     }
 
     @Transactional
-    public User addBlackList(Long userId) {
+    public User addBlackList(UserRoleEnum userRole, Long userId) {
+        if (!userRole.equals(UserRoleEnum.ADMIN)) {
+            throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
+        }
 
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_USER)
@@ -91,7 +94,10 @@ public class AdminService {
 
 
     @Transactional
-    public User deleteBlackList(Long userId) {
+    public User deleteBlackList(UserRoleEnum userRole, Long userId) {
+        if (!userRole.equals(UserRoleEnum.ADMIN)) {
+            throw new CustomException(ErrorCode.NOT_ADMIN_USER_ERROR);
+        }
 
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_USER)

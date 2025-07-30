@@ -68,20 +68,13 @@ class AdminServiceTest {
         UserRoleEnum userRole = UserRoleEnum.SURVEYEE;
         String search = "test";
         Pageable pageable = Pageable.unpaged();
-        Page<UserDto> userList = Page.empty();
-        when(userRepository.findAllBySearch(search, pageable)).thenReturn(userList);
 
         // when & then
-        try {
-            adminService.getUserList(userRole, search, pageable);
-        } catch (CustomException e) {
-            Assertions.assertThatExceptionOfType(CustomException.class)
-                    .isThrownBy(() -> { throw new CustomException(e.getErrorCode()); })
-                    .withMessageContaining("관리자 계정으로 로그인하세요.");
-        }
+        Assertions.assertThatThrownBy(() -> adminService.getUserList(userRole, search, pageable))
+                .isInstanceOf(CustomException.class)
+                .hasMessageContaining("관리자 계정으로 로그인하세요.");
 
     }
-
 
     @Test
     void 단일_회원을_조회한다() {
@@ -107,31 +100,23 @@ class AdminServiceTest {
         Long userId = 1L;
 
         // when & then
-        try {
-            adminService.getUser(userRole, userId);
-        } catch (CustomException e) {
-            Assertions.assertThatExceptionOfType(CustomException.class)
-                    .isThrownBy(() -> { throw new CustomException(e.getErrorCode()); })
-                    .withMessageContaining("관리자 계정으로 로그인하세요.");
-        }
+        Assertions.assertThatThrownBy(() -> adminService.getUser(userRole, userId))
+                .isInstanceOf(CustomException.class)
+                .hasMessageContaining("관리자 계정으로 로그인하세요.");
 
     }
 
     @Test
-    void 회원이_없어서_단일_회원을조회를_실패한다() {
+    void 일치하는_회원이_없어서_단일_회원을조회를_실패한다() {
 
         // given
         UserRoleEnum userRole = UserRoleEnum.ADMIN;
         Long userId = 1L;
 
         // when & then
-        try {
-            adminService.getUser(userRole, userId);
-        } catch (CustomException e) {
-            Assertions.assertThatExceptionOfType(CustomException.class)
-            .isThrownBy(() -> { throw new CustomException(e.getErrorCode()); })
-                    .withMessageContaining("사용자를 찾을 수 없습니다.");
-        }
+        Assertions.assertThatThrownBy(() -> adminService.getUser(userRole, userId))
+                .isInstanceOf(CustomException.class)
+                .hasMessageContaining("사용자를 찾을 수 없습니다.");
 
     }
 
@@ -140,11 +125,12 @@ class AdminServiceTest {
     void 블랙리스트에_등록한다() {
 
         // given
+        UserRoleEnum userRole = UserRoleEnum.ADMIN;
         Long userId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         // when
-        User result = adminService.addBlackList(userId);
+        User result = adminService.addBlackList(userRole, userId);
 
         // then
         Assertions.assertThat(user).isEqualTo(result);
@@ -152,37 +138,46 @@ class AdminServiceTest {
     }
 
     @Test
-    void 블랙리스트_등록을_실패한다1() {
+    void 권한이_없어서_블랙리스트_등록을_실패한다() {
 
         // given
+        UserRoleEnum userRole = UserRoleEnum.SURVEYEE;
         Long userId = 1L;
 
         // when & then
-        try {
-            adminService.addBlackList(userId);
-        } catch (CustomException e) {
-            Assertions.assertThatExceptionOfType(CustomException.class)
-                    .isThrownBy(() -> { throw new CustomException(e.getErrorCode()); })
-                    .withMessageContaining("사용자를 찾을 수 없습니다.");
-        }
+        Assertions.assertThatThrownBy(() -> adminService.addBlackList(userRole, userId))
+                .isInstanceOf(CustomException.class)
+                .hasMessageContaining("관리자 계정으로 로그인하세요.");
 
     }
 
     @Test
-    void 블랙리스트_등록을_실패한다2() {
+    void 일치하는_회원이_없어서_블랙리스트_등록을_실패한다() {
 
         // given
+        UserRoleEnum userRole = UserRoleEnum.ADMIN;
         Long userId = 1L;
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         // when & then
-        try {
-            adminService.addBlackList(userId);
-        } catch (CustomException e) {
-            Assertions.assertThatExceptionOfType(CustomException.class)
-                    .isThrownBy(() -> { throw new CustomException(e.getErrorCode()); })
-                    .withMessageContaining("해당 회원은 이미 블랙입니다.");
-        }
+        Assertions.assertThatThrownBy(() -> adminService.addBlackList(userRole, userId))
+                .isInstanceOf(CustomException.class)
+                .hasMessageContaining("사용자를 찾을 수 없습니다.");
+
+    }
+
+    @Test
+    void 이미_블랙회원일_경우_블랙리스트_등록을_실패한다() {
+
+        // given
+        UserRoleEnum userRole = UserRoleEnum.ADMIN;
+        Long userId = 1L;
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(blackListRepository.findByUserId(user)).thenReturn(Optional.of(blackList));
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> adminService.addBlackList(userRole, userId))
+                .isInstanceOf(CustomException.class)
+                .hasMessageContaining("해당 회원은 이미 블랙입니다.");
 
     }
 
@@ -191,12 +186,13 @@ class AdminServiceTest {
     void 블랙리스트에서_삭제한다() {
 
         // given
+        UserRoleEnum userRole = UserRoleEnum.ADMIN;
         Long userId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(blackListRepository.findByUserId(user)).thenReturn(Optional.of(blackList));
 
         // when
-        User result = adminService.deleteBlackList(userId);
+        User result = adminService.deleteBlackList(userRole, userId);
 
 
         // then
@@ -205,37 +201,45 @@ class AdminServiceTest {
     }
 
     @Test
-    void 블랙리스트_삭제를_실패한다1() {
+    void 권한이_없어서_블랙리스트_삭제를_실패한다() {
 
         // given
+        UserRoleEnum userRole = UserRoleEnum.SURVEYEE;
         Long userId = 1L;
 
         // when & then
-        try {
-            adminService.deleteBlackList(userId);
-        } catch (CustomException e) {
-            Assertions.assertThatExceptionOfType(CustomException.class)
-                    .isThrownBy(() -> { throw new CustomException(e.getErrorCode()); })
-                    .withMessageContaining("사용자를 찾을 수 없습니다.");
-        }
+        Assertions.assertThatThrownBy(() -> adminService.deleteBlackList(userRole, userId))
+                .isInstanceOf(CustomException.class)
+                .hasMessageContaining("관리자 계정으로 로그인하세요.");
 
     }
 
     @Test
-    void 블랙리스트_삭제를_실패한다2() {
+    void 일치하는_회원이_없어서_블랙리스트_삭제를_실패한다() {
 
         // given
+        UserRoleEnum userRole = UserRoleEnum.ADMIN;
+        Long userId = 1L;
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> adminService.deleteBlackList(userRole, userId))
+                .isInstanceOf(CustomException.class)
+                .hasMessageContaining("사용자를 찾을 수 없습니다.");
+
+    }
+
+    @Test
+    void 블랙회원이_아니라서_블랙리스트_삭제를_실패한다() {
+
+        // given
+        UserRoleEnum userRole = UserRoleEnum.ADMIN;
         Long userId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         // when & then
-        try {
-            adminService.deleteBlackList(userId);
-        } catch (CustomException e) {
-            Assertions.assertThatExceptionOfType(CustomException.class)
-                    .isThrownBy(() -> { throw new CustomException(e.getErrorCode()); })
-                    .withMessageContaining("해당 회원은 블랙이 아닙니다.");
-        }
+        Assertions.assertThatThrownBy(() -> adminService.deleteBlackList(userRole, userId))
+                .isInstanceOf(CustomException.class)
+                .hasMessageContaining("해당 회원은 블랙이 아닙니다.");
 
     }
 }

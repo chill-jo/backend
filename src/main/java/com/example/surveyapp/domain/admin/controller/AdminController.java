@@ -67,14 +67,20 @@ public class AdminController {
 
     // 블랙리스트 등록
     @PostMapping("/black/{userId}")
-    public ResponseEntity<ApiResponse<User>> addBlackList(@PathVariable Long userId) {
-        return ResponseEntity.ok(ApiResponse.success("블랙리스트에 등록되었습니다.", adminService.addBlackList(userId)));
+    public ResponseEntity<ApiResponse<User>> addBlackList(
+            @AuthenticationPrincipal CustomUserDetails user,
+            @PathVariable Long userId
+    ) {
+        return ResponseEntity.ok(ApiResponse.success("블랙리스트에 등록되었습니다.", adminService.addBlackList(user.getUserRole(), userId)));
     }
 
 
     // 블랙리스트 삭제
     @DeleteMapping("/black/{userId}")
-    public ResponseEntity<ApiResponse<User>> deleteBlackList(@PathVariable Long userId) {
-        return ResponseEntity.ok(ApiResponse.success("블랙리스트에서 삭제되었습니다.", adminService.deleteBlackList(userId)));
+    public ResponseEntity<ApiResponse<User>> deleteBlackList(
+            @AuthenticationPrincipal CustomUserDetails user,
+            @PathVariable Long userId
+    ) {
+        return ResponseEntity.ok(ApiResponse.success("블랙리스트에서 삭제되었습니다.", adminService.deleteBlackList(user.getUserRole(), userId)));
     }
 }
