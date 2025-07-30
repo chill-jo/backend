@@ -12,18 +12,24 @@ public class OrderResponseDto {
 
     private Long orderId;
 
-    private User user;
+    private String orderNumber;
+
+    private Long userId;
+
+    private String username;
 
     private String title;
 
     private Status status;
 
-    private int price;
+    private Long price;
 
     public static OrderResponseDto from(Order order) {
     return new OrderResponseDto(
             order.getId(),
-            order.getUser(),
+            order.getOrderNumber(),
+            order.getUser().getId(),
+            order.getUser().getName(),
             order.getTitle(),
             order.getProduct().getStatus(),
             order.getPrice()

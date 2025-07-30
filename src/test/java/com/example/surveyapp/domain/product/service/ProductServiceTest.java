@@ -54,16 +54,15 @@ class ProductServiceTest {
     void 상품_생성() {
         // Given
         //테스트 전제 조건 및 환경 설정
-        String title = "상품명";
-        int price = 1800;
-        String content = "상품설명";
-        Status status =Status.ON_SALE;
 
-        Product product = Product.create(title, price, content, status);
+        Product product = ProductFixtureGenerator.generateProductFixture();
         User adminUser = User.of("test@test.com", "test1234!", "관리자", "도한123", UserRoleEnum.ADMIN);
         ReflectionTestUtils.setField(adminUser,"id",1L);
 
-        ProductCreateRequestDto requestDto = new ProductCreateRequestDto(title, content, price, status);
+        ProductCreateRequestDto requestDto = new ProductCreateRequestDto(product.getTitle(),
+                product.getContent(),
+                product.getPrice(),
+                product.getStatus());
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(adminUser));
         when(productRepository.save(any(Product.class))).thenReturn(product);
@@ -74,9 +73,9 @@ class ProductServiceTest {
         // Then
         //검증 사항
         verify(productRepository,times(1)).save(any(Product.class));
-        assertEquals(title, productCreateResponseDto.getTitle());
-        assertEquals(price,productCreateResponseDto.getPrice());
-        assertEquals(status,productCreateResponseDto.getStatus());
+        assertEquals(product.getTitle(), productCreateResponseDto.getTitle());
+        assertEquals(product.getPrice(),productCreateResponseDto.getPrice());
+        assertEquals(product.getStatus(),productCreateResponseDto.getStatus());
 
     }
 
@@ -85,13 +84,13 @@ class ProductServiceTest {
     void 상품_생성_참여자는_불가능_하다() {
         // Given
         //테스트 전제 조건 및 환경 설정
-        String title = "상품명";
-        int price = 1800;
-        String content = "상품설명";
-        Status status =Status.ON_SALE;
+        Product product = ProductFixtureGenerator.generateProductFixture();
         User surveyeeUser = User.of("test@test.com", "test1234!", "참여자", "도한123", UserRoleEnum.SURVEYOR);
 
-        ProductCreateRequestDto requestDto = new ProductCreateRequestDto(title, content, price, status);
+        ProductCreateRequestDto requestDto = new ProductCreateRequestDto(product.getTitle(),
+                product.getContent(),
+                product.getPrice(),
+                product.getStatus());
         // When
         //실행할 행동
 
@@ -107,13 +106,13 @@ class ProductServiceTest {
     void 상품_생성_출제자는_불가능_하다() {
         // Given
         //테스트 전제 조건 및 환경 설정
-        String title = "상품명";
-        int price = 1800;
-        String content = "상품설명";
-        Status status =Status.ON_SALE;
+        Product product = ProductFixtureGenerator.generateProductFixture();
         User surveyorUser = User.of("test@test.com", "test1234!", "출제자", "도한123", UserRoleEnum.SURVEYOR);
 
-        ProductCreateRequestDto requestDto = new ProductCreateRequestDto(title, content, price, status);
+        ProductCreateRequestDto requestDto = new ProductCreateRequestDto(product.getTitle(),
+                product.getContent(),
+                product.getPrice(),
+                product.getStatus());
         // When
         //실행할 행동
 
@@ -129,18 +128,17 @@ class ProductServiceTest {
     void 상품_생성시_동일한_상품명으로_생성_불가_하다() {
         // Given
         //테스트 전제 조건 및 환경 설정
-        String title = "상품명";
-        int price = 1800;
-        String content = "상품설명";
-        Status status =Status.ON_SALE;
-
+        Product product = ProductFixtureGenerator.generateProductFixture();
         User adminUser = User.of("test@test.com", "test1234!", "관리자", "도한123", UserRoleEnum.ADMIN);
-        ProductCreateRequestDto requestDto = new ProductCreateRequestDto(title, content, price, status);
+        ProductCreateRequestDto requestDto = new ProductCreateRequestDto(product.getTitle(),
+                product.getContent(),
+                product.getPrice(),
+                product.getStatus());
 
         // When
         //실행할 행동
         when(userRepository.findById(adminUser.getId())).thenReturn(Optional.of(adminUser));
-        when(productRepository.existsByTitleAndIsDeletedFalse(title)).thenReturn(true);
+        when(productRepository.existsByTitleAndIsDeletedFalse(product.getTitle())).thenReturn(true);
 
         // Then
         //검증 사항
@@ -155,11 +153,11 @@ class ProductServiceTest {
         // Given
         //테스트 전제 조건 및 환경 설정
         Product product1 = ProductFixtureGenerator.generateProductFixture();
-        Product product2 = Product.create("상품2",1800,"설명2",Status.ON_SALE);
+        Product product2 = Product.create("상품2",1800L,"설명2",Status.ON_SALE);
         List<Product> productList = List.of(product1, product2);
 
         int page = 0;
-        int size = 2;
+        int size = 10;
 
         Pageable pageable = PageRequest.of(page, size);
         PageImpl<Product> products = new PageImpl<>(productList, pageable, productList.size());
@@ -206,7 +204,7 @@ class ProductServiceTest {
         Long id = 1L;
         Product product = ProductFixtureGenerator.generateProductFixture();
 
-        ProductUpdateRequestDto requestDto = new ProductUpdateRequestDto("변경된상품명", 2500, "변경된설명", Status.ON_SALE);
+        ProductUpdateRequestDto requestDto = new ProductUpdateRequestDto("변경된상품명", 2500L, "변경된설명", Status.ON_SALE);
         User adminUser = User.of("test@test.com", "test1234!", "관리자", "도한123", UserRoleEnum.ADMIN);
         lenient().when(userRepository.findById(adminUser.getId())) //실제 서비스코드에 findById 가 안쓰였으나, leniet stub- 호출 안되고 예외 터지지않게 사용
                         .thenReturn(Optional.of(adminUser));
@@ -221,6 +219,7 @@ class ProductServiceTest {
         //검증 사항
         verify(productRepository, times(1)).findById(id);
         assertThat(responseDto.getTitle()).isEqualTo("변경된상품명");
+        assertThat(adminUser.getUserRole()).isEqualTo(UserRoleEnum.ADMIN);
 
     }
 

@@ -32,7 +32,7 @@ public class Order extends BaseEntity {
     private String title;
 
     @Column(nullable = false)
-    private int price;
+    private Long price;
 
     @Column(nullable = false)
     private boolean isDeleted = false;
@@ -41,8 +41,13 @@ public class Order extends BaseEntity {
         this.isDeleted = true;
     }
 
+
+    public void updateId(Long id){
+        this.id = id;
+
+    }
     @Builder(access = AccessLevel.PRIVATE)
-    private Order(User user, Product product, String title, int price, String orderNumber) {
+    private Order(User user, Product product, String title, Long price, String orderNumber) {
         this.user = user;
         this.product = product;
         this.title = title;
@@ -50,14 +55,14 @@ public class Order extends BaseEntity {
         this.orderNumber = orderNumber;
     }
 
-    public static Order create(User user, Product product, String  title, int price) {
+    public static Order create(User user, Product product) {
 
         return Order.builder()
                 .user(user)
-                .product(product)
-                .title(title)
-                .price(price)
                 .orderNumber(UUID.randomUUID().toString())
+                .product(product)
+                .title(product.getTitle())
+                .price(product.getPrice())
                 .build();
     }
 }

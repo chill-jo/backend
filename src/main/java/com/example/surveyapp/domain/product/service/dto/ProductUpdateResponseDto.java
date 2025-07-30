@@ -12,11 +12,11 @@ public class ProductUpdateResponseDto {
 
     private String content;
 
-    private int price;
+    private Long price;
 
     private Status status;
 
-    public ProductUpdateResponseDto(Long id, String title, String content, int price, Status status) {
+    public ProductUpdateResponseDto(Long id, String title, String content, Long price, Status status) {
         this.id = id;
         this.title = title;
         this.content = content;

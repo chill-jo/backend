@@ -11,7 +11,7 @@ public class ProductCreateResponseDto {
 
     private String title;
 
-    private int price;
+    private Long price;
 
     private Status status;
 
@@ -22,7 +22,7 @@ public class ProductCreateResponseDto {
         this.status = product.getStatus();
     }
 
-    public ProductCreateResponseDto(Long id, String title, int price, Status status) {
+    public ProductCreateResponseDto(Long id, String title, Long price, Status status) {
         this.id = id;
         this.title = title;
         this.price = price;

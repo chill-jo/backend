@@ -1,6 +1,7 @@
 package com.example.surveyapp.domain.product.domain.repository;
 
 import com.example.surveyapp.config.DataJpaTestBase;
+import com.example.surveyapp.config.ProductFixtureGenerator;
 import com.example.surveyapp.domain.product.domain.model.Product;
 import com.example.surveyapp.domain.product.domain.model.Status;
 import com.example.surveyapp.domain.product.domain.model.repository.ProductRepository;
@@ -15,12 +16,7 @@ public class ProductRepoTest extends DataJpaTestBase {
     @Test
     public void 상품_생성() {
         // given
-        String title = "title";
-        int price = 1000;
-        String content = "content";
-        Status status = Status.ON_SALE;
-
-        Product product = Product.create(title, price, content, status);
+        Product product= ProductFixtureGenerator.generateProductFixture();
 
         // when
         productRepository.save(product);

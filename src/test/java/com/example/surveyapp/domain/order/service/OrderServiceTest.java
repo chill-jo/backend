@@ -2,6 +2,7 @@ package com.example.surveyapp.domain.order.service;
 
 import com.example.surveyapp.config.OrderFixtureGenerator;
 import com.example.surveyapp.config.ProductFixtureGenerator;
+import com.example.surveyapp.config.UserFixtureGenerator;
 import com.example.surveyapp.domain.order.controller.dto.OrderCreateRequestDto;
 import com.example.surveyapp.domain.order.controller.dto.OrderCreateResponseDto;
 import com.example.surveyapp.domain.order.controller.dto.OrderResponseDto;
@@ -9,6 +10,7 @@ import com.example.surveyapp.domain.order.model.Order;
 import com.example.surveyapp.domain.order.model.repository.OrderRepository;
 import com.example.surveyapp.domain.point.domain.model.entity.Point;
 import com.example.surveyapp.domain.point.domain.repository.PointRepository;
+import com.example.surveyapp.domain.point.service.PointService;
 import com.example.surveyapp.domain.product.domain.model.Product;
 import com.example.surveyapp.domain.product.domain.model.Status;
 import com.example.surveyapp.domain.product.domain.model.repository.ProductRepository;
@@ -51,29 +53,31 @@ class OrderServiceTest {
     @Mock
     private ProductRepository productRepository;
 
+    @Mock
+    private PointService pointService;
+
     @Test
+    @DisplayName("참여자가 주문을 생성한다")
     void 주문_생성() {
 
         // Given
         //테스트 전제 조건 및 환경 설정
-        User user = User.of("test@test.com", "Test1234!", "김도한", "도한1", UserRoleEnum.SURVEYEE);
-        Long userId = 1L;
-
+        User user = UserFixtureGenerator.generateUserFixture();
         Product product = ProductFixtureGenerator.generateProductFixture();
-        Long productId = 1L;
-        Order order = OrderFixtureGenerator.generateOrderFixture(user);
+        Order order = OrderFixtureGenerator.generateOrderFixture(user,product);
+        Point point = Point.of(user);
+        point.pointCharge(5000L);
 
-        //Point point = new Point(1L, user, 3000L);
 
-        OrderCreateRequestDto requestDto = new OrderCreateRequestDto(1L, "상품명", 2500);
+        OrderCreateRequestDto requestDto = new OrderCreateRequestDto(product.getId(),product.getTitle(),product.getPrice()) ;
         // When
         //실행할 행동
         when(orderRepository.save(any(Order.class))).thenReturn(order);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        //when(pointRepository.findByUser(user)).thenReturn(Optional.of(point));
-        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
-
-        OrderCreateResponseDto responseDto = orderService.createOrder(requestDto, userId);
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(pointRepository.findByUser(user)).thenReturn(Optional.of(point));
+        when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
+        doNothing().when(pointService).redeem(anyLong(), anyLong(),anyLong());
+        OrderCreateResponseDto responseDto = orderService.createOrder(requestDto, user.getId());
 
         // Then
         //검증 사항
@@ -81,6 +85,8 @@ class OrderServiceTest {
         assertThat(responseDto.getPrice()).isEqualTo(order.getPrice());
         assertThat(responseDto.getStatus()).isEqualTo(Status.ON_SALE);
         assertThat(responseDto.getTitle()).isEqualTo(order.getTitle());
+
+        verify(pointService, times(1)).redeem(eq(user.getId()),eq(product.getPrice()), eq(order.getId()));
         verify(orderRepository, times(1)).save(any(Order.class));
     }
 
@@ -94,9 +100,12 @@ class OrderServiceTest {
         User user2 = User.of("test2@test.com", "test1234!", "김민성", "민성1", UserRoleEnum.SURVEYEE);
         User user3 = User.of("test3@test.com", "test1234!", "김도한", "도한1", UserRoleEnum.SURVEYEE);
 
-        Order order1 = OrderFixtureGenerator.generateOrderFixture(user1);
-        Order order2 = OrderFixtureGenerator.generateOrderFixture(user2);
-        Order order3 = OrderFixtureGenerator.generateOrderFixture(user3);
+        Product product = ProductFixtureGenerator.generateProductFixture();
+        Product product1 = ProductFixtureGenerator.generateProductFixture();
+        Product product2 = ProductFixtureGenerator.generateProductFixture();
+        Order order1 = OrderFixtureGenerator.generateOrderFixture(user1,product);
+        Order order2 = OrderFixtureGenerator.generateOrderFixture(user2,product1);
+        Order order3 = OrderFixtureGenerator.generateOrderFixture(user3,product2);
         List<Order> orderList = List.of(order1, order2, order3);
 
         int page = 0;
@@ -126,9 +135,12 @@ class OrderServiceTest {
         // Given
         //테스트 전제 조건 및 환경 설정
         User user1 = User.of("test1@test.com", "test1234!", "김민진", "민진1", UserRoleEnum.SURVEYEE);
-        Order order1 = OrderFixtureGenerator.generateOrderFixture(user1);
-        Order order2 = OrderFixtureGenerator.generateOrderFixture(user1);
-        Order order3 = OrderFixtureGenerator.generateOrderFixture(user1);
+        Product product = ProductFixtureGenerator.generateProductFixture();
+        Product product1 = ProductFixtureGenerator.generateProductFixture();
+        Product product2 = ProductFixtureGenerator.generateProductFixture();
+        Order order1 = OrderFixtureGenerator.generateOrderFixture(user1,product);
+        Order order2 = OrderFixtureGenerator.generateOrderFixture(user1,product1);
+        Order order3 = OrderFixtureGenerator.generateOrderFixture(user1,product2);
         List<Order> orderList1 = List.of(order1, order2, order3);
 
         int page = 0;
