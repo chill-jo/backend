@@ -56,14 +56,14 @@ public class SurveyService {
 
         User user = userFacade.findUser(userId);
 
-        if(user.isUserRoleSurveyor()){
-            //포인트 잔액 차감
-            //pointService.
-        }
 
         Survey survey = surveyMapper.createSurveyEntity(requestDto, user);
 
         Survey saved = surveyRepository.save(survey);
+
+        if(user.isUserRoleSurveyor()){
+            pointService.surveyorRedeem(userId, saved.getTotalPoint(), saved.getId());
+        }
 
         return surveyMapper.toResponseDto(saved);
     }
@@ -107,7 +107,6 @@ public class SurveyService {
 
         currentUserMatchesSurveyCreatorOrAdmin(user, survey);
 
-        SurveyStatus currentStatus = survey.getStatus();
         SurveyStatus newStatus = requestDto.getStatus();
 
         survey.changeSurveyStatus(newStatus);
