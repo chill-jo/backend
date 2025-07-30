@@ -6,7 +6,6 @@ import com.example.surveyapp.domain.survey.controller.dto.request.SurveyStatusUp
 import com.example.surveyapp.domain.survey.controller.dto.request.SurveyUpdateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.*;
 import com.example.surveyapp.domain.survey.service.SurveyService;
-import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.global.response.ApiResponse;
 import com.example.surveyapp.global.security.jwt.CustomUserDetails;
 import jakarta.validation.Valid;
