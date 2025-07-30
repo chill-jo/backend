@@ -6,6 +6,8 @@ import com.example.surveyapp.domain.user.domain.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @AllArgsConstructor
 public class OrderResponseDto {
@@ -20,9 +22,12 @@ public class OrderResponseDto {
 
     private String title;
 
+    private Long price;
+
     private Status status;
 
-    private Long price;
+    private LocalDateTime createAt;
+
 
     public static OrderResponseDto from(Order order) {
     return new OrderResponseDto(
@@ -31,8 +36,10 @@ public class OrderResponseDto {
             order.getUser().getId(),
             order.getUser().getName(),
             order.getTitle(),
+            order.getPrice(),
             order.getProduct().getStatus(),
-            order.getPrice()
+            order.getCreatedAt()
+
     );
 
     }
