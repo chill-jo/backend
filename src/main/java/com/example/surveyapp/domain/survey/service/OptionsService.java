@@ -81,6 +81,10 @@ public class OptionsService {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
 
+        if(question.isSubjective()){
+            throw new CustomException(ErrorCode.OPTION_INVALID_FOR_SUBJECTIVE_QUESTION);
+        }
+
         currentUserMatchesSurveyCreator(user, survey);
         isSurveyNotStarted(survey);
         isQuestionFromSurvey(survey, question);

@@ -133,6 +133,14 @@ public class SurveyService {
             throw new CustomException(ErrorCode.SURVEY_CANNOT_BE_DELETED);
         }
 
+        List<Question> questions = questionRepository.findAllBySurvey(survey);
+
+        for(Question q : questions){
+            optionsRepository.deleteAllByQuestion(q);
+        }
+
+        questionRepository.deleteAllBySurvey(survey);
+
         survey.deleteSurvey();
     }
 
