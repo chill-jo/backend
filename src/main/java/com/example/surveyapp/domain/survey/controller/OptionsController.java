@@ -5,9 +5,11 @@ import com.example.surveyapp.domain.survey.controller.dto.request.OptionUpdateRe
 import com.example.surveyapp.domain.survey.controller.dto.response.OptionResponseDto;
 import com.example.surveyapp.domain.survey.service.OptionsService;
 import com.example.surveyapp.global.response.ApiResponse;
+import com.example.surveyapp.global.security.jwt.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,11 +23,12 @@ public class OptionsController {
 
     @PostMapping("/{surveyId}/question/{questionId}/option")
     public ResponseEntity<ApiResponse<OptionResponseDto>> createOption(
-            Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long surveyId,
             @PathVariable Long questionId,
-            @RequestBody OptionCreateRequestDto requestDto){
-
+            @RequestBody OptionCreateRequestDto requestDto
+    ){
+        Long userId = userDetails.getId();
         OptionResponseDto responseDto = optionsService.createOption(userId, surveyId, questionId, requestDto);
 
         return ResponseEntity
@@ -35,10 +38,11 @@ public class OptionsController {
 
     @GetMapping("/{surveyId}/question/{questionId}/option")
     public ResponseEntity<ApiResponse<List<OptionResponseDto>>> getOptions(
-            Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long surveyId,
             @PathVariable Long questionId
     ){
+        Long userId = userDetails.getId();
         List<OptionResponseDto> responseDtoList = optionsService.getOptions(userId, surveyId, questionId);
 
         return ResponseEntity
@@ -48,13 +52,13 @@ public class OptionsController {
 
     @PatchMapping("/{surveyId}/question/{questionId}/option/{optionId}")
     public ResponseEntity<ApiResponse<OptionResponseDto>> updateOption(
-            Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long surveyId,
             @PathVariable Long questionId,
             @PathVariable Long optionId,
             @RequestBody OptionUpdateRequestDto requestDto
     ){
-
+        Long userId = userDetails.getId();
         OptionResponseDto responseDto = optionsService.updateOption(userId, surveyId, questionId, optionId, requestDto);
 
         return ResponseEntity
@@ -64,12 +68,13 @@ public class OptionsController {
 
     @DeleteMapping("/{surveyId}/question/{questionId}/option/{optionId}")
     public ResponseEntity<ApiResponse<Void>> deleteOption(
-            Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long surveyId,
             @PathVariable Long questionId,
             @PathVariable Long optionId
     )
     {
+        Long userId = userDetails.getId();
         optionsService.deleteOption(userId, surveyId, questionId, optionId);
 
         return ResponseEntity

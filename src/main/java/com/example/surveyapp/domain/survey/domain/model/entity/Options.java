@@ -24,7 +24,8 @@ public class Options extends BaseEntity {
     @Column(nullable = false, length = 255)
     private String content;
 
-    public Options(Long number, String content){
+    public Options(Question question, Long number, String content){
+        this.question = question;
         this.number = number;
         this.content = content;
     }

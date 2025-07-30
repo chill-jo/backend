@@ -12,8 +12,8 @@ import java.util.Optional;
 @Repository
 public interface SurveyRepository extends JpaRepository<Survey, Long> {
 
-    Optional<Survey> findByIdAndDeletedFalse(Long id);
+    Optional<Survey> findByIdAndIsDeletedFalse(Long id);
 
-    @Query("SELECT s FROM Survey s WHERE s.deleted = false")
+    @Query("SELECT s FROM Survey s WHERE s.isDeleted = false")
     Page<Survey> findAllSurveyPaged(Pageable pageable);
 }
