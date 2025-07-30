@@ -1,7 +1,6 @@
 package com.example.surveyapp.domain.survey.service;
 
 import static org.assertj.core.api.Assertions.*;
-import com.example.surveyapp.config.QuestionFixtureGenerator;
 import com.example.surveyapp.domain.survey.controller.dto.request.QuestionCreateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.request.QuestionUpdateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.QuestionResponseDto;
@@ -13,7 +12,6 @@ import com.example.surveyapp.domain.survey.domain.repository.QuestionRepository;
 import com.example.surveyapp.domain.survey.domain.repository.SurveyRepository;
 import com.example.surveyapp.domain.survey.facade.UserFacade;
 import com.example.surveyapp.domain.user.domain.model.User;
-import com.example.surveyapp.domain.user.domain.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,8 +22,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import javax.swing.text.html.Option;
-import java.sql.Ref;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
@@ -35,9 +31,6 @@ import static org.mockito.Mockito.*;
 public class QuestionServiceTest {
     @Mock
     private QuestionRepository questionRepository;
-
-    @Mock
-    private UserRepository userRepository;
 
     @Mock
     private OptionsRepository optionsRepository;
