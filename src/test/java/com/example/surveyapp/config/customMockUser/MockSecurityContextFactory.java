@@ -6,6 +6,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
+import org.springframework.test.util.ReflectionTestUtils;
 
 public class MockSecurityContextFactory implements WithSecurityContextFactory<WithCustomMockUser> {
     @Override
@@ -17,7 +18,7 @@ public class MockSecurityContextFactory implements WithSecurityContextFactory<Wi
                 annotation.nickname(),
                 annotation.role()
         );
-        mockUser.updateId(annotation.id());
+        ReflectionTestUtils.getField(annotation.id(), "mockUser");
 
         CustomUserDetails userDetails = new CustomUserDetails(mockUser);
 

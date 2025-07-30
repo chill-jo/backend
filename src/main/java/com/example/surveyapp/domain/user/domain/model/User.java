@@ -55,10 +55,6 @@ public class User extends BaseEntity {
         this.isDeleted = true;
     }
 
-    public void updateId(Long id){
-        this.id = id;
-    }
-
     public void updateInfo(String email, String name, String nickname, String rawPassword, PasswordEncoder passwordEncoder) {
         this.email = email;
         this.name = name;
