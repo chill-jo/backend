@@ -3,6 +3,7 @@ package com.example.surveyapp.domain.survey.service;
 import static org.assertj.core.api.Assertions.*;
 import com.example.surveyapp.domain.survey.controller.dto.request.QuestionCreateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.request.QuestionUpdateRequestDto;
+import com.example.surveyapp.domain.survey.controller.dto.response.PageQuestionResponseDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.QuestionResponseDto;
 import com.example.surveyapp.domain.survey.domain.model.entity.Question;
 import com.example.surveyapp.domain.survey.domain.model.entity.Survey;
@@ -20,9 +21,14 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 
@@ -137,6 +143,64 @@ public class QuestionServiceTest {
         verify(questionMock).isFromSurvey(surveyMock);
         verify(surveyMock).isInProgress();
         verify(surveyMock).isUserSurveyCreator(userMock);
+
+    }
+
+    @Test
+    void 질문_목록을_조회한다(){
+        Long userId = 1L;
+        Long surveyId = 1L;
+        Long questionId = 1L;
+        Long number = 1L;
+        String content = "테스트질문내용";
+        QuestionType type = QuestionType.SINGLE_CHOICE;
+        int page = 0;
+        int size = 2;
+        Pageable pageable = PageRequest.of(page, size);
+
+        Survey surveyMock = mock(Survey.class);
+        User userMock = mock(User.class);
+        Question questionMock1 = mock(Question.class);
+        Question questionMock2 = mock(Question.class);
+
+        List<Question> questionMockList = List.of(questionMock1, questionMock2);
+        Page<Question> questionMockPage = new PageImpl<>(questionMockList, pageable, questionMockList.size());
+        when(userFacade.findUser(userId)).thenReturn(userMock);
+
+        when(surveyRepository.findByIdAndIsDeletedFalse(surveyId)).thenReturn(Optional.of(surveyMock));
+        when(surveyMock.isInProgress()).thenReturn(true);
+
+        when(questionRepository.findAllBySurveyId(surveyId, pageable)).thenReturn(questionMockPage);
+
+        when(questionMock1.getId()).thenReturn(1L);
+        when(questionMock1.getNumber()).thenReturn(1L);
+        when(questionMock1.getContent()).thenReturn("테스트질문내용1");
+        when(questionMock1.getType()).thenReturn(QuestionType.SINGLE_CHOICE);
+        when(questionMock2.getId()).thenReturn(2L);
+        when(questionMock2.getNumber()).thenReturn(2L);
+        when(questionMock2.getContent()).thenReturn("테스트질문내용2");
+        when(questionMock2.getType()).thenReturn(QuestionType.SUBJECTIVE);
+
+
+        //when
+        PageQuestionResponseDto<QuestionResponseDto> pageQuestionResponseDto = questionService.getQuestions(page, size, userId, surveyId);
+
+        //then
+        assertThat(pageQuestionResponseDto).isNotNull();
+        assertThat(pageQuestionResponseDto.getContent()).hasSize(2);
+        assertThat(pageQuestionResponseDto.getContent().get(0).getId())
+                .isEqualTo(questionMock1.getId());
+        assertThat(pageQuestionResponseDto.getContent().get(1).getId())
+                .isEqualTo(questionMock2.getId());
+        assertThat(pageQuestionResponseDto.getTotalElements()).isEqualTo(questionMockList.size());
+
+        verify(userFacade).findUser(userId);
+        verify(surveyRepository).findByIdAndIsDeletedFalse(surveyId);
+        verify(surveyMock).isInProgress();
+        verify(questionRepository).findAllBySurveyId(surveyId, pageable);
+        verify(questionMock1).getNumber();
+        verify(questionMock2).getContent();
+
 
     }
 
