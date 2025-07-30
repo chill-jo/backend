@@ -50,6 +50,7 @@ public class AdminService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
         return UserDto.from(user);
     }
 
@@ -62,15 +63,15 @@ public class AdminService {
         List<CategoryEnum> categoryEnumList = Arrays.stream(CategoryEnum.values()).toList();
 
         return categoryEnumList.stream().map(
-            categoryEnum -> {
-                StatsListDto statsListDto = StatsListDto.of(categoryEnum.getCategory());
-                for (Long i = 1L; i <= categoryEnum.getOptionMaxNum(); i++) {
-                    Long count = userBaseDataRepository.countByCategoryAndDataAndStartDateAndEndDate(categoryEnum, i, startDateLocal, endDateLocal);
-                    StatDto statDto = StatDto.of(i, count);
-                    statsListDto.addStat(statDto);
+                categoryEnum -> {
+                    StatsListDto statsListDto = StatsListDto.of(categoryEnum.getCategory());
+                    for (Long i = 1L; i <= categoryEnum.getOptionMaxNum(); i++) {
+                        Long count = userBaseDataRepository.countByCategoryAndDataAndStartDateAndEndDate(categoryEnum, i, startDateLocal, endDateLocal);
+                        StatDto statDto = StatDto.of(i, count);
+                        statsListDto.addStat(statDto);
+                    }
+                    return statsListDto;
                 }
-                return statsListDto;
-            }
         ).toList();
 
     }

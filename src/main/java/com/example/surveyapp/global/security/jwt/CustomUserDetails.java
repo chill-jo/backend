@@ -24,7 +24,6 @@ public class CustomUserDetails implements UserDetails {
 
     @JsonIgnore
     private final String password;
-    private final UserRoleEnum userRole;
     private final Collection<? extends GrantedAuthority> authorities;
 
     public CustomUserDetails(User user) {
