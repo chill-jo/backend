@@ -37,4 +37,9 @@ public class RegisterRequestDto {
 
     @NotNull(message = "회원 유형은 필수입니다.")
     private UserRoleEnum userRole;
+
+    @AssertTrue(message = "회원 유형은 SURVEYEE 또는 SURVEYOR만 가능합니다.")
+    public boolean isValidUserRole() {
+        return userRole == UserRoleEnum.SURVEYEE || userRole == UserRoleEnum.SURVEYOR;
+    }
 }
