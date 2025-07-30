@@ -11,6 +11,7 @@ import com.example.surveyapp.domain.survey.controller.dto.response.PageSurveyRes
 import com.example.surveyapp.domain.survey.controller.dto.response.SurveyResponseDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.SurveyStatusResponseDto;
 import com.example.surveyapp.domain.survey.domain.model.enums.SurveyStatus;
+import com.example.surveyapp.domain.survey.facade.UserFacade;
 import com.example.surveyapp.global.response.exception.CustomException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,8 @@ public class SurveyServiceTest {
     @Mock
     private SurveyMapper surveyMapper;
 
+    @Mock
+    private UserFacade userFacade;
 
     @InjectMocks
     private SurveyService surveyService;
@@ -49,6 +52,7 @@ public class SurveyServiceTest {
     void 설문을_생성한다(){
         //Given
         User userMock = mock(User.class);
+        Long userId = 1L;
 
         String title = "테스트 설문 제목";
         String description = "테스트 설문 설명";
@@ -83,7 +87,7 @@ public class SurveyServiceTest {
                 );
 
         //When
-        SurveyResponseDto surveyResponseDto = surveyService.createSurvey(surveyCreateRequestDto, userMock);
+        SurveyResponseDto surveyResponseDto = surveyService.createSurvey(userId, surveyCreateRequestDto);
 
         //Then
         assertThat(surveyResponseDto.getTitle()).isEqualTo(title);
@@ -103,6 +107,7 @@ public class SurveyServiceTest {
     @Test
     void 참여자가_설문_출제_요청을_보낼때_에러가_발생한다(){
         User userMock = mock(User.class);
+        Long userId = 1L;
         String title = "테스트 설문 제목";
         String description = "테스트 설문 설명";
         Long maxSurveyee = 50L;
@@ -116,7 +121,7 @@ public class SurveyServiceTest {
         when(userMock.isUserRoleSurveyee()).thenReturn(true);
 
         //then
-        assertThatThrownBy(() -> surveyService.createSurvey(surveyCreateRequestDto, userMock))
+        assertThatThrownBy(() -> surveyService.createSurvey(userId, surveyCreateRequestDto))
                 .isInstanceOf(CustomException.class)
                 .hasMessageContaining("참여자 권한으로는 질문을 생성할 수 없습니다");
 
@@ -188,7 +193,7 @@ public class SurveyServiceTest {
     void 설문_출제자가_설문_상세정보를_수정한다(){
         //given
         User userMock = mock(User.class);
-
+        Long userId = 1L;
         Long id = 1L;
         String title = "테스트설문제목수정";
         String description = "테스트설문내용수정";
@@ -202,11 +207,11 @@ public class SurveyServiceTest {
 
         Survey surveyMock = mock(Survey.class);
 
-        when(surveyRepository.findByIdAndDeletedFalse(id)).thenReturn(Optional.of(surveyMock));
+        when(surveyRepository.findByIdAndIsDeletedFalse(id)).thenReturn(Optional.of(surveyMock));
 
         when(userMock.isUserRoleSurveyee()).thenReturn(false);
         when(surveyMock.isUserSurveyCreator(userMock)).thenReturn(true);
-        when(surveyMock.isSurveyStatusNotStarted()).thenReturn(true);
+        when(surveyMock.isNotStarted()).thenReturn(true);
 
         doNothing().when(surveyMapper).updateSurvey(updateRequestDto, surveyMock);
 
@@ -227,7 +232,7 @@ public class SurveyServiceTest {
         when(surveyMapper.toResponseDto(surveyMock)).thenReturn(expectedResponseDto);
 
         //when
-        SurveyResponseDto responseDto = surveyService.updateSurvey(userMock, 1L, updateRequestDto);
+        SurveyResponseDto responseDto = surveyService.updateSurvey(userId, 1L, updateRequestDto);
 
         //then
         assertThat(responseDto.getTitle()).isEqualTo(title);
@@ -235,11 +240,11 @@ public class SurveyServiceTest {
         assertThat(responseDto.getMaxSurveyee()).isEqualTo(maxSurveyee);
         assertThat(responseDto.getTotalPoint()).isEqualTo(maxSurveyee * pointPerPerson);
 
-        verify(surveyRepository).findByIdAndDeletedFalse(id);
+        verify(surveyRepository).findByIdAndIsDeletedFalse(id);
         verify(userMock).isUserRoleSurveyee();
         verify(surveyMock).isUserSurveyCreator(userMock);
         verify(userMock, never()).isUserRoleNotAdmin();
-        verify(surveyMock).isSurveyStatusNotStarted();
+        verify(surveyMock).isNotStarted();
         verify(surveyMapper).updateSurvey(updateRequestDto, surveyMock);
         verify(surveyRepository).save(surveyMock);
         verify(surveyMapper).toResponseDto(surveyMock);
@@ -250,7 +255,7 @@ public class SurveyServiceTest {
     void 관리자가_설문_상태를_변경한다(){
         //given
         User userMock = mock(User.class);
-
+        Long userId = 1L;
         Long id = 1L;
         SurveyStatus status = SurveyStatus.IN_PROGRESS;
 
@@ -258,7 +263,7 @@ public class SurveyServiceTest {
 
         Survey surveyMock = mock(Survey.class);
 
-        when(surveyRepository.findByIdAndDeletedFalse(id)).thenReturn(Optional.of(surveyMock));
+        when(surveyRepository.findByIdAndIsDeletedFalse(id)).thenReturn(Optional.of(surveyMock));
 
         when(userMock.isUserRoleSurveyee()).thenReturn(false);
         when(surveyMock.isUserSurveyCreator(userMock)).thenReturn(false);
@@ -271,13 +276,13 @@ public class SurveyServiceTest {
         when(surveyRepository.save(surveyMock)).thenReturn(surveyMock);
 
         //when
-        SurveyStatusResponseDto responseDto = surveyService.updateSurveyStatus(userMock, id, updateRequestDto);
+        SurveyStatusResponseDto responseDto = surveyService.updateSurveyStatus(userId, id, updateRequestDto);
 
         //then
 
         assertThat(responseDto.getStatus()).isEqualTo(status);
 
-        verify(surveyRepository).findByIdAndDeletedFalse(id);
+        verify(surveyRepository).findByIdAndIsDeletedFalse(id);
         verify(userMock).isUserRoleSurveyee();
         verify(userMock).isUserRoleNotAdmin();
         verify(surveyMock).isUserSurveyCreator(userMock);
@@ -291,7 +296,7 @@ public class SurveyServiceTest {
     void 관리자가_설문_상태를_진행중에서_진행전으로_변경할시_에러가_발생한다(){
         //given
         User userMock = mock(User.class);
-
+        Long userId = 1L;
         Long id = 1L;
         SurveyStatus status = SurveyStatus.NOT_STARTED;
 
@@ -299,7 +304,7 @@ public class SurveyServiceTest {
 
         Survey surveyMock = mock(Survey.class);
 
-        when(surveyRepository.findByIdAndDeletedFalse(id)).thenReturn(Optional.of(surveyMock));
+        when(surveyRepository.findByIdAndIsDeletedFalse(id)).thenReturn(Optional.of(surveyMock));
 
         when(userMock.isUserRoleSurveyee()).thenReturn(false);
         when(surveyMock.isUserSurveyCreator(userMock)).thenReturn(false);
@@ -312,11 +317,11 @@ public class SurveyServiceTest {
 
         //when
         //then
-        assertThatThrownBy(() -> surveyService.updateSurveyStatus(userMock, id, requestDto))
+        assertThatThrownBy(() -> surveyService.updateSurveyStatus(userId, id, requestDto))
                 .isInstanceOf(CustomException.class)
                 .hasMessageContaining("설문은 진행 전 상태로 변경할 수 없습니다");
 
-        verify(surveyRepository).findByIdAndDeletedFalse(id);
+        verify(surveyRepository).findByIdAndIsDeletedFalse(id);
         verify(userMock).isUserRoleSurveyee();
         verify(userMock).isUserRoleNotAdmin();
         verify(surveyMock).isUserSurveyCreator(userMock);
@@ -331,7 +336,7 @@ public class SurveyServiceTest {
     void 설문을_삭제한다(){
         //given
         User userMock = mock(User.class);
-
+        Long userId = 1L;
         Long id = 1L;
 
         Survey surveyMock = mock(Survey.class);
@@ -343,19 +348,19 @@ public class SurveyServiceTest {
 
         when(surveyMock.isDeleted()).thenReturn(false);
 
-        when(surveyMock.isSurveyStatusInProgress()).thenReturn(false);
+        when(surveyMock.isInProgress()).thenReturn(false);
 
         doNothing().when(surveyMock).deleteSurvey();
 
         //when
-        surveyService.deleteSurvey(userMock, id);
+        surveyService.deleteSurvey(userId, id);
 
         //then
         verify(surveyRepository).findById(id);
         verify(userMock).isUserRoleSurveyee();
         verify(surveyMock).isUserSurveyCreator(userMock);
         verify(surveyMock).isDeleted();
-        verify(surveyMock).isSurveyStatusInProgress();
+        verify(surveyMock).isInProgress();
         verify(surveyMock).deleteSurvey();
 
     }
