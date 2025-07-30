@@ -42,6 +42,13 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("주문목록을 조회 하였습니다.",orderList));
     }
 
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<OrderResponseDto>> readOneOrder(@PathVariable Long id) {
+        OrderResponseDto responseDto = orderService.readOneOrder(id);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("주문 단 건 조회가 완료되었습니다.",responseDto));
+    }
+
     @GetMapping("/my")
     @PreAuthorize("hasRole('SURVEYEE')")
     public ResponseEntity<ApiResponse<List<OrderResponseDto>>> readMyOrders(

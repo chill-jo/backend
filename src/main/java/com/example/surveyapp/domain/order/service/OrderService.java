@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -72,6 +73,15 @@ public class OrderService {
                 .toList();
     }
 
+    public OrderResponseDto readOneOrder(Long id) {
+
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ORDER));
+
+        return OrderResponseDto.from(order);
+
+    }
+
     public List<OrderResponseDto> readMyOrderList(int page, int size, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
@@ -95,4 +105,7 @@ public class OrderService {
         order.delete();
 
     }
+
+
+
 }
