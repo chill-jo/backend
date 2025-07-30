@@ -61,7 +61,7 @@ public class QuestionServiceTest {
         when(surveyRepository.findById(surveyId)).thenReturn(Optional.of(surveyMock));
         when(userMock.isUserRoleSurveyee()).thenReturn(false);
         when(surveyMock.isUserSurveyCreator(userMock)).thenReturn(true);
-        when(surveyMock.isSurveyStatusNotStarted()).thenReturn(true);
+        when(surveyMock.isNotStarted()).thenReturn(true);
 
         // question을 생성자로 만들어서 저장하고 있기 때문에
         // fixture를 전달해 줄 수 없어서 fixture generator 사용할 수 없다
@@ -75,7 +75,7 @@ public class QuestionServiceTest {
         });
 
         //when
-        QuestionResponseDto responseDto = questionService.createQuestion(userMock, surveyId, requestDto);
+        QuestionResponseDto responseDto = questionService.createQuestion(userId, surveyId, requestDto);
 
         //then
         verify(questionRepository).save(questionCaptor.capture());
@@ -90,7 +90,7 @@ public class QuestionServiceTest {
         verify(surveyRepository).findById(surveyId);
         verify(userMock).isUserRoleSurveyee();
         verify(surveyMock).isUserSurveyCreator(userMock);
-        verify(surveyMock).isSurveyStatusNotStarted();
+        verify(surveyMock).isNotStarted();
         verify(questionRepository).save(any(Question.class));
     }
 
@@ -113,7 +113,7 @@ public class QuestionServiceTest {
 
         when(questionMock.isFromSurvey(surveyMock)).thenReturn(true);
 
-        when(surveyMock.isSurveyStatusInProgress()).thenReturn(false);
+        when(surveyMock.isInProgress()).thenReturn(false);
         when(userMock.isUserRoleSurveyee()).thenReturn(false);
         when(surveyMock.isUserSurveyCreator(userMock)).thenReturn(true);
         when(questionMock.getId()).thenReturn(questionId);
@@ -122,7 +122,7 @@ public class QuestionServiceTest {
         when(questionMock.getType()).thenReturn(type);
 
         //when
-        QuestionResponseDto responseDto = questionService.getQuestion(userMock, surveyId, questionId);
+        QuestionResponseDto responseDto = questionService.getQuestion(userId, surveyId, questionId);
 
         //then
         assertThat(responseDto.getId()).isEqualTo(questionId);
@@ -133,7 +133,7 @@ public class QuestionServiceTest {
         verify(surveyRepository).findById(surveyId);
         verify(questionRepository).findById(questionId);
         verify(questionMock).isFromSurvey(surveyMock);
-        verify(surveyMock).isSurveyStatusInProgress();
+        verify(surveyMock).isInProgress();
         verify(userMock).isUserRoleSurveyee();
         verify(surveyMock).isUserSurveyCreator(userMock);
 
@@ -142,6 +142,7 @@ public class QuestionServiceTest {
     @Test
     void 관리자가_질문을_수정한다(){
         User userMock = mock(User.class);
+        Long userId = 1L;
         Long surveyId = 1L;
         Long questionId = 1L;
         Long number = 2L;
@@ -160,7 +161,7 @@ public class QuestionServiceTest {
         when(userMock.isUserRoleSurveyee()).thenReturn(false);
         when(surveyMock.isUserSurveyCreator(userMock)).thenReturn(false);
         when(userMock.isUserRoleNotAdmin()).thenReturn(false);
-        when(surveyMock.isSurveyStatusNotStarted()).thenReturn(true);
+        when(surveyMock.isNotStarted()).thenReturn(true);
 
 //
 //        doNothing().when(questionMock).changeNumber(requestDto.getNumber());
@@ -169,7 +170,7 @@ public class QuestionServiceTest {
         when(questionRepository.save(any(Question.class))).thenReturn(questionMock);
 
         //when
-        QuestionResponseDto responseDto = questionService.updateQuestion(userMock, surveyId, questionId, requestDto);
+        QuestionResponseDto responseDto = questionService.updateQuestion(userId, surveyId, questionId, requestDto);
 
         //then
 
@@ -181,12 +182,13 @@ public class QuestionServiceTest {
         verify(userMock).isUserRoleSurveyee();
         verify(userMock).isUserRoleNotAdmin();
         verify(surveyMock).isUserSurveyCreator(userMock);
-        verify(surveyMock).isSurveyStatusNotStarted();
+        verify(surveyMock).isNotStarted();
         verify(questionRepository).save(any(Question.class));
     }
 
     @Test
     void 해당설문_출제자가_질문을_삭제한다(){
+        Long userId = 1L;
         Long surveyId = 1L;
         Long questionId = 1L;
 
@@ -200,19 +202,19 @@ public class QuestionServiceTest {
         when(questionRepository.findById(questionId)).thenReturn(Optional.of(questionMock));
         when(userMock.isUserRoleSurveyee()).thenReturn(false);
         when(surveyMock.isUserSurveyCreator(userMock)).thenReturn(true);
-        when(surveyMock.isSurveyStatusNotStarted()).thenReturn(true);
+        when(surveyMock.isNotStarted()).thenReturn(true);
 
         doNothing().when(questionRepository).delete(questionMock);
 
         //when
-        questionService.deleteQuestion(userMock, surveyId, questionId);
+        questionService.deleteQuestion(userId, surveyId, questionId);
 
         //then
         verify(surveyRepository).findById(surveyId);
         verify(questionRepository).findById(questionId);
         verify(userMock).isUserRoleSurveyee();
         verify(surveyMock).isUserSurveyCreator(userMock);
-        verify(surveyMock).isSurveyStatusNotStarted();
+        verify(surveyMock).isNotStarted();
         verify(questionRepository).delete(questionMock);
     }
 }

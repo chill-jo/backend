@@ -39,7 +39,7 @@ public enum ErrorCode {
     INVALID_SURVEY_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "설문 상태를 변경할 수 없습니다."),
     SURVEY_CANNOT_BE_MODIFIED(HttpStatus.CONFLICT, "설문 상세정보를 수정할 수 없습니다."),
     SURVEYEE_NOT_ALLOWED(HttpStatus.UNAUTHORIZED, "참여자 권한으로는 요청이 불가합니다."),
-    SURVEY_NOT_STARTED(HttpStatus.FORBIDDEN, "설문이 시작 전일 때는 요청이 불가합니다."),
+    SURVEY_STARTED(HttpStatus.FORBIDDEN, "설문 참여가 시작되었을 때는 요청이 불가합니다."),
 
 
     //질문 에러
@@ -61,11 +61,14 @@ public enum ErrorCode {
     POINT_EARN_FAILED(HttpStatus.BAD_REQUEST,"포인트 지급에 실패했습니다."),
     POINT_MINIMUM_AMOUNT(HttpStatus.BAD_REQUEST,"포인트가 존재하지 않습니다."),
 
-    // admin
+    //회원 기초 정보 관련 에러
+    NOT_FOUNT_BASE_DATA(HttpStatus.NOT_FOUND, "기초 정보가 존재하지 않습니다."),
+    EXISTS_BASE_DATA(HttpStatus.NOT_FOUND, "기초 정보가 존재합니다."),
+    MISSING_BASE_DATA_CATEGORIES(HttpStatus.BAD_REQUEST, "모든 기초 정보 항목을 입력해주세요."),
 
+
+    //관리자
     NOT_ADMIN_USER_ERROR(HttpStatus.UNAUTHORIZED,"관리자 계정으로 로그인하세요."),
-
-
     IS_BLACKLIST(HttpStatus.BAD_REQUEST, "해당 회원은 이미 블랙입니다."),
     IS_NOT_BLACKLIST(HttpStatus.BAD_REQUEST, "해당 회원은 블랙이 아닙니다.");
 

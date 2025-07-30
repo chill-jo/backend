@@ -3,6 +3,8 @@ package com.example.surveyapp.domain.survey.domain.model.entity;
 import com.example.surveyapp.domain.survey.domain.model.enums.SurveyStatus;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.global.config.entity.BaseEntity;
+import com.example.surveyapp.global.response.exception.CustomException;
+import com.example.surveyapp.global.response.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,9 +23,13 @@ public class Survey extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // 직접 참조
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    // 간접 참조
+//    private Long userId;
 
     @Column(nullable = false, length = 100)
     private String title;
@@ -50,18 +56,43 @@ public class Survey extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private SurveyStatus status;
 
-    @Column(nullable = false)
-    private boolean deleted;
+    @Column(name= "is_deleted", nullable = false)
+    private boolean isDeleted;
 
-    public void deleteSurvey(){ this.deleted = true; }
-    public void changeSurveyStatus(SurveyStatus newStatus) {this.status = newStatus;}
-    public void changeTotalPoint(Long totalPoint){ this.totalPoint = totalPoint; }
-    public boolean isSurveyStatusNotStarted(){
-        return this.status.equals(SurveyStatus.NOT_STARTED);
+    public void deleteSurvey(){
+        this.isDeleted = true;
     }
-    public boolean isSurveyStatusInProgress(){
-        return this.status.equals(SurveyStatus.IN_PROGRESS);
+
+    public void changeSurveyStatus(SurveyStatus newStatus) {
+        validateStatus(newStatus);
+        this.status = newStatus;
     }
+
+    private void validateStatus(SurveyStatus newStatus){
+        if(status.equals(newStatus)){
+            throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION);
+        }
+        if(newStatus.isNotStarted()){
+            throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION);
+        }
+        if(status.isDone() && newStatus.isInProgress()){
+            throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION);
+        }
+        if(!status.isInProgress() && newStatus.isPaused()){
+            throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION);
+        }
+        if(status.isNotStarted() && newStatus.isDone()){
+            throw new CustomException(ErrorCode.INVALID_SURVEY_STATUS_TRANSITION);
+        }
+    }
+
+    public boolean isNotStarted(){
+        return status.equals(SurveyStatus.NOT_STARTED);
+    }
+    public boolean isInProgress(){
+        return status.isInProgress();
+    }
+
     public boolean isUserSurveyCreator(User user){
         return this.user.equals(user);
     }
@@ -77,7 +108,7 @@ public class Survey extends BaseEntity {
         this.deadline = deadline;
         this.expectedTime = expectedTime;
         this.status = SurveyStatus.NOT_STARTED;
-        this.deleted = false;
+        this.isDeleted = false;
     }
 
     public void update(String title, String description, Long maxSurveyee, Long pointPerPerson,
@@ -95,7 +126,5 @@ public class Survey extends BaseEntity {
                             Long pointPerPerson, LocalDateTime deadline, Long expectedTime) {
         return new Survey(user, title, description, maxSurveyee, pointPerPerson, deadline, expectedTime);
     }
-
-
 
 }
