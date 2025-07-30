@@ -5,9 +5,12 @@ import com.example.surveyapp.domain.survey.controller.dto.request.QuestionUpdate
 import com.example.surveyapp.domain.survey.controller.dto.response.PageQuestionResponseDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.PageSurveyResponseDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.QuestionResponseDto;
+import com.example.surveyapp.domain.survey.domain.model.entity.Options;
 import com.example.surveyapp.domain.survey.domain.model.entity.Question;
 import com.example.surveyapp.domain.survey.domain.model.entity.Survey;
+import com.example.surveyapp.domain.survey.domain.model.enums.QuestionType;
 import com.example.surveyapp.domain.survey.domain.model.enums.SurveyStatus;
+import com.example.surveyapp.domain.survey.domain.repository.OptionsRepository;
 import com.example.surveyapp.domain.survey.domain.repository.QuestionRepository;
 import com.example.surveyapp.domain.survey.domain.repository.SurveyRepository;
 import com.example.surveyapp.domain.survey.facade.UserFacade;
@@ -23,6 +26,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class QuestionService {
@@ -30,14 +35,15 @@ public class QuestionService {
     private final QuestionRepository questionRepository;
     private final SurveyRepository surveyRepository;
     private final UserFacade userFacade;
+    private final OptionsRepository optionsRepository;
 
+    @Transactional
     public QuestionResponseDto createQuestion(Long userId, Long surveyId, QuestionCreateRequestDto requestDto){
 
         User user = userFacade.findUser(userId);
         Survey survey = surveyRepository.findByIdAndIsDeletedFalse(surveyId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
 
-        //isCurrentUserSurveyee(user, "참여자 권한으로는 질문을 생성할 수 없습니다.");
         currentUserMatchesSurveyCreatorOrAdmin(user, survey);
         isSurveyNotStarted(survey);
 
@@ -104,6 +110,7 @@ public class QuestionService {
 
     }
 
+    @Transactional
     public QuestionResponseDto updateQuestion(Long userId, Long surveyId, Long questionId, QuestionUpdateRequestDto requestDto){
 
         User user = userFacade.findUser(userId);
@@ -113,7 +120,6 @@ public class QuestionService {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
 
-        isCurrentUserSurveyee(user);
         currentUserMatchesSurveyCreatorOrAdmin(user, survey);
         isSurveyNotStarted(survey);
         isQuestionFromSurvey(survey, question);
@@ -124,13 +130,13 @@ public class QuestionService {
         if(requestDto.getContent() != null){
             question.changeContent(requestDto.getContent());
         }
-        //주관식 -> 선택형 or 선택형 -> 주관식으로 바꿨을 때 선택지가 필수적으로 추가되거나 삭제되어야하는데
-        //어떻게 하지?
         if(requestDto.getType() != null){
             question.changeQuestionType(requestDto.getType());
         }
 
-        questionRepository.save(question);
+        if(question.isSubjective()){
+            optionsRepository.deleteAllByQuestion(question);
+        }
 
         return new QuestionResponseDto(question.getId(), question.getNumber(), question.getContent(), question.getType());
 
@@ -146,10 +152,11 @@ public class QuestionService {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
 
-        isCurrentUserSurveyee(user);
         currentUserMatchesSurveyCreatorOrAdmin(user, survey);
         isSurveyNotStarted(survey);
         isQuestionFromSurvey(survey, question);
+
+        optionsRepository.deleteAllByQuestion(question);
 
         questionRepository.delete(question);
     }
