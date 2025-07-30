@@ -52,6 +52,9 @@ public enum ErrorCode {
     OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 선택지입니다."),
 
     //설문 응답 등록 에러
+    SURVEY_ALREADY_PARTICIPATED(HttpStatus.BAD_REQUEST, "이미 설문에 응답하셨습니다."),
+    SURVEY_NOT_IN_PROGRESS(HttpStatus.BAD_REQUEST, "진행 중이 아닌 설문에는 참여할 수 없습니다."),
+
 
 
     //포인트 에러
