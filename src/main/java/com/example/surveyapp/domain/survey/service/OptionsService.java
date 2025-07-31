@@ -6,14 +6,11 @@ import com.example.surveyapp.domain.survey.controller.dto.response.OptionRespons
 import com.example.surveyapp.domain.survey.domain.model.entity.Options;
 import com.example.surveyapp.domain.survey.domain.model.entity.Question;
 import com.example.surveyapp.domain.survey.domain.model.entity.Survey;
-import com.example.surveyapp.domain.survey.domain.model.enums.SurveyStatus;
 import com.example.surveyapp.domain.survey.domain.repository.OptionsRepository;
 import com.example.surveyapp.domain.survey.domain.repository.QuestionRepository;
 import com.example.surveyapp.domain.survey.domain.repository.SurveyRepository;
 import com.example.surveyapp.domain.survey.facade.UserFacade;
 import com.example.surveyapp.domain.user.domain.model.User;
-import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
-import com.example.surveyapp.domain.user.domain.repository.UserRepository;
 import com.example.surveyapp.global.response.exception.CustomException;
 import com.example.surveyapp.global.response.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -28,55 +25,17 @@ import java.util.stream.Collectors;
 public class OptionsService {
 
     private final OptionsRepository optionsRepository;
-    private final UserRepository userRepository;
     private final SurveyRepository surveyRepository;
     private final QuestionRepository questionRepository;
     private final UserFacade userFacade;
 
-    //참여자 권한 막기(생성, 수정, 삭제, 진행중아닌 설문선택지조회)
-    public void isCurrentUserSurveyee(User user){
-
-        if(user.isUserRoleSurveyee()){
-            throw new CustomException(ErrorCode.SURVEYEE_NOT_ALLOWED);
-        }
-    }
-
-    //해당 설문 출제자가 아니거나 관리자가 아닐 시 예외
-    public void currentUserMatchesSurveyCreator(User user, Survey survey){
-
-        if(!survey.isUserSurveyCreator(user) && user.isUserRoleNotAdmin()){
-            throw new CustomException(ErrorCode.NOT_SURVEY_CREATOR);
-        }
-    }
-
-    //설문 상태가 진행 전이 아닐 때 생성, 수정, 삭제 시 예외
-    public void isSurveyNotStarted(Survey survey){
-        if(!survey.isNotStarted()){
-            throw new CustomException(ErrorCode.SURVEY_STARTED);
-        }
-    }
-
-    //설문에 포함된 질문이 아닐 때 예외
-    public void isQuestionFromSurvey(Survey survey, Question question){
-        if(!question.isFromSurvey(survey)){
-            throw new CustomException(ErrorCode.QUESTION_NOT_FROM_SURVEY);
-        }
-    }
-
-    //질문에 포함된 선택지가 아닐 때 예외
-    public void isOptionFromQuestion(Question question, Options option){
-        if(!option.isFromQuestion(question)){
-            throw new CustomException(ErrorCode.OPTIONS_NOT_FROM_SURVEY);
-        }
-    }
-
+    @Transactional
     public OptionResponseDto createOption(Long userId, Long surveyId, Long questionId, OptionCreateRequestDto requestDto){
 
         User user = userFacade.findUser(userId);
 
-        Survey survey = surveyRepository.findById(surveyId)
+        Survey survey = surveyRepository.findByIdAndIsDeletedFalse(surveyId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
-        if(survey.isDeleted()){ throw new CustomException(ErrorCode.SURVEY_ALREADY_DELETED); }
 
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
@@ -85,7 +44,7 @@ public class OptionsService {
             throw new CustomException(ErrorCode.OPTION_INVALID_FOR_SUBJECTIVE_QUESTION);
         }
 
-        currentUserMatchesSurveyCreator(user, survey);
+        currentUserMatchesSurveyCreatorOrAdmin(user, survey);
         isSurveyNotStarted(survey);
         isQuestionFromSurvey(survey, question);
 
@@ -111,7 +70,7 @@ public class OptionsService {
         //진행 중 설문이 아닐 때는 참여자, 해당 설문 출제자가 아닌 출제자는 조회 불가.
         if(!survey.isInProgress()){
             isCurrentUserSurveyee(user);
-            currentUserMatchesSurveyCreator(user, survey);
+            currentUserMatchesSurveyCreatorOrAdmin(user, survey);
         }
 
         List<Options> optionsList = optionsRepository.findAllByQuestionId(questionId);
@@ -123,19 +82,19 @@ public class OptionsService {
         return dtoList;
     }
 
+    @Transactional
     public OptionResponseDto updateOption(Long userId, Long surveyId, Long questionId, Long optionId, OptionUpdateRequestDto requestDto){
 
         User user = userFacade.findUser(userId);
 
-        Survey survey = surveyRepository.findById(surveyId)
+        Survey survey = surveyRepository.findByIdAndIsDeletedFalse(surveyId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
-        if(survey.isDeleted()){ throw new CustomException(ErrorCode.SURVEY_ALREADY_DELETED); }
 
         Question question = questionRepository.findById(questionId).orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
 
         Options option = optionsRepository.findById(optionId).orElseThrow(() -> new CustomException(ErrorCode.OPTION_NOT_FOUND));
 
-        currentUserMatchesSurveyCreator(user, survey);
+        currentUserMatchesSurveyCreatorOrAdmin(user, survey);
         isSurveyNotStarted(survey);
         isQuestionFromSurvey(survey, question);
         isOptionFromQuestion(question, option);
@@ -146,8 +105,6 @@ public class OptionsService {
         if(requestDto.getContent() != null){
             option.changeContent(requestDto.getContent());
         }
-
-        optionsRepository.save(option);
 
         return new OptionResponseDto(option.getId(), option.getNumber(), option.getContent());
     }
@@ -166,13 +123,49 @@ public class OptionsService {
         Options option = optionsRepository.findById(optionId)
                 .orElseThrow(() -> new CustomException(ErrorCode.OPTION_NOT_FOUND));
 
-        isCurrentUserSurveyee(user);
-        currentUserMatchesSurveyCreator(user, survey);
+        currentUserMatchesSurveyCreatorOrAdmin(user, survey);
         isSurveyNotStarted(survey);
         isQuestionFromSurvey(survey, question);
         isOptionFromQuestion(question, option);
 
         optionsRepository.delete(option);
 
+    }
+
+    //참여자 권한 막기(생성, 수정, 삭제, 진행중아닌 설문선택지조회)
+    public void isCurrentUserSurveyee(User user){
+
+        if(user.isUserRoleSurveyee()){
+            throw new CustomException(ErrorCode.SURVEYEE_NOT_ALLOWED);
+        }
+    }
+
+    //해당 설문 출제자가 아니거나 관리자가 아닐 시 예외
+    public void currentUserMatchesSurveyCreatorOrAdmin(User user, Survey survey){
+
+        if(!survey.isUserSurveyCreator(user) && user.isUserRoleNotAdmin()){
+            throw new CustomException(ErrorCode.NOT_SURVEY_CREATOR);
+        }
+    }
+
+    //설문 상태가 진행 전이 아닐 때 생성, 수정, 삭제 시 예외
+    public void isSurveyNotStarted(Survey survey){
+        if(!survey.isNotStarted()){
+            throw new CustomException(ErrorCode.SURVEY_STARTED);
+        }
+    }
+
+    //설문에 포함된 질문이 아닐 때 예외
+    public void isQuestionFromSurvey(Survey survey, Question question){
+        if(!question.isFromSurvey(survey)){
+            throw new CustomException(ErrorCode.QUESTION_NOT_FROM_SURVEY);
+        }
+    }
+
+    //질문에 포함된 선택지가 아닐 때 예외
+    public void isOptionFromQuestion(Question question, Options option){
+        if(!option.isFromQuestion(question)){
+            throw new CustomException(ErrorCode.OPTIONS_NOT_FROM_SURVEY);
+        }
     }
 }
