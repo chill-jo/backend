@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -72,12 +73,14 @@ public class UserController {
 
 
     // 참여자 기초 정보 등록 선택지 보기
+    @PreAuthorize("hasRole('SURVEYEE')")
     @GetMapping("/surveyee/base-data-info")
     public ResponseEntity<ApiResponse<BaseDataInfoResponseDto>> getBaseDataInfo() {
         return ResponseEntity.ok(ApiResponse.success("선택지 중 해당하는 번호를 선택하여 입력해주세요.", userService.getBaseDataInfo()));
     }
 
     // 참여자 기초 정보 C,U
+    @PreAuthorize("hasRole('SURVEYEE')")
     @PostMapping("/surveyee/base-datas")
     public ResponseEntity<ApiResponse<Void>> saveBaseDatas(
             @AuthenticationPrincipal CustomUserDetails user,
@@ -88,6 +91,7 @@ public class UserController {
     }
 
     // 참여자 기초 정보 R
+    @PreAuthorize("hasRole('SURVEYEE')")
     @GetMapping("/surveyee/base-datas")
     public ResponseEntity<ApiResponse<BaseDataListResponseDto>> getBaseDatas(@AuthenticationPrincipal CustomUserDetails user) {
         return ResponseEntity.ok(ApiResponse.success("기초 정보를 조회하였습니다.", userService.getBaseDatas(user.getId())));
