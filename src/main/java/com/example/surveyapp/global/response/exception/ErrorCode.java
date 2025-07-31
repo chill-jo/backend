@@ -31,7 +31,8 @@ public enum ErrorCode {
     NOT_SURVEYEE_USER(HttpStatus.UNAUTHORIZED,"참여자 계정만 주문이 가능합니다." ),
     NOT_YOUR_ACCOUNT(HttpStatus.BAD_REQUEST,"본인이 아닌 다른 계정 조회는 불가능합니다." ),
     NOT_FOUND_ORDER(HttpStatus.UNAUTHORIZED,"해당 주문을 찾을 수 없습니다." ),
-
+    NOT_YOUR_ORDER(HttpStatus.UNAUTHORIZED,"본인 주문만 확인 할 수 있습니다." ),
+    NOT_SAME_ORDER_USER(HttpStatus.BAD_REQUEST,"본인이 주문한 주문만 삭제할 수 있습니다." ),
     //설문 에러
     SURVEY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 설문입니다."),
     SURVEY_ALREADY_DELETED(HttpStatus.GONE, "이미 삭제된 설문입니다."),
@@ -39,7 +40,7 @@ public enum ErrorCode {
     INVALID_SURVEY_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "설문 상태를 변경할 수 없습니다."),
     SURVEY_CANNOT_BE_MODIFIED(HttpStatus.CONFLICT, "설문 상세정보를 수정할 수 없습니다."),
     SURVEYEE_NOT_ALLOWED(HttpStatus.UNAUTHORIZED, "참여자 권한으로는 요청이 불가합니다."),
-    SURVEY_NOT_STARTED(HttpStatus.FORBIDDEN, "설문이 시작 전일 때는 요청이 불가합니다."),
+    SURVEY_STARTED(HttpStatus.FORBIDDEN, "설문 참여가 시작되었을 때는 요청이 불가합니다."),
 
 
     //질문 에러
@@ -50,8 +51,12 @@ public enum ErrorCode {
 
     //선택지 에러
     OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 선택지입니다."),
+    OPTION_INVALID_FOR_SUBJECTIVE_QUESTION(HttpStatus.BAD_REQUEST, "주관식 질문에는 선택지를 생성할 수 없습니다."),
 
     //설문 응답 등록 에러
+    SURVEY_ALREADY_PARTICIPATED(HttpStatus.BAD_REQUEST, "이미 설문에 응답하셨습니다."),
+    SURVEY_NOT_IN_PROGRESS(HttpStatus.BAD_REQUEST, "진행 중이 아닌 설문에는 참여할 수 없습니다."),
+
 
 
     //포인트 에러
@@ -61,11 +66,14 @@ public enum ErrorCode {
     POINT_EARN_FAILED(HttpStatus.BAD_REQUEST,"포인트 지급에 실패했습니다."),
     POINT_MINIMUM_AMOUNT(HttpStatus.BAD_REQUEST,"포인트가 존재하지 않습니다."),
 
-    // admin
+    //회원 기초 정보 관련 에러
+    NOT_FOUNT_BASE_DATA(HttpStatus.NOT_FOUND, "기초 정보가 존재하지 않습니다."),
+    EXISTS_BASE_DATA(HttpStatus.NOT_FOUND, "기초 정보가 존재합니다."),
+    MISSING_BASE_DATA_CATEGORIES(HttpStatus.BAD_REQUEST, "모든 기초 정보 항목을 입력해주세요."),
 
+
+    //관리자
     NOT_ADMIN_USER_ERROR(HttpStatus.UNAUTHORIZED,"관리자 계정으로 로그인하세요."),
-
-
     IS_BLACKLIST(HttpStatus.BAD_REQUEST, "해당 회원은 이미 블랙입니다."),
     IS_NOT_BLACKLIST(HttpStatus.BAD_REQUEST, "해당 회원은 블랙이 아닙니다.");
 

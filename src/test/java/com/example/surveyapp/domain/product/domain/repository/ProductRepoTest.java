@@ -1,12 +1,17 @@
 package com.example.surveyapp.domain.product.domain.repository;
 
-import com.example.surveyapp.config.DataJpaTestBase;
+import com.example.surveyapp.config.testbase.DataJpaTestBase;
+import com.example.surveyapp.config.generator.ProductFixtureGenerator;
+import com.example.surveyapp.domain.product.controller.dto.ProductCreateResponseDto;
 import com.example.surveyapp.domain.product.domain.model.Product;
 import com.example.surveyapp.domain.product.domain.model.Status;
 import com.example.surveyapp.domain.product.domain.model.repository.ProductRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class ProductRepoTest extends DataJpaTestBase {
     @Autowired
@@ -15,17 +20,12 @@ public class ProductRepoTest extends DataJpaTestBase {
     @Test
     public void 상품_생성() {
         // given
-        String title = "title";
-        int price = 1000;
-        String content = "content";
-        Status status = Status.ON_SALE;
-
-        Product product = Product.create(title, price, content, status);
-
+        Product product = Product.create("상품", 2500L, "설명", Status.ON_SALE);
         // when
-        productRepository.save(product);
+        Product saved = productRepository.save(product);
 
         // then
-        Assertions.assertThat(product.getCreatedAt()).isNotNull();
+        assertThat(saved.getId()).isNotNull();
+        assertThat(saved.getContent()).isNotNull();
     }
 }

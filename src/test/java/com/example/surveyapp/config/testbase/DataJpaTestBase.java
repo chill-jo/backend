@@ -1,4 +1,4 @@
-package com.example.surveyapp.config;
+package com.example.surveyapp.config.testbase;
 
 import com.example.surveyapp.global.config.JpaConfig;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;

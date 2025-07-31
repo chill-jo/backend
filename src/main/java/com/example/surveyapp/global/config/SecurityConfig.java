@@ -23,7 +23,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-
     private final JwtFilter jwtFilter;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final CustomAccessDeniedHandler accessDeniedHandler;
@@ -32,7 +31,6 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -53,10 +51,13 @@ public class SecurityConfig {
                         ).permitAll()
 
                         // 관리자 권한 필요
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole(UserRoleEnum.ADMIN.getRole())
 
-                        // 유저 권한 필요
-                        .requestMatchers("/api/user/**").hasRole("USER")
+                        // 유저 권한 필요 (설문 참여자, 출제자 모두 허용)
+                        .requestMatchers("/api/user/**").hasAnyRole(
+                                UserRoleEnum.SURVEYEE.getRole(),
+                                UserRoleEnum.SURVEYOR.getRole()
+                        )
 
                         // 나머지 인증 필요
                         .anyRequest().authenticated()
@@ -66,6 +67,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint(authenticationEntryPoint)   // 401 인증 실패
                         .accessDeniedHandler(accessDeniedHandler)             // 403 인가 실패
                 )
+
 
                 //UsernamePasswordAuthenticationFilter : 스프링 시큐리티에서 기본적으로
                 // username, password와 같은 입력값을 이용해서 인증을 시도하고, 인증된 사용자 정보를

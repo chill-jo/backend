@@ -1,5 +1,9 @@
 package com.example.surveyapp.domain.user.controller.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -33,4 +37,11 @@ public class RegisterRequestDto {
     @Size(min = 1, max = 10, message = "별명은 1~10자여야 합니다.")
     private String nickname;
 
+    @NotNull(message = "회원 유형은 필수입니다.")
+    private UserRoleEnum userRole;
+
+    @AssertTrue(message = "회원 유형은 SURVEYEE 또는 SURVEYOR만 가능합니다.")
+    public boolean isValidUserRole() {
+        return userRole == UserRoleEnum.SURVEYEE || userRole == UserRoleEnum.SURVEYOR;
+    }
 }

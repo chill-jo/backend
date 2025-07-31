@@ -12,9 +12,4 @@ public class OrderCreateRequestDto {
     @NotNull
     private Long productId;
 
-    @NotNull
-    private String title;
-
-    @NotNull
-    private int price;
  }

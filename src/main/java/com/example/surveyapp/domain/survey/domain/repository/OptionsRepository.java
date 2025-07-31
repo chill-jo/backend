@@ -2,6 +2,7 @@ package com.example.surveyapp.domain.survey.domain.repository;
 
 import com.example.surveyapp.domain.survey.controller.dto.response.OptionResponseDto;
 import com.example.surveyapp.domain.survey.domain.model.entity.Options;
+import com.example.surveyapp.domain.survey.domain.model.entity.Question;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,4 +27,5 @@ public interface OptionsRepository extends JpaRepository<Options, Long> {
     """)
     List<OptionResponseDto> findAllByQuestionIdOrderByNumberAsc(@Param("questionId") Long questionId);
 
+    void deleteAllByQuestion(Question question);
 }

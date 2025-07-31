@@ -1,17 +1,18 @@
 package com.example.surveyapp.domain.survey.service;
 
 import static org.assertj.core.api.Assertions.*;
-import com.example.surveyapp.config.QuestionFixtureGenerator;
 import com.example.surveyapp.domain.survey.controller.dto.request.QuestionCreateRequestDto;
 import com.example.surveyapp.domain.survey.controller.dto.request.QuestionUpdateRequestDto;
+import com.example.surveyapp.domain.survey.controller.dto.response.PageQuestionResponseDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.QuestionResponseDto;
 import com.example.surveyapp.domain.survey.domain.model.entity.Question;
 import com.example.surveyapp.domain.survey.domain.model.entity.Survey;
 import com.example.surveyapp.domain.survey.domain.model.enums.QuestionType;
+import com.example.surveyapp.domain.survey.domain.repository.OptionsRepository;
 import com.example.surveyapp.domain.survey.domain.repository.QuestionRepository;
 import com.example.surveyapp.domain.survey.domain.repository.SurveyRepository;
+import com.example.surveyapp.domain.survey.facade.UserFacade;
 import com.example.surveyapp.domain.user.domain.model.User;
-import com.example.surveyapp.domain.user.domain.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,11 +21,14 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import javax.swing.text.html.Option;
-import java.sql.Ref;
 import java.util.Optional;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 
@@ -35,7 +39,10 @@ public class QuestionServiceTest {
     private QuestionRepository questionRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private OptionsRepository optionsRepository;
+
+    @Mock
+    private UserFacade userFacade;
 
     @Mock
     private SurveyRepository surveyRepository;
@@ -58,10 +65,11 @@ public class QuestionServiceTest {
 
         QuestionCreateRequestDto requestDto = new QuestionCreateRequestDto(number, content, type);
 
-        when(surveyRepository.findById(surveyId)).thenReturn(Optional.of(surveyMock));
-        when(userMock.isUserRoleSurveyee()).thenReturn(false);
+        when(userFacade.findUser(userId)).thenReturn(userMock);
+        when(surveyRepository.findByIdAndIsDeletedFalse(surveyId)).thenReturn(Optional.of(surveyMock));
+
         when(surveyMock.isUserSurveyCreator(userMock)).thenReturn(true);
-        when(surveyMock.isSurveyStatusNotStarted()).thenReturn(true);
+        when(surveyMock.isNotStarted()).thenReturn(true);
 
         // question을 생성자로 만들어서 저장하고 있기 때문에
         // fixture를 전달해 줄 수 없어서 fixture generator 사용할 수 없다
@@ -75,7 +83,7 @@ public class QuestionServiceTest {
         });
 
         //when
-        QuestionResponseDto responseDto = questionService.createQuestion(userMock, surveyId, requestDto);
+        QuestionResponseDto responseDto = questionService.createQuestion(userId, surveyId, requestDto);
 
         //then
         verify(questionRepository).save(questionCaptor.capture());
@@ -87,10 +95,9 @@ public class QuestionServiceTest {
         assertThat(responseDto.getNumber()).isEqualTo(number);
         assertThat(responseDto.getContent()).isEqualTo(content);
         assertThat(responseDto.getType()).isEqualTo(type);
-        verify(surveyRepository).findById(surveyId);
-        verify(userMock).isUserRoleSurveyee();
+        verify(surveyRepository).findByIdAndIsDeletedFalse(surveyId);
         verify(surveyMock).isUserSurveyCreator(userMock);
-        verify(surveyMock).isSurveyStatusNotStarted();
+        verify(surveyMock).isNotStarted();
         verify(questionRepository).save(any(Question.class));
     }
 
@@ -108,13 +115,14 @@ public class QuestionServiceTest {
         User userMock = mock(User.class);
         Question questionMock = mock(Question.class);
 
-        when(surveyRepository.findById(surveyId)).thenReturn(Optional.of(surveyMock));
+        when(userFacade.findUser(userId)).thenReturn(userMock);
+
+        when(surveyRepository.findByIdAndIsDeletedFalse(surveyId)).thenReturn(Optional.of(surveyMock));
         when(questionRepository.findById(questionId)).thenReturn(Optional.of(questionMock));
 
         when(questionMock.isFromSurvey(surveyMock)).thenReturn(true);
 
-        when(surveyMock.isSurveyStatusInProgress()).thenReturn(false);
-        when(userMock.isUserRoleSurveyee()).thenReturn(false);
+        when(surveyMock.isInProgress()).thenReturn(false);
         when(surveyMock.isUserSurveyCreator(userMock)).thenReturn(true);
         when(questionMock.getId()).thenReturn(questionId);
         when(questionMock.getNumber()).thenReturn(number);
@@ -122,7 +130,7 @@ public class QuestionServiceTest {
         when(questionMock.getType()).thenReturn(type);
 
         //when
-        QuestionResponseDto responseDto = questionService.getQuestion(userMock, surveyId, questionId);
+        QuestionResponseDto responseDto = questionService.getQuestion(userId, surveyId, questionId);
 
         //then
         assertThat(responseDto.getId()).isEqualTo(questionId);
@@ -130,89 +138,154 @@ public class QuestionServiceTest {
         assertThat(responseDto.getContent()).isEqualTo(content);
         assertThat(responseDto.getType()).isEqualTo(type);
 
-        verify(surveyRepository).findById(surveyId);
+        verify(surveyRepository).findByIdAndIsDeletedFalse(surveyId);
         verify(questionRepository).findById(questionId);
         verify(questionMock).isFromSurvey(surveyMock);
-        verify(surveyMock).isSurveyStatusInProgress();
-        verify(userMock).isUserRoleSurveyee();
+        verify(surveyMock).isInProgress();
         verify(surveyMock).isUserSurveyCreator(userMock);
 
     }
 
     @Test
-    void 관리자가_질문을_수정한다(){
+    void 질문_목록을_조회한다(){
+        Long userId = 1L;
+        Long surveyId = 1L;
+        Long questionId = 1L;
+        Long number = 1L;
+        String content = "테스트질문내용";
+        QuestionType type = QuestionType.SINGLE_CHOICE;
+        int page = 0;
+        int size = 2;
+        Pageable pageable = PageRequest.of(page, size);
+
+        Survey surveyMock = mock(Survey.class);
         User userMock = mock(User.class);
+        Question questionMock1 = mock(Question.class);
+        Question questionMock2 = mock(Question.class);
+
+        List<Question> questionMockList = List.of(questionMock1, questionMock2);
+        Page<Question> questionMockPage = new PageImpl<>(questionMockList, pageable, questionMockList.size());
+        when(userFacade.findUser(userId)).thenReturn(userMock);
+
+        when(surveyRepository.findByIdAndIsDeletedFalse(surveyId)).thenReturn(Optional.of(surveyMock));
+        when(surveyMock.isInProgress()).thenReturn(true);
+
+        when(questionRepository.findAllBySurveyId(surveyId, pageable)).thenReturn(questionMockPage);
+
+        when(questionMock1.getId()).thenReturn(1L);
+        when(questionMock1.getNumber()).thenReturn(1L);
+        when(questionMock1.getContent()).thenReturn("테스트질문내용1");
+        when(questionMock1.getType()).thenReturn(QuestionType.SINGLE_CHOICE);
+        when(questionMock2.getId()).thenReturn(2L);
+        when(questionMock2.getNumber()).thenReturn(2L);
+        when(questionMock2.getContent()).thenReturn("테스트질문내용2");
+        when(questionMock2.getType()).thenReturn(QuestionType.SUBJECTIVE);
+
+
+        //when
+        PageQuestionResponseDto<QuestionResponseDto> pageQuestionResponseDto = questionService.getQuestions(page, size, userId, surveyId);
+
+        //then
+        assertThat(pageQuestionResponseDto).isNotNull();
+        assertThat(pageQuestionResponseDto.getContent()).hasSize(2);
+        assertThat(pageQuestionResponseDto.getContent().get(0).getId())
+                .isEqualTo(questionMock1.getId());
+        assertThat(pageQuestionResponseDto.getContent().get(1).getId())
+                .isEqualTo(questionMock2.getId());
+        assertThat(pageQuestionResponseDto.getTotalElements()).isEqualTo(questionMockList.size());
+
+        verify(userFacade).findUser(userId);
+        verify(surveyRepository).findByIdAndIsDeletedFalse(surveyId);
+        verify(surveyMock).isInProgress();
+        verify(questionRepository).findAllBySurveyId(surveyId, pageable);
+        verify(questionMock1).getNumber();
+        verify(questionMock2).getContent();
+
+
+    }
+
+    @Test
+    void 관리자가_질문을_주관식으로_수정한다(){
+
+        Long userId = 1L;
         Long surveyId = 1L;
         Long questionId = 1L;
         Long number = 2L;
         String content = "테스트질문내용수정";
+        QuestionType type = QuestionType.SUBJECTIVE;
 
+        User userMock = mock(User.class);
         Survey surveyMock = mock(Survey.class);
-
-        Question questionMock = QuestionFixtureGenerator.generateQuestionFixture();
+        Question questionMock = mock(Question.class);
         ReflectionTestUtils.setField(questionMock, "survey", surveyMock);
 
-        QuestionUpdateRequestDto requestDto = new QuestionUpdateRequestDto(number, content, null);
+        QuestionUpdateRequestDto requestDto = new QuestionUpdateRequestDto(number, content, type);
 
-        when(surveyRepository.findById(surveyId)).thenReturn(Optional.of(surveyMock));
+        when(userFacade.findUser(userId)).thenReturn(userMock);
+        when(surveyRepository.findByIdAndIsDeletedFalse(surveyId)).thenReturn(Optional.of(surveyMock));
         when(questionRepository.findById(questionId)).thenReturn(Optional.of(questionMock));
 
-        when(userMock.isUserRoleSurveyee()).thenReturn(false);
         when(surveyMock.isUserSurveyCreator(userMock)).thenReturn(false);
         when(userMock.isUserRoleNotAdmin()).thenReturn(false);
-        when(surveyMock.isSurveyStatusNotStarted()).thenReturn(true);
+        when(surveyMock.isNotStarted()).thenReturn(true);
+        when(questionMock.isSubjective()).thenReturn(true);
+        when(questionMock.isFromSurvey(surveyMock)).thenReturn(true);
 
-//
-//        doNothing().when(questionMock).changeNumber(requestDto.getNumber());
-//        doNothing().when(questionMock).changeContent(requestDto.getContent());
-
-        when(questionRepository.save(any(Question.class))).thenReturn(questionMock);
+        when(questionMock.getId()).thenReturn(questionId);
+        when(questionMock.getNumber()).thenReturn(number);
+        when(questionMock.getContent()).thenReturn(content);
+        when(questionMock.getType()).thenReturn(type);
 
         //when
-        QuestionResponseDto responseDto = questionService.updateQuestion(userMock, surveyId, questionId, requestDto);
+        QuestionResponseDto responseDto = questionService.updateQuestion(userId, surveyId, questionId, requestDto);
 
         //then
+        verify(surveyRepository).findByIdAndIsDeletedFalse(surveyId);
+        verify(questionRepository).findById(questionId);
+        verify(userMock).isUserRoleNotAdmin();
+        verify(surveyMock).isUserSurveyCreator(userMock);
+        verify(surveyMock).isNotStarted();
+        verify(questionMock).changeNumber(number);
+        verify(questionMock).changeContent(content);
+        verify(questionMock).changeQuestionType(type);
+        verify(optionsRepository).deleteAllByQuestion(questionMock);
 
         assertThat(responseDto.getNumber()).isEqualTo(number);
         assertThat(responseDto.getContent()).isEqualTo(content);
         assertThat(responseDto.getType()).isEqualTo(questionMock.getType());
-        verify(surveyRepository).findById(surveyId);
-        verify(questionRepository).findById(questionId);
-        verify(userMock).isUserRoleSurveyee();
-        verify(userMock).isUserRoleNotAdmin();
-        verify(surveyMock).isUserSurveyCreator(userMock);
-        verify(surveyMock).isSurveyStatusNotStarted();
-        verify(questionRepository).save(any(Question.class));
+
     }
 
     @Test
     void 해당설문_출제자가_질문을_삭제한다(){
+        Long userId = 1L;
         Long surveyId = 1L;
         Long questionId = 1L;
 
         User userMock = mock(User.class);
         Survey surveyMock = mock(Survey.class);
-
-        Question questionMock = QuestionFixtureGenerator.generateQuestionFixture();
+        Question questionMock = mock(Question.class);
         ReflectionTestUtils.setField(questionMock, "survey", surveyMock);
 
-        when(surveyRepository.findById(surveyId)).thenReturn(Optional.of(surveyMock));
+        when(userFacade.findUser(userId)).thenReturn(userMock);
+        when(surveyRepository.findByIdAndIsDeletedFalse(surveyId)).thenReturn(Optional.of(surveyMock));
         when(questionRepository.findById(questionId)).thenReturn(Optional.of(questionMock));
-        when(userMock.isUserRoleSurveyee()).thenReturn(false);
+
         when(surveyMock.isUserSurveyCreator(userMock)).thenReturn(true);
-        when(surveyMock.isSurveyStatusNotStarted()).thenReturn(true);
+        when(surveyMock.isNotStarted()).thenReturn(true);
+        when(questionMock.isFromSurvey(surveyMock)).thenReturn(true);
 
         doNothing().when(questionRepository).delete(questionMock);
 
         //when
-        questionService.deleteQuestion(userMock, surveyId, questionId);
+        questionService.deleteQuestion(userId, surveyId, questionId);
 
         //then
-        verify(surveyRepository).findById(surveyId);
+        verify(surveyRepository).findByIdAndIsDeletedFalse(surveyId);
         verify(questionRepository).findById(questionId);
-        verify(userMock).isUserRoleSurveyee();
         verify(surveyMock).isUserSurveyCreator(userMock);
-        verify(surveyMock).isSurveyStatusNotStarted();
+        verify(surveyMock).isNotStarted();
+        verify(optionsRepository).deleteAllByQuestion(questionMock);
         verify(questionRepository).delete(questionMock);
     }
 }

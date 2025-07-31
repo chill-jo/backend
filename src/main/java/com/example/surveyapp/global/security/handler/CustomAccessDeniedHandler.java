@@ -1,3 +1,4 @@
+
 package com.example.surveyapp.global.security.handler;
 
 import com.example.surveyapp.global.response.ApiResponse;
@@ -27,3 +28,4 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         new ObjectMapper().writeValue(response.getWriter(), ApiResponse.fail(error.getMessage(), error));
     }
 }
+

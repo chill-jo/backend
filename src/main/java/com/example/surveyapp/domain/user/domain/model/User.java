@@ -51,12 +51,19 @@ public class User extends BaseEntity {
                 .build();
     }
 
-    public void softDelete(){
-        this.isDeleted = true;
+    //admin 인프라 구축용
+    public static User createAdmin(String adminEmail, String adminName, String adminNickname, String adminPassword) {
+        return User.builder()
+                .email(adminEmail)
+                .name(adminName)
+                .nickname(adminNickname)
+                .password(adminPassword)
+                .userRole(UserRoleEnum.ADMIN)
+                .build();
     }
 
-    public void updateId(Long id){
-        this.id = id;
+    public void softDelete(){
+        this.isDeleted = true;
     }
 
     public void updateInfo(String email, String name, String nickname, String rawPassword, PasswordEncoder passwordEncoder) {
@@ -74,5 +81,8 @@ public class User extends BaseEntity {
     }
     public boolean isUserRoleNotAdmin(){
         return !this.userRole.equals(UserRoleEnum.ADMIN);
+    }
+    public boolean isUserRoleSurveyor(){
+        return userRole.equals(UserRoleEnum.SURVEYOR);
     }
 }

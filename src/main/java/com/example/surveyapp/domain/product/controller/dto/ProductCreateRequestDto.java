@@ -20,7 +20,7 @@ public class ProductCreateRequestDto {
     private String content;
 
     @NotNull
-    private int price;
+    private Long price;
 
     @NotNull
     private Status status;
