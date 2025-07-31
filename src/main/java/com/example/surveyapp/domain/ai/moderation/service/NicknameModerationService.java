@@ -25,9 +25,7 @@ public class NicknameModerationService {
                 .trim()
                 .toUpperCase();
 
-        ModerationResultStatusEnum status = result.startsWith("DENIED")
-                ? ModerationResultStatusEnum.DENIED
-                : ModerationResultStatusEnum.APPROVED;
+        ModerationResultStatusEnum status = result.startsWith("DENIED") ? ModerationResultStatusEnum.DENIED : ModerationResultStatusEnum.APPROVED;
 
         String reason = status == ModerationResultStatusEnum.DENIED ? "부적절한 닉네임입니다." : null;
 
