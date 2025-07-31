@@ -115,6 +115,10 @@ public class OrderService {
         Order order = orderRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ORDER));
 
+        if (!order.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.NOT_SAME_ORDER_USER);
+        }
+
         order.delete();
 
     }

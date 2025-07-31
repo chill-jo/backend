@@ -35,7 +35,7 @@ public class PointController {
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<PointHistoryResponseDto>>> getHistories(
             @AuthenticationPrincipal CustomUserDetails userDetails, Pageable pageable){
-        Page<PointHistoryResponseDto> page = pointService.getHistories(userDetails.getId(), pageable);
+        Page<PointHistoryResponseDto> page = pointService.getHistories(userDetails.getId(),pageable);
         return ResponseEntity.ok(ApiResponse.success("포인트 내역이 조회되었습니다.",new PageResponse<>(page)));
     }
 
