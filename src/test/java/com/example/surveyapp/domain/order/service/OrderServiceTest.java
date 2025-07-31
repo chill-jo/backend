@@ -67,6 +67,7 @@ class OrderServiceTest {
         // Given
         //테스트 전제 조건 및 환경 설정
         User user = UserFixtureGenerator.generateUserFixture();
+        ReflectionTestUtils.setField(user, "id" , 1L);
         Product product = ProductFixtureGenerator.generateProductFixture();
         Order order = OrderFixtureGenerator.generateOrderFixture(user,product);
         Point point = Point.of(user);
@@ -199,6 +200,7 @@ class OrderServiceTest {
         // Given
         //테스트 전제 조건 및 환경 설정
         User user = UserFixtureGenerator.generateUserFixture();
+        ReflectionTestUtils.setField(user, "id" , 1L);
         Product product = ProductFixtureGenerator.generateProductFixture();
         Order order = OrderFixtureGenerator.generateOrderFixture(user,product);
 

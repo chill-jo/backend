@@ -25,6 +25,7 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -58,6 +59,7 @@ public class OrderControllerTest {
         // Given
         //테스트 전제 조건 및 환경 설정
         User user = UserFixtureGenerator.generateUserFixture();
+        ReflectionTestUtils.setField(user, "id" , 1L);
         Product product = ProductFixtureGenerator.generateProductFixture();
         Order order = OrderFixtureGenerator.generateOrderFixture(user,product);
         OrderCreateRequestDto requestDto = new OrderCreateRequestDto(product.getId());

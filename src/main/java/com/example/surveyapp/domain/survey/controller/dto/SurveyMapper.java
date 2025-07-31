@@ -10,6 +10,7 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring")
 public interface SurveyMapper {
 
+    @Mapping(target = "surveyeeCount", ignore = true)
     SurveyResponseDto toResponseDto(Survey survey);
 
     @BeanMapping(ignoreByDefault = true)
