@@ -13,4 +13,6 @@ public interface SurveyAnswerRepository extends JpaRepository<SurveyAnswer, Long
 
     boolean existsBySurveyIdAndUserId(Survey surveyId, User userId);
 
+    Long countBySurveyId(Survey surveyId);
+
 }

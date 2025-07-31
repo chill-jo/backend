@@ -12,15 +12,12 @@ import com.example.surveyapp.domain.survey.domain.model.entity.Question;
 import com.example.surveyapp.domain.survey.domain.model.entity.Survey;
 import com.example.surveyapp.domain.survey.domain.model.entity.SurveyAnswer;
 import com.example.surveyapp.domain.survey.domain.model.enums.SurveyStatus;
-import com.example.surveyapp.domain.survey.domain.repository.*;
 import com.example.surveyapp.domain.survey.facade.UserFacade;
 import com.example.surveyapp.domain.survey.domain.repository.OptionsRepository;
 import com.example.surveyapp.domain.survey.domain.repository.QuestionRepository;
 import com.example.surveyapp.domain.survey.domain.repository.SurveyAnswerRepository;
 import com.example.surveyapp.domain.survey.domain.repository.SurveyRepository;
 import com.example.surveyapp.domain.survey.service.strategy.SurveyQuestionStrategy;
-import com.example.surveyapp.domain.user.domain.model.User;
-import com.example.surveyapp.domain.user.domain.repository.UserRepository;
 import com.example.surveyapp.global.response.exception.CustomException;
 import com.example.surveyapp.global.response.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +27,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -49,7 +48,6 @@ public class SurveyService {
     public SurveyResponseDto createSurvey(Long userId, SurveyCreateRequestDto requestDto) {
 
         User user = userFacade.findUser(userId);
-
 
         Survey survey = surveyMapper.createSurveyEntity(requestDto, user);
 
@@ -146,7 +144,10 @@ public class SurveyService {
         Survey survey = surveyRepository.findByIdAndIsDeletedFalse(surveyId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
 
-        return surveyMapper.toResponseDto(survey);
+        SurveyResponseDto responseDto = surveyMapper.toResponseDto(survey);
+        responseDto.changeSurveyeeCount(surveyAnswerRepository.countBySurveyId(survey));
+
+        return responseDto;
     }
 
     // 설문 시작
@@ -156,7 +157,7 @@ public class SurveyService {
         Survey survey = surveyRepository.findByIdAndIsDeletedFalse(surveyId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
 
-        if (!survey.getStatus().equals(SurveyStatus.IN_PROGRESS)) {
+        if (!survey.getStatus().equals(SurveyStatus.IN_PROGRESS) || survey.getDeadline().isBefore(LocalDateTime.now())) {
             throw new CustomException(ErrorCode.SURVEY_NOT_IN_PROGRESS);
         }
 
@@ -186,7 +187,7 @@ public class SurveyService {
         Survey survey = surveyRepository.findByIdAndIsDeletedFalse(surveyId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
 
-        if (!survey.getStatus().equals(SurveyStatus.IN_PROGRESS)) {
+        if (!survey.getStatus().equals(SurveyStatus.IN_PROGRESS) || survey.getDeadline().isBefore(LocalDateTime.now())) {
             throw new CustomException(ErrorCode.SURVEY_NOT_IN_PROGRESS);
         }
 
@@ -210,6 +211,12 @@ public class SurveyService {
                     .orElseThrow()
                     .doSave(questionAnswer, surveyAnswer, question);
         });
+
+        pointService.earn(user.getId(), survey.getPointPerPerson(), surveyAnswer.getId());
+
+        if (surveyAnswerRepository.countBySurveyId(survey) >= survey.getMaxSurveyee()) {
+            survey.changeSurveyStatus(SurveyStatus.DONE);
+        }
     }
 
     @Transactional(readOnly = true)
