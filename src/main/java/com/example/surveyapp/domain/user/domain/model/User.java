@@ -51,6 +51,17 @@ public class User extends BaseEntity {
                 .build();
     }
 
+    //admin 인프라 구축용
+    public static User createAdmin(String adminEmail, String adminName, String adminNickname, String adminPassword) {
+        return User.builder()
+                .email(adminEmail)
+                .name(adminName)
+                .nickname(adminNickname)
+                .password(adminPassword)
+                .userRole(UserRoleEnum.ADMIN)
+                .build();
+    }
+
     public void softDelete(){
         this.isDeleted = true;
     }

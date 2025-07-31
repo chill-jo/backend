@@ -2,6 +2,7 @@ package com.example.surveyapp.config;
 
 import com.example.surveyapp.domain.product.domain.model.Product;
 import com.example.surveyapp.domain.product.domain.model.Status;
+import org.springframework.test.util.ReflectionTestUtils;
 
 public class ProductFixtureGenerator {
 
@@ -12,7 +13,9 @@ public class ProductFixtureGenerator {
 
     public static Product generateProductFixture() {
         Product product = Product.create(TITLE, PRICE, CONTENT, STATUS);
-        product.updateId(1L);
+        Long id = 1L;
+        ReflectionTestUtils.setField(product,"id",id);
+
         return product;
 
     }

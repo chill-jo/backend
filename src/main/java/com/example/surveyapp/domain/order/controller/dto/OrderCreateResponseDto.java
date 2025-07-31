@@ -11,6 +11,8 @@ public class OrderCreateResponseDto {
 
     private Long id;
 
+    private String orderNumber;
+
     private String title;
 
     private Status status;
@@ -20,6 +22,7 @@ public class OrderCreateResponseDto {
     public static OrderCreateResponseDto from(Order order) {
         return new OrderCreateResponseDto(
                 order.getUser().getId(),
+                order.getOrderNumber(),
                 order.getTitle(),
                 order.getProduct().getStatus(),
                 order.getPrice());
