@@ -45,7 +45,7 @@ public class OrderService {
         Product product = productRepository.findById(requestDto.getProductId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PRODUCT));
 
-        if (point.getPointBalance() < requestDto.getPrice()) {
+        if (point.getPointBalance() < product.getPrice()) {
             throw new CustomException(ErrorCode.NOT_ENOUGH_POINT);
         }
 
