@@ -24,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -72,7 +73,7 @@ class OrderServiceTest {
         point.pointCharge(5000L);
 
 
-        OrderCreateRequestDto requestDto = new OrderCreateRequestDto(product.getId(),product.getTitle(),product.getPrice()) ;
+        OrderCreateRequestDto requestDto = new OrderCreateRequestDto(product.getId()) ;
         // When
         //실행할 행동
         when(orderRepository.save(any(Order.class))).thenReturn(order);
@@ -84,10 +85,10 @@ class OrderServiceTest {
 
         // Then
         //검증 사항
-        assertThat(responseDto.getPrice() >= order.getPrice());
-        assertThat(responseDto.getPrice()).isEqualTo(order.getPrice());
+        assertThat(responseDto.getPrice() >= product.getPrice());
+        assertThat(responseDto.getPrice()).isEqualTo(product.getPrice());
         assertThat(responseDto.getStatus()).isEqualTo(Status.ON_SALE);
-        assertThat(responseDto.getTitle()).isEqualTo(order.getTitle());
+        assertThat(responseDto.getTitle()).isEqualTo(product.getTitle());
 
         verify(pointService, times(1)).redeem(eq(user.getId()),eq(product.getPrice()), eq(order.getId()));
         verify(orderRepository, times(1)).save(any(Order.class));

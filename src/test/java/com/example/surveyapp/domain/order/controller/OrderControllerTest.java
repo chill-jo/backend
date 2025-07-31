@@ -1,6 +1,5 @@
 package com.example.surveyapp.domain.order.controller;
 
-import com.example.surveyapp.config.DataJpaTestBase;
 import com.example.surveyapp.config.OrderFixtureGenerator;
 import com.example.surveyapp.config.ProductFixtureGenerator;
 import com.example.surveyapp.config.UserFixtureGenerator;
@@ -61,12 +60,13 @@ public class OrderControllerTest {
         User user = UserFixtureGenerator.generateUserFixture();
         Product product = ProductFixtureGenerator.generateProductFixture();
         Order order = OrderFixtureGenerator.generateOrderFixture(user,product);
-        OrderCreateRequestDto requestDto = new OrderCreateRequestDto(product.getId(), order.getTitle(), order.getPrice());
+        OrderCreateRequestDto requestDto = new OrderCreateRequestDto(product.getId());
         OrderCreateResponseDto responseDto = new OrderCreateResponseDto(order.getId(),
                 order.getOrderNumber(),
-                order.getTitle(),
-                order.getProduct().getStatus(),
-                order.getPrice());
+                product.getTitle(),
+                product.getStatus(),
+                product.getPrice()
+                );
         // When
         //실행할 행동
         when(orderService.createOrder(any(OrderCreateRequestDto.class), eq(user.getId()))).thenReturn(responseDto);
@@ -81,6 +81,7 @@ public class OrderControllerTest {
         actions.andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.title").value(order.getTitle()))
+                .andExpect(jsonPath("$.data.title").value(product.getTitle()))
                 .andExpect(jsonPath("$.data.orderNumber").value(order.getOrderNumber()));
 
 
