@@ -42,6 +42,7 @@ public class SurveyService {
     private final OptionsRepository optionsRepository;
     private final SurveyAnswerRepository surveyAnswerRepository;
     private final UserFacade userFacade;
+    private final PointService pointService;
     private final List<SurveyQuestionStrategy> surveyQuestionStrategies;
 
     @Transactional
