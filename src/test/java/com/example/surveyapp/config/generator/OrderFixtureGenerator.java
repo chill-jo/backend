@@ -1,10 +1,8 @@
-package com.example.surveyapp.config;
+package com.example.surveyapp.config.generator;
 
 import com.example.surveyapp.domain.order.model.Order;
 import com.example.surveyapp.domain.product.domain.model.Product;
-import com.example.surveyapp.domain.product.domain.model.Status;
 import com.example.surveyapp.domain.user.domain.model.User;
-import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
 import org.springframework.test.util.ReflectionTestUtils;
 
 
