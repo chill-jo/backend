@@ -1,5 +1,6 @@
 package com.example.surveyapp.domain.user.controller;
 
+import com.example.surveyapp.config.TestMockBeans.TestMockBeans;
 import com.example.surveyapp.config.WebMvcTestBase;
 import com.example.surveyapp.config.UserFixtureGenerator;
 import com.example.surveyapp.domain.user.controller.dto.UserRequestDto;
@@ -10,8 +11,9 @@ import com.example.surveyapp.domain.user.service.UserService;
 import com.example.surveyapp.config.customMockUser.WithCustomMockUser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static com.example.surveyapp.config.UserFixtureGenerator.ID;
@@ -24,8 +26,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @DisplayName("Controller:User")
+@Import(TestMockBeans.class)
 public class UserControllerTest extends WebMvcTestBase {
-    @MockitoBean
+    @Autowired
     private UserService userService;
 
     private final User user = UserFixtureGenerator.generateUserFixture();
