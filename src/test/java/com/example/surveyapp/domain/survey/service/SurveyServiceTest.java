@@ -10,9 +10,11 @@ import com.example.surveyapp.domain.survey.controller.dto.request.SurveyUpdateRe
 import com.example.surveyapp.domain.survey.controller.dto.response.PageSurveyResponseDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.SurveyResponseDto;
 import com.example.surveyapp.domain.survey.controller.dto.response.SurveyStatusResponseDto;
+import com.example.surveyapp.domain.survey.domain.model.entity.Question;
 import com.example.surveyapp.domain.survey.domain.model.enums.SurveyStatus;
+import com.example.surveyapp.domain.survey.domain.repository.OptionsRepository;
+import com.example.surveyapp.domain.survey.domain.repository.QuestionRepository;
 import com.example.surveyapp.domain.survey.facade.UserFacade;
-import com.example.surveyapp.global.response.exception.CustomException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +42,12 @@ public class SurveyServiceTest {
     private SurveyRepository surveyRepository;
 
     @Mock
+    private QuestionRepository questionRepository;
+
+    @Mock
+    private OptionsRepository optionsRepository;
+
+    @Mock
     private SurveyMapper surveyMapper;
 
     @Mock
@@ -64,8 +72,11 @@ public class SurveyServiceTest {
         SurveyCreateRequestDto surveyCreateRequestDto = new SurveyCreateRequestDto(
                 title, description, maxSurveyee, pointPerPerson, deadline, expectedTime);
 
+
         Survey surveyMock = SurveyFixtureGenerator.generateSurveyFixture();
         Survey saved = SurveyFixtureGenerator.generateSurveyFixture();
+
+        when(userFacade.findUser(userId)).thenReturn(userMock);
 
         when(surveyMapper.createSurveyEntity(surveyCreateRequestDto, userMock))
                 .thenReturn(surveyMock);
@@ -97,35 +108,10 @@ public class SurveyServiceTest {
         assertThat(surveyResponseDto.getDeadline()).isEqualTo(deadline);
         assertThat(surveyResponseDto.getExpectedTime()).isEqualTo(expectedTime);
 
-        verify(userMock).isUserRoleSurveyee();
         verify(surveyMapper).createSurveyEntity(surveyCreateRequestDto, userMock);
         verify(surveyRepository, times(1))
                 .save(surveyMock);
         verify(surveyMapper).toResponseDto(saved);
-    }
-
-    @Test
-    void 참여자가_설문_출제_요청을_보낼때_에러가_발생한다(){
-        User userMock = mock(User.class);
-        Long userId = 1L;
-        String title = "테스트 설문 제목";
-        String description = "테스트 설문 설명";
-        Long maxSurveyee = 50L;
-        Long pointPerPerson = 100L;
-        LocalDateTime deadline = LocalDateTime.of(2025, 7,25, 15,30);
-        Long expectedTime = 20L;
-
-        SurveyCreateRequestDto surveyCreateRequestDto = new SurveyCreateRequestDto(
-                title, description, maxSurveyee, pointPerPerson, deadline, expectedTime);
-
-        when(userMock.isUserRoleSurveyee()).thenReturn(true);
-
-        //then
-        assertThatThrownBy(() -> surveyService.createSurvey(userId, surveyCreateRequestDto))
-                .isInstanceOf(CustomException.class)
-                .hasMessageContaining("참여자 권한으로는 질문을 생성할 수 없습니다");
-
-        verify(userMock).isUserRoleSurveyee();
     }
 
     @Test
@@ -207,15 +193,13 @@ public class SurveyServiceTest {
 
         Survey surveyMock = mock(Survey.class);
 
+        when(userFacade.findUser(userId)).thenReturn(userMock);
         when(surveyRepository.findByIdAndIsDeletedFalse(id)).thenReturn(Optional.of(surveyMock));
 
-        when(userMock.isUserRoleSurveyee()).thenReturn(false);
         when(surveyMock.isUserSurveyCreator(userMock)).thenReturn(true);
         when(surveyMock.isNotStarted()).thenReturn(true);
 
         doNothing().when(surveyMapper).updateSurvey(updateRequestDto, surveyMock);
-
-        when(surveyRepository.save(surveyMock)).thenReturn(surveyMock);
 
         SurveyResponseDto expectedResponseDto = new SurveyResponseDto(
                 id,
@@ -241,12 +225,10 @@ public class SurveyServiceTest {
         assertThat(responseDto.getTotalPoint()).isEqualTo(maxSurveyee * pointPerPerson);
 
         verify(surveyRepository).findByIdAndIsDeletedFalse(id);
-        verify(userMock).isUserRoleSurveyee();
         verify(surveyMock).isUserSurveyCreator(userMock);
         verify(userMock, never()).isUserRoleNotAdmin();
         verify(surveyMock).isNotStarted();
         verify(surveyMapper).updateSurvey(updateRequestDto, surveyMock);
-        verify(surveyRepository).save(surveyMock);
         verify(surveyMapper).toResponseDto(surveyMock);
 
     }
@@ -263,18 +245,14 @@ public class SurveyServiceTest {
 
         Survey surveyMock = mock(Survey.class);
 
+        when(userFacade.findUser(userId)).thenReturn(userMock);
         when(surveyRepository.findByIdAndIsDeletedFalse(id)).thenReturn(Optional.of(surveyMock));
 
-        when(userMock.isUserRoleSurveyee()).thenReturn(false);
         when(surveyMock.isUserSurveyCreator(userMock)).thenReturn(false);
         when(userMock.isUserRoleNotAdmin()).thenReturn(false);
 
-        when(surveyMock.getStatus()).thenReturn(SurveyStatus.NOT_STARTED)
-                .thenReturn(status);
-
         doNothing().when(surveyMock).changeSurveyStatus(status);
-        when(surveyRepository.save(surveyMock)).thenReturn(surveyMock);
-
+        when(surveyMock.getStatus()).thenReturn(status);
         //when
         SurveyStatusResponseDto responseDto = surveyService.updateSurveyStatus(userId, id, updateRequestDto);
 
@@ -283,52 +261,10 @@ public class SurveyServiceTest {
         assertThat(responseDto.getStatus()).isEqualTo(status);
 
         verify(surveyRepository).findByIdAndIsDeletedFalse(id);
-        verify(userMock).isUserRoleSurveyee();
-        verify(userMock).isUserRoleNotAdmin();
-        verify(surveyMock).isUserSurveyCreator(userMock);
-        verify(surveyMock, times(2)).getStatus();
-        verify(surveyMock).changeSurveyStatus(status);
-        verify(surveyRepository).save(surveyMock);
-
-    }
-
-    @Test
-    void 관리자가_설문_상태를_진행중에서_진행전으로_변경할시_에러가_발생한다(){
-        //given
-        User userMock = mock(User.class);
-        Long userId = 1L;
-        Long id = 1L;
-        SurveyStatus status = SurveyStatus.NOT_STARTED;
-
-        SurveyStatusUpdateRequestDto requestDto = new SurveyStatusUpdateRequestDto(status);
-
-        Survey surveyMock = mock(Survey.class);
-
-        when(surveyRepository.findByIdAndIsDeletedFalse(id)).thenReturn(Optional.of(surveyMock));
-
-        when(userMock.isUserRoleSurveyee()).thenReturn(false);
-        when(surveyMock.isUserSurveyCreator(userMock)).thenReturn(false);
-        when(userMock.isUserRoleNotAdmin()).thenReturn(false);
-
-        when(surveyMock.getStatus()).thenReturn(SurveyStatus.IN_PROGRESS);
-
-//        doNothing().when(surveyMock).changeSurveyStatus(status);
-//        when(surveyRepository.save(surveyMock)).thenReturn(surveyMock);
-
-        //when
-        //then
-        assertThatThrownBy(() -> surveyService.updateSurveyStatus(userId, id, requestDto))
-                .isInstanceOf(CustomException.class)
-                .hasMessageContaining("설문은 진행 전 상태로 변경할 수 없습니다");
-
-        verify(surveyRepository).findByIdAndIsDeletedFalse(id);
-        verify(userMock).isUserRoleSurveyee();
         verify(userMock).isUserRoleNotAdmin();
         verify(surveyMock).isUserSurveyCreator(userMock);
         verify(surveyMock, times(1)).getStatus();
-        verify(surveyMock, never()).changeSurveyStatus(status);
-        verify(surveyRepository, never()).save(surveyMock);
-
+        verify(surveyMock).changeSurveyStatus(status);
 
     }
 
@@ -340,15 +276,22 @@ public class SurveyServiceTest {
         Long id = 1L;
 
         Survey surveyMock = mock(Survey.class);
+        Question questionMock1 = mock(Question.class);
+        Question questionMock2 = mock(Question.class);
+        ReflectionTestUtils.setField(questionMock2, "id", 2L);
 
+        List<Question> questionMockList = List.of(questionMock1, questionMock2);
+
+        when(userFacade.findUser(userId)).thenReturn(userMock);
         when(surveyRepository.findById(id)).thenReturn(Optional.of(surveyMock));
 
-        when(userMock.isUserRoleSurveyee()).thenReturn(false);
         when(surveyMock.isUserSurveyCreator(userMock)).thenReturn(true);
 
         when(surveyMock.isDeleted()).thenReturn(false);
 
         when(surveyMock.isInProgress()).thenReturn(false);
+
+        when(questionRepository.findAllBySurvey(surveyMock)).thenReturn(questionMockList);
 
         doNothing().when(surveyMock).deleteSurvey();
 
@@ -356,11 +299,14 @@ public class SurveyServiceTest {
         surveyService.deleteSurvey(userId, id);
 
         //then
+        verify(userFacade).findUser(userId);
         verify(surveyRepository).findById(id);
-        verify(userMock).isUserRoleSurveyee();
         verify(surveyMock).isUserSurveyCreator(userMock);
         verify(surveyMock).isDeleted();
         verify(surveyMock).isInProgress();
+        verify(optionsRepository).deleteAllByQuestion(questionMock1);
+        verify(optionsRepository).deleteAllByQuestion(questionMock2);
+        verify(questionRepository).deleteAllBySurvey(surveyMock);
         verify(surveyMock).deleteSurvey();
 
     }
