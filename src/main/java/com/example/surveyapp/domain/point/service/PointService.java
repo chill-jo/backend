@@ -16,6 +16,7 @@ import com.example.surveyapp.global.response.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,7 @@ public class PointService {
 
 
     // 충전
+    @PreAuthorize("hasAnyRole('SURVEYOR')")
     @Transactional
     public void charge(Long userId, PointChargeRequestDto dto){
         //요청받은 금액
@@ -70,7 +72,9 @@ public class PointService {
 
     }
 
+
     // 설문 응답하는 경우 적립
+    @PreAuthorize("hasAnyRole('SURVEYEE')")
     @Transactional
     public void earn(Long userId, Long amount, Long surveyAnswerId){
 
@@ -101,6 +105,7 @@ public class PointService {
 
 
     // 상점에서 상품 교환하는 경우 차감
+    @PreAuthorize("hasAnyRole('SURVEYEE')")
     @Transactional
     public void redeem(Long userId, Long amount, Long orderId){
 
@@ -128,7 +133,7 @@ public class PointService {
 
         pointHistoryRepository.save(history);
     }
-
+    @PreAuthorize("hasAnyRole('SURVEYOR')")
     @Transactional
     public void surveyorRedeem(Long userId, Long amount, Long surveyId){
 
