@@ -13,7 +13,7 @@ public class ProductResponseDto {
 
     private String title;
 
-    private int price;
+    private Long price;
 
     private Status status;
 

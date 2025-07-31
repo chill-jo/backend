@@ -31,6 +31,7 @@ public enum ErrorCode {
     NOT_SURVEYEE_USER(HttpStatus.UNAUTHORIZED,"참여자 계정만 주문이 가능합니다." ),
     NOT_YOUR_ACCOUNT(HttpStatus.BAD_REQUEST,"본인이 아닌 다른 계정 조회는 불가능합니다." ),
     NOT_FOUND_ORDER(HttpStatus.UNAUTHORIZED,"해당 주문을 찾을 수 없습니다." ),
+    NOT_YOUR_ORDER(HttpStatus.UNAUTHORIZED,"본인 주문만 확인 할 수 있습니다." ),
 
     //설문 에러
     SURVEY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 설문입니다."),
@@ -50,8 +51,12 @@ public enum ErrorCode {
 
     //선택지 에러
     OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 선택지입니다."),
+    OPTION_INVALID_FOR_SUBJECTIVE_QUESTION(HttpStatus.BAD_REQUEST, "주관식 질문에는 선택지를 생성할 수 없습니다."),
 
     //설문 응답 등록 에러
+    SURVEY_ALREADY_PARTICIPATED(HttpStatus.BAD_REQUEST, "이미 설문에 응답하셨습니다."),
+    SURVEY_NOT_IN_PROGRESS(HttpStatus.BAD_REQUEST, "진행 중이 아닌 설문에는 참여할 수 없습니다."),
+
 
 
     //포인트 에러

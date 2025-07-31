@@ -1,20 +1,25 @@
 package com.example.surveyapp.domain.product.controller;
 
+import com.example.surveyapp.config.ProductFixtureGenerator;
+import com.example.surveyapp.config.customMockUser.WithCustomMockUser;
 import com.example.surveyapp.domain.product.controller.dto.ProductCreateRequestDto;
 import com.example.surveyapp.domain.product.controller.dto.ProductCreateResponseDto;
 import com.example.surveyapp.domain.product.controller.dto.ProductResponseDto;
 import com.example.surveyapp.domain.product.controller.dto.ProductUpdateRequestDto;
+import com.example.surveyapp.domain.product.domain.model.Product;
 import com.example.surveyapp.domain.product.domain.model.Status;
 import com.example.surveyapp.domain.product.service.ProductService;
 import com.example.surveyapp.domain.product.service.dto.ProductUpdateResponseDto;
+import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
+import com.example.surveyapp.global.filter.JwtFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -30,41 +35,44 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ActiveProfiles("test")
-//@SpringBootTest
-@WebMvcTest(controllers = ProductController.class)
+@WebMvcTest(controllers = ProductController.class,
+        excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = JwtFilter.class))
 // 웹계층 테스트에 필요한 Bean들만 등록해주는 Annotations
 // 당연히 데이터 접근 계층에 관련된 JPA와 연관된 Bean은 등록되질 않아야 하는데
 // 왜 JPA 관련된, Audting 관련된 Bean 생성을 시도했을까
-@AutoConfigureMockMvc(addFilters = false) //인증인가 시 변경
+@AutoConfigureMockMvc(addFilters = false)
 class ProductControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    ObjectMapper objectMapper;
+
+    @Autowired
+    MockMvc mockMvc;
 
     @MockitoBean
     private ProductService productService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Test
     @DisplayName("상품을 생성한다")
-    @WithMockUser(username = "김도한", roles = "ADMIN")
+    @WithCustomMockUser(id = 1, role = UserRoleEnum.ADMIN)
     void 상품_생성한다() throws Exception {
         // Given
-        String title = "상품 이름";
-        int price = 1800;
-        String content = "상품 설명";
-        Status status = Status.ON_SALE;
 
-        ProductCreateRequestDto requestDto = new ProductCreateRequestDto(title, content, price, status);
-        ProductCreateResponseDto responseDto = new ProductCreateResponseDto(1L,title, price, status);
+        Product product = ProductFixtureGenerator.generateProductFixture();
+        ProductCreateRequestDto requestDto = new ProductCreateRequestDto(product.getTitle(),
+                product.getContent(),
+                product.getPrice(),
+                product.getStatus());
+        ProductCreateResponseDto responseDto = new ProductCreateResponseDto(product.getId(),
+                product.getTitle(),
+                product.getPrice(),
+                product.getStatus());
 
         when(productService.createProduct(any(ProductCreateRequestDto.class), eq(1L))).thenReturn(responseDto);
         // When
         //실행할 행동
         ResultActions actions = mockMvc.perform(post("/api/products")
-                .param("userId","1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDto)));
 
@@ -78,63 +86,13 @@ class ProductControllerTest {
 
     }
 
-//    @Test
-//    @DisplayName("참여자 계정은 생성이 불가능하다")
-//    @WithMockUser(username = "김도한", roles = "SURVEYEE")
-//    void 상품_생성_참여자_계정은_불가능_하다() throws Exception{
-//        // Given
-//        ProductCreateRequestDto requestDto = new ProductCreateRequestDto("상품", "설명", 1800, Status.ON_SALE);
-//        ProductCreateResponseDto responseDto = new ProductCreateResponseDto(1L,"상품",1800  , Status.ON_SALE);
-//
-//        when(productService.createProduct(any(requestDto))
-//        // When
-//        //실행할 행동
-//        ResultActions actions = mockMvc.perform(post("/api/products")
-//                .param("userId","1")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsString(requestDto)));
-//
-//        // Then
-//        //검증 사항
-//        verify(productService, never()).createProduct(any(),anyLong()); //서비스 호출 안되게
-//        actions.andDo(print())
-//                .andExpect(status().isForbidden());
-//    }
-//
-//    @Test
-//    @DisplayName("출제자 계정은 생성이 불가능하다")
-//    @WithMockUser(username = "김도한", roles = "SURVEYOR")
-//    void 상품_생성_출제자_계정은_불가능_하다() throws Exception{
-//        // Given
-//        String title = "상품 이름";
-//        int price = 1800;
-//        String content = "상품 설명";
-//        Status status = Status.ON_SALE;
-//
-//        ProductCreateRequestDto requestDto = new ProductCreateRequestDto(title, content, price, status);
-//        ProductCreateResponseDto responseDto = new ProductCreateResponseDto(1L,title, price, status);
-//
-//        when(productService.createProduct(any(ProductCreateRequestDto.class), eq(1L))).thenReturn(responseDto);
-//        // When
-//        //실행할 행동
-//        ResultActions actions = mockMvc.perform(post("/api/products")
-//                .param("userId","1")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsString(requestDto)));
-//
-//        // Then
-//        //검증 사항
-//        actions.andDo(print())
-//                .andExpect(status().isOk());
-//    }
-
     @Test
     @DisplayName("관리자 계정으로 상품을 전체 조회한다.")
-    @WithMockUser(username = "김도한", roles = "ADMIN")
+    @WithCustomMockUser(id = 1, role = UserRoleEnum.ADMIN)
     void 상품_전체_조회를_한다() throws Exception {
         // Given
-        ProductResponseDto product1 = new ProductResponseDto(1L, "상품1", 2000, Status.ON_SALE);
-        ProductResponseDto product2 = new ProductResponseDto(2L, "상품2", 2500, Status.ON_SALE);
+        ProductResponseDto product1 = new ProductResponseDto(1L, "상품1", 2000L, Status.ON_SALE);
+        ProductResponseDto product2 = new ProductResponseDto(2L, "상품2", 2500L, Status.ON_SALE);
         List<ProductResponseDto> productList = List.of(product1, product2);
 
         when(productService.readAllProduct(0,10)).thenReturn(productList);
@@ -156,39 +114,14 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.data[0].title").value("상품1"))
                 .andExpect(jsonPath("$.data[1].title").value("상품2"));
     }
-//
-//    @Test
-//    @DisplayName("출제자 계정으로 상품 조회는 불가능하다.")
-//    @WithMockUser(username = "김도한", roles = "SURVEYOR")
-//    void 상품_전체_조회는_출제자계정은_불가능해야한다() throws Exception {
-//        // Given
-//        ProductResponseDto product1 = new ProductResponseDto(1L, "상품1", 2000, Status.ON_SALE);
-//        ProductResponseDto product2 = new ProductResponseDto(2L, "상품2", 2500, Status.ON_SALE);
-//        List<ProductResponseDto> productList = List.of(product1, product2);
-//
-//        when(productService.readAllProduct(0,10)).thenReturn(productList);
-//
-//        // When
-//        //실행할 행동
-//        ResultActions actions = mockMvc.perform(get("/api/products")
-//                .param("page", "0")
-//                .param("size", "10")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsString(productList)));
-//        // Then
-//        //검증 사항
-//        actions.andDo(print())
-//                .andExpect(status().isOk());
-//
-//    }
 
     @Test
     @DisplayName("참여자 계정으로 상품 조회는 가능하다.")
-    @WithMockUser(username = "김도한", roles = "SURVEYEE")
+    @WithCustomMockUser(id = 2, role = UserRoleEnum.SURVEYEE)
     void 상품_전체_조회_참여자계정은_가능해야한다() throws Exception {
         // Given
-        ProductResponseDto product1 = new ProductResponseDto(1L, "상품1", 2000, Status.ON_SALE);
-        ProductResponseDto product2 = new ProductResponseDto(2L, "상품2", 2500, Status.ON_SALE);
+        ProductResponseDto product1 = new ProductResponseDto(1L, "상품1", 2000L, Status.ON_SALE);
+        ProductResponseDto product2 = new ProductResponseDto(2L, "상품2", 2500L, Status.ON_SALE);
         List<ProductResponseDto> productList = List.of(product1, product2);
 
         when(productService.readAllProduct(0,10)).thenReturn(productList);
@@ -214,48 +147,44 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("상품을 한개 조회한다.")
-    @WithMockUser(username = "김도한", roles = "SURVEYEE")
+    @WithCustomMockUser(id = 2, role = UserRoleEnum.SURVEYEE)
     void 상품_한개를_조회한다() throws Exception{
         // Given
         //테스트 전제 조건 및 환경 설정
-        Long id = 1L;
-        ProductResponseDto product1 = new ProductResponseDto(1L, "상품1", 2000, Status.ON_SALE);
-
-
-        when(productService.readOneProduct(id)).thenReturn(product1);
+        Product product = ProductFixtureGenerator.generateProductFixture();
+        ProductResponseDto productResponseDto = new ProductResponseDto(product.getId(), product.getTitle(), product.getPrice(), product.getStatus());
+        when(productService.readOneProduct(product.getId())).thenReturn(productResponseDto);
 
         // When
         //실행할 행동
-        ResultActions actions = mockMvc.perform(get("/api/products/{id}",id)
-                .param("userId", "1")
+        ResultActions actions = mockMvc.perform(get("/api/products/{id}",product.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(product1)));
+                .content(objectMapper.writeValueAsString(productResponseDto)));
 
         // Then
         //검증 사항
-        verify(productService, times(1)).readOneProduct(id);
+        verify(productService, times(1)).readOneProduct(product.getId());
         actions.andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.title").value("상품1"));
+                .andExpect(jsonPath("$.data.title").value("상품명"));
 
     }
 
     @Test
     @DisplayName("상품을 수정 한다.")
-    @WithMockUser(username = "김도한", roles = "ADMIN")
+    @WithCustomMockUser(id = 1, role = UserRoleEnum.ADMIN)
     void 상품을_수정한다() throws Exception{
         // Given
         //테스트 전제 조건 및 환경 설정
         Long productId = 1L;
-        ProductUpdateRequestDto requestDto = new ProductUpdateRequestDto("변경된 상품명", 2500, "변경된 상품설명", Status.ON_SALE);
-        ProductUpdateResponseDto responseDto = new ProductUpdateResponseDto(1L, "변경된 상품명", "변경된 상품설명:", 2500, Status.ON_SALE);
+        ProductUpdateRequestDto requestDto = new ProductUpdateRequestDto("변경된 상품명", 2500L, "변경된 상품설명", Status.ON_SALE);
+        ProductUpdateResponseDto responseDto = new ProductUpdateResponseDto(1L, "변경된 상품명", "변경된 상품설명:", 2500L, Status.ON_SALE);
 
         when(productService.updateProduct(eq(productId), any(ProductUpdateRequestDto.class))).thenReturn(responseDto);
 
         // When
         //실행할 행동
         ResultActions actions = mockMvc.perform(patch("/api/products/{id}", productId)
-                .param("userId", "1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDto)));
 
@@ -268,34 +197,9 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.data.title").value("변경된 상품명"));
     }
 
-//    @Test
-//    @DisplayName("상품수정은 참여자가 불가능하다.")
-//    @WithMockUser(username = "김도한", roles = "SURVEYEE")
-//    void 상품수정_참여자는_불가능하다() throws Exception{
-//        // Given
-//        //테스트 전제 조건 및 환경 설정
-//        Long productId = 1L;
-//        ProductUpdateRequestDto requestDto = new ProductUpdateRequestDto("변경된 상품명", 2500, "변경된 상품설명", Status.ON_SALE);
-//        ProductUpdateResponseDto responseDto = new ProductUpdateResponseDto(1L, "변경된 상품명", "변경된 상품설명:", 2500, Status.ON_SALE);
-//
-//        when(productService.updateProduct(eq(productId), any(ProductUpdateRequestDto.class))).thenReturn(responseDto);
-//
-//        // When
-//        //실행할 행동
-//        ResultActions actions = mockMvc.perform(patch("/api/products/{id}", productId)
-//                .param("userId", "1")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsString(requestDto)));
-//
-//        // Then
-//        //검증 사항
-//        actions.andDo(print())
-//                .andExpect(status().isOk());
-//    }
-
     @Test
     @DisplayName("상품을 삭제 한다.")
-    @WithMockUser(username = "김도한", roles = "ADMIN")
+    @WithCustomMockUser(id = 1, role = UserRoleEnum.ADMIN)
     void 상품을_삭제한다() throws Exception{
 
         // Given
@@ -303,8 +207,7 @@ class ProductControllerTest {
         Long productId = 1L;
         Long userId = 1L;
 
-        ProductCreateRequestDto requestDto = new ProductCreateRequestDto("상품명", "상품설명", 2500, Status.ON_SALE);
-        ProductCreateResponseDto responseDto = new ProductCreateResponseDto(1L, "상품명", 2500, Status.ON_SALE);
+        ProductCreateRequestDto requestDto = new ProductCreateRequestDto("상품명", "상품설명", 2500L, Status.ON_SALE);
 
         doNothing().when(productService).deleteProduct(productId,userId);
 

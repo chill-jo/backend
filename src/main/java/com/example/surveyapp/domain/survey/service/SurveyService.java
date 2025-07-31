@@ -30,11 +30,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import static com.example.surveyapp.domain.survey.domain.model.enums.QuestionType.SINGLE_CHOICE;
-import static com.example.surveyapp.domain.survey.domain.model.enums.QuestionType.SUBJECTIVE;
 
 @Service
 @RequiredArgsConstructor
@@ -46,8 +42,6 @@ public class SurveyService {
     private final OptionsRepository optionsRepository;
     private final SurveyAnswerRepository surveyAnswerRepository;
     private final UserFacade userFacade;
-    private final SurveyOptionsAnswerRepository surveyOptionsAnswerRepository;
-    private final SurveyTextAnswerRepository surveyTextAnswerRepository;
     private final PointService pointService;
     private final List<SurveyQuestionStrategy> surveyQuestionStrategies;
 
@@ -56,14 +50,14 @@ public class SurveyService {
 
         User user = userFacade.findUser(userId);
 
-        if(user.isUserRoleSurveyor()){
-            //포인트 잔액 차감
-            //pointService.
-        }
 
         Survey survey = surveyMapper.createSurveyEntity(requestDto, user);
 
         Survey saved = surveyRepository.save(survey);
+
+        if(user.isUserRoleSurveyor()){
+            pointService.surveyorRedeem(userId, saved.getTotalPoint(), saved.getId());
+        }
 
         return surveyMapper.toResponseDto(saved);
     }
@@ -107,7 +101,6 @@ public class SurveyService {
 
         currentUserMatchesSurveyCreatorOrAdmin(user, survey);
 
-        SurveyStatus currentStatus = survey.getStatus();
         SurveyStatus newStatus = requestDto.getStatus();
 
         survey.changeSurveyStatus(newStatus);
@@ -133,6 +126,14 @@ public class SurveyService {
             throw new CustomException(ErrorCode.SURVEY_CANNOT_BE_DELETED);
         }
 
+        List<Question> questions = questionRepository.findAllBySurvey(survey);
+
+        for(Question q : questions){
+            optionsRepository.deleteAllByQuestion(q);
+        }
+
+        questionRepository.deleteAllBySurvey(survey);
+
         survey.deleteSurvey();
     }
 
@@ -149,12 +150,21 @@ public class SurveyService {
     }
 
     // 설문 시작
-    // survey_answer 테이블 생기면 기참여자 재참여 못하게 막는 로직 추가해야함
     @Transactional(readOnly = true)
-    public SurveyQuestionDto startSurvey(Long surveyId) {
+    public SurveyQuestionDto startSurvey(Long userId, Long surveyId) {
 
         Survey survey = surveyRepository.findByIdAndIsDeletedFalse(surveyId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
+
+        if (!survey.getStatus().equals(SurveyStatus.IN_PROGRESS)) {
+            throw new CustomException(ErrorCode.SURVEY_NOT_IN_PROGRESS);
+        }
+
+        User user = userFacade.findUser(userId);
+
+        if (surveyAnswerRepository.existsBySurveyIdAndUserId(survey, user)) {
+            throw new CustomException(ErrorCode.SURVEY_ALREADY_PARTICIPATED);
+        };
 
         SurveyQuestionDto surveyQuestionDto = SurveyQuestionDto.of(survey);
 
@@ -172,14 +182,19 @@ public class SurveyService {
     }
 
     @Transactional
-    public void saveSurveyAnswer(Long surveyId, SurveyAnswerRequestDto requestDto) {
+    public void saveSurveyAnswer(Long surveyId, SurveyAnswerRequestDto requestDto, Long userId) {
         Survey survey = surveyRepository.findByIdAndIsDeletedFalse(surveyId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SURVEY_NOT_FOUND));
 
-        Long userId = 1L;
+        if (!survey.getStatus().equals(SurveyStatus.IN_PROGRESS)) {
+            throw new CustomException(ErrorCode.SURVEY_NOT_IN_PROGRESS);
+        }
+
         User user = userFacade.findUser(userId);
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        if (surveyAnswerRepository.existsBySurveyIdAndUserId(survey, user)) {
+            throw new CustomException(ErrorCode.SURVEY_ALREADY_PARTICIPATED);
+        };
 
         SurveyAnswer surveyAnswer = surveyAnswerRepository.save(SurveyAnswer.of(survey, user));
 
@@ -198,17 +213,13 @@ public class SurveyService {
     }
 
     @Transactional(readOnly = true)
-    public SurveyeeSurveyListDto getSurveyeeSurveyList() {
+    public SurveyeeSurveyListDto getSurveyeeSurveyList(Long userId) {
 
-        // User 추가시 userId 수정
-        Long userId = 1L;
         User user = userFacade.findUser(userId);
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
         List<SurveyAnswer> surveyAnswerList = surveyAnswerRepository.findAllByUserIdOrderByCreatedAtDesc(user);
 
-        SurveyeeSurveyListDto surveyListDto = new SurveyeeSurveyListDto();
+        SurveyeeSurveyListDto surveyListDto = SurveyeeSurveyListDto.of();
 
         surveyAnswerList.forEach(surveyAnswer -> {
             SurveyeeSurveyDto surveyeeSurveyDto = SurveyeeSurveyDto.of(surveyAnswer);
