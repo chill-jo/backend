@@ -94,7 +94,9 @@ public class SurveyServiceTest {
                         surveyMock.getTotalPoint(),
                         surveyMock.getDeadline(),
                         surveyMock.getExpectedTime(),
-                        surveyMock.getStatus())
+                        surveyMock.getStatus(),
+                        0L
+                        )
                 );
 
         //When
@@ -140,7 +142,8 @@ public class SurveyServiceTest {
                         surveyMock1.getTotalPoint(),
                         surveyMock1.getDeadline(),
                         surveyMock1.getExpectedTime(),
-                        surveyMock1.getStatus()
+                        surveyMock1.getStatus(),
+                        0L
         ));
         when(surveyMapper.toResponseDto(surveyMock2))
                 .thenReturn(new SurveyResponseDto(
@@ -152,7 +155,8 @@ public class SurveyServiceTest {
                         surveyMock2.getTotalPoint(),
                         surveyMock2.getDeadline(),
                         surveyMock2.getExpectedTime(),
-                        surveyMock2.getStatus()
+                        surveyMock2.getStatus(),
+                        0L
                 ));
 
         //When
@@ -210,7 +214,8 @@ public class SurveyServiceTest {
                 maxSurveyee * pointPerPerson,
                 deadline,
                 expectedTime,
-                SurveyStatus.NOT_STARTED
+                SurveyStatus.NOT_STARTED,
+                0L
         );
 
         when(surveyMapper.toResponseDto(surveyMock)).thenReturn(expectedResponseDto);
