@@ -41,6 +41,14 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain filterChain
     ) throws ServletException, IOException {
         // 1. Authorization Header가 있는지 검증(해당 요청이 인증 항목을 포함하고 있는지)
+
+        String path = request.getRequestURI();
+
+        if (path.equals("/api/register") || path.equals("/api/login")) {
+            filterChain.doFilter(request, response); // 토큰 검증 없이 통과
+            return;
+        }
+
         String bearerJwt = request.getHeader("Authorization");
 
         // 2. Authorization Header가 Bearer 타입인지 검증(JWT 기반 인증 방식인지)
