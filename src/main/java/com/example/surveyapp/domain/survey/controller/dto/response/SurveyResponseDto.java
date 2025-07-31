@@ -27,4 +27,10 @@ public class SurveyResponseDto {
 
     private SurveyStatus status;
 
+    private Long surveyeeCount = 0L;
+
+    public void changeSurveyeeCount(Long surveyeeCount) {
+        this.surveyeeCount = surveyeeCount;
+    }
+
 }
