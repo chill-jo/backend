@@ -1,7 +1,7 @@
 package com.example.surveyapp.domain.product.controller;
 
-import com.example.surveyapp.config.ProductFixtureGenerator;
-import com.example.surveyapp.config.customMockUser.WithCustomMockUser;
+import com.example.surveyapp.config.generator.ProductFixtureGenerator;
+import com.example.surveyapp.config.custommockuser.WithCustomMockUser;
 import com.example.surveyapp.domain.product.controller.dto.ProductCreateRequestDto;
 import com.example.surveyapp.domain.product.controller.dto.ProductCreateResponseDto;
 import com.example.surveyapp.domain.product.controller.dto.ProductResponseDto;

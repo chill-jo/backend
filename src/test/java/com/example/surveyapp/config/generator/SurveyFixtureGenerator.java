@@ -1,4 +1,4 @@
-package com.example.surveyapp.config;
+package com.example.surveyapp.config.generator;
 
 import com.example.surveyapp.domain.survey.domain.model.entity.Survey;
 import com.example.surveyapp.domain.user.domain.model.User;
