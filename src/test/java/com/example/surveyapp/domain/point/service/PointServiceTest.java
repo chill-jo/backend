@@ -66,23 +66,23 @@ public class PointServiceTest {
         verify(pointHistoryRepository).save(any(PointHistory.class)); //포인트 내역 저장
     }
 
-    @Test
-    void 출제자_포인트_충전_요청_값이_5000원_미만인_경우_POINT_INVALID_AMOUNT_커스템_예외_발생(){
-// given
-        Long userId = 1L;
-        Long chargeAmount = 4999L;
-        User userMock=mock(User.class);
-        Point pointMock=mock(Point.class);
-        PointChargeRequestDto dto = mock(PointChargeRequestDto.class);
-
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(userMock));
-        when(pointRepository.findByUserId(userId)).thenReturn(Optional.of(pointMock));
-        when(dto.getPrice()).thenReturn(chargeAmount);
-        
-        
-        //작성중
-    }
+//    @Test
+//    void 출제자_포인트_충전_요청_값이_5000원_미만인_경우_POINT_INVALID_AMOUNT_커스템_예외_발생(){
+//// given
+//        Long userId = 1L;
+//        Long chargeAmount = 4999L;
+//        User userMock=mock(User.class);
+//        Point pointMock=mock(Point.class);
+//        PointChargeRequestDto dto = mock(PointChargeRequestDto.class);
+//
+//
+//        when(userRepository.findById(userId)).thenReturn(Optional.of(userMock));
+//        when(pointRepository.findByUserId(userId)).thenReturn(Optional.of(pointMock));
+//        when(dto.getPrice()).thenReturn(chargeAmount);
+//
+//
+//        //작성중
+//    }
 
     @Test
     void 출제자_포인트_충전_요청_값이_null인_경우_POINT_INVALID_AMOUNT_커스템_예외_발생(){

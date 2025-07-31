@@ -164,7 +164,7 @@ public class PointService {
     public Page<PointHistoryResponseDto> getHistories(Long userId, Pageable pageable){
         User user = getUser(userId);
 
-        return pointHistoryRepository.findByPoint_User(user, pageable)
+        return pointHistoryRepository.findPointHistoryByUser(user, pageable)
                 .map(PointHistoryResponseDto::from);
     }
 
