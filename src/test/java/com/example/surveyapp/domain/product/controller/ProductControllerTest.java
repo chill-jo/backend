@@ -1,7 +1,6 @@
 package com.example.surveyapp.domain.product.controller;
 
 import com.example.surveyapp.config.ProductFixtureGenerator;
-import com.example.surveyapp.config.WebMvcTestBase;
 import com.example.surveyapp.config.customMockUser.WithCustomMockUser;
 import com.example.surveyapp.domain.product.controller.dto.ProductCreateRequestDto;
 import com.example.surveyapp.domain.product.controller.dto.ProductCreateResponseDto;
@@ -12,7 +11,6 @@ import com.example.surveyapp.domain.product.domain.model.Status;
 import com.example.surveyapp.domain.product.service.ProductService;
 import com.example.surveyapp.domain.product.service.dto.ProductUpdateResponseDto;
 import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
-import com.example.surveyapp.global.config.SecurityConfig;
 import com.example.surveyapp.global.filter.JwtFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +20,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -61,6 +58,7 @@ class ProductControllerTest {
     @WithCustomMockUser(id = 1, role = UserRoleEnum.ADMIN)
     void 상품_생성한다() throws Exception {
         // Given
+
         Product product = ProductFixtureGenerator.generateProductFixture();
         ProductCreateRequestDto requestDto = new ProductCreateRequestDto(product.getTitle(),
                 product.getContent(),
@@ -210,7 +208,6 @@ class ProductControllerTest {
         Long userId = 1L;
 
         ProductCreateRequestDto requestDto = new ProductCreateRequestDto("상품명", "상품설명", 2500L, Status.ON_SALE);
-        ProductCreateResponseDto responseDto = new ProductCreateResponseDto(1L, "상품명", 2500L, Status.ON_SALE);
 
         doNothing().when(productService).deleteProduct(productId,userId);
 

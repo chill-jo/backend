@@ -58,7 +58,4 @@ public class Product extends BaseEntity {
         if (status != null)  this.status = status;
     }
 
-    public void updateId(long id) {
-        this.id = id;
-    }
 }
