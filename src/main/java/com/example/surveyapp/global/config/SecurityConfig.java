@@ -1,6 +1,9 @@
 package com.example.surveyapp.global.config;
 
+import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
 import com.example.surveyapp.global.filter.JwtFilter;
+import com.example.surveyapp.global.security.handler.CustomAccessDeniedHandler;
+import com.example.surveyapp.global.security.handler.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,12 +23,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+
+    private final JwtFilter jwtFilter;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    private final JwtFilter jwtFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -54,6 +61,12 @@ public class SecurityConfig {
                         // 나머지 인증 필요
                         .anyRequest().authenticated()
                 )
+
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(authenticationEntryPoint)   // 401 인증 실패
+                        .accessDeniedHandler(accessDeniedHandler)             // 403 인가 실패
+                )
+
                 //UsernamePasswordAuthenticationFilter : 스프링 시큐리티에서 기본적으로
                 // username, password와 같은 입력값을 이용해서 인증을 시도하고, 인증된 사용자 정보를
                 // UsernamePasswrodAuthenticationToken으로 구성해서 SecurityContextHodler에 저장하는
