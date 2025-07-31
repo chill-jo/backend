@@ -1,7 +1,7 @@
 package com.example.surveyapp.domain.product.domain.repository;
 
-import com.example.surveyapp.config.DataJpaTestBase;
-import com.example.surveyapp.config.ProductFixtureGenerator;
+import com.example.surveyapp.config.testbase.DataJpaTestBase;
+import com.example.surveyapp.config.generator.ProductFixtureGenerator;
 import com.example.surveyapp.domain.product.controller.dto.ProductCreateResponseDto;
 import com.example.surveyapp.domain.product.domain.model.Product;
 import com.example.surveyapp.domain.product.domain.model.Status;

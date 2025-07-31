@@ -1,9 +1,9 @@
 package com.example.surveyapp.domain.order.controller;
 
-import com.example.surveyapp.config.OrderFixtureGenerator;
-import com.example.surveyapp.config.ProductFixtureGenerator;
-import com.example.surveyapp.config.UserFixtureGenerator;
-import com.example.surveyapp.config.customMockUser.WithCustomMockUser;
+import com.example.surveyapp.config.generator.OrderFixtureGenerator;
+import com.example.surveyapp.config.generator.ProductFixtureGenerator;
+import com.example.surveyapp.config.generator.UserFixtureGenerator;
+import com.example.surveyapp.config.custommockuser.WithCustomMockUser;
 import com.example.surveyapp.domain.order.controller.dto.OrderCreateRequestDto;
 import com.example.surveyapp.domain.order.controller.dto.OrderCreateResponseDto;
 import com.example.surveyapp.domain.order.controller.dto.OrderResponseDto;
