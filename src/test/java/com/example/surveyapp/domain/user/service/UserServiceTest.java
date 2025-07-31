@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -20,11 +21,14 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
+    @InjectMocks
+    private UserService userService;
+
     @Mock
     private UserRepository userRepository;
 
-    @InjectMocks
-    private UserService userService;
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @Test
     void 유저_정보를_조회한다(){
@@ -45,11 +49,12 @@ public class UserServiceTest {
     void 유저_정보를_수정한다(){
         // Given
         User user = generateUserFixture();
-        UserRequestDto requestDto = new UserRequestDto("newEmail@example.com", "newPassword", "NewName", "newNickname");
+        UserRequestDto requestDto = new UserRequestDto("new@example.com", "newPw123!", "NewName", "newNickname");
 
         when(userRepository.findById(ID)).thenReturn(Optional.of(user));
         when(userRepository.existsByEmail(requestDto.getEmail())).thenReturn(false);
         when(userRepository.existsByNickname(requestDto.getNickname())).thenReturn(false);
+        when(passwordEncoder.encode(requestDto.getPassword())).thenReturn("encodedPw123!");
 
         // When
         UserResponseDto updatedUser = userService.updateMyInfo(ID, requestDto);
