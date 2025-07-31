@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import com.example.surveyapp.config.SurveyFixtureGenerator;
+import com.example.surveyapp.config.generator.SurveyFixtureGenerator;
 import com.example.surveyapp.domain.survey.domain.model.entity.Survey;
 import com.example.surveyapp.domain.survey.domain.repository.SurveyRepository;
 import com.example.surveyapp.domain.user.domain.model.User;

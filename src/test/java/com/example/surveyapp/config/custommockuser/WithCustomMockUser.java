@@ -1,4 +1,4 @@
-package com.example.surveyapp.config.customMockUser;
+package com.example.surveyapp.config.custommockuser;
 
 import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
 import org.springframework.security.test.context.support.WithSecurityContext;

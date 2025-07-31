@@ -1,4 +1,4 @@
-package com.example.surveyapp.config;
+package com.example.surveyapp.config.testbase;
 
 import com.example.surveyapp.domain.admin.controller.AdminController;
 import com.example.surveyapp.domain.order.controller.OrderController;

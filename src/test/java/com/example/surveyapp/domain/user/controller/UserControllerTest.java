@@ -1,14 +1,14 @@
 package com.example.surveyapp.domain.user.controller;
 
-import com.example.surveyapp.config.TestMockBeans.TestMockBeans;
-import com.example.surveyapp.config.WebMvcTestBase;
-import com.example.surveyapp.config.UserFixtureGenerator;
+import com.example.surveyapp.config.testmockbeans.TestMockBeans;
+import com.example.surveyapp.config.testbase.WebMvcTestBase;
+import com.example.surveyapp.config.generator.UserFixtureGenerator;
 import com.example.surveyapp.domain.user.controller.dto.UserRequestDto;
 import com.example.surveyapp.domain.user.controller.dto.UserResponseDto;
 import com.example.surveyapp.domain.user.domain.model.User;
 import com.example.surveyapp.domain.user.domain.model.UserRoleEnum;
 import com.example.surveyapp.domain.user.service.UserService;
-import com.example.surveyapp.config.customMockUser.WithCustomMockUser;
+import com.example.surveyapp.config.custommockuser.WithCustomMockUser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +16,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static com.example.surveyapp.config.UserFixtureGenerator.ID;
-import static com.example.surveyapp.config.UserFixtureGenerator.ROLE;
+import static com.example.surveyapp.config.generator.UserFixtureGenerator.ID;
+import static com.example.surveyapp.config.generator.UserFixtureGenerator.ROLE;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;

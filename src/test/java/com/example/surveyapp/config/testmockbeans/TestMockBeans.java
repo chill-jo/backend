@@ -1,4 +1,4 @@
-package com.example.surveyapp.config.TestMockBeans;
+package com.example.surveyapp.config.testmockbeans;
 
 import com.example.surveyapp.domain.admin.service.AdminService;
 import com.example.surveyapp.domain.order.service.OrderService;
