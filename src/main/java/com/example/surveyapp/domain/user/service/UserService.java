@@ -1,5 +1,9 @@
 package com.example.surveyapp.domain.user.service;
 
+import com.example.surveyapp.domain.ai.moderation.config.ModerationResultStatusEnum;
+import com.example.surveyapp.domain.ai.moderation.controller.dto.NicknameModerationRequestDto;
+import com.example.surveyapp.domain.ai.moderation.controller.dto.NicknameModerationResponseDto;
+import com.example.surveyapp.domain.ai.moderation.service.NicknameModerationService;
 import com.example.surveyapp.domain.point.domain.model.entity.Point;
 import com.example.surveyapp.domain.point.domain.repository.PointRepository;
 import com.example.surveyapp.domain.user.controller.dto.*;
@@ -31,6 +35,7 @@ public class UserService {
     private final JwtUtil jwtUtil;
     private final PointRepository pointRepository;
     private final UserBaseDataRepository userBaseDataRepository;
+    private final NicknameModerationService nicknameModerationService;
 
     @Transactional
     public void register(RegisterRequestDto requestDto) {
@@ -45,6 +50,7 @@ public class UserService {
         if (!requestDto.getPassword().equals(requestDto.getConfirmPassword())) {
             throw new CustomException(ErrorCode.NOT_MATCH_PASSWORD);
         }
+        validateNicknameModeration(requestDto.getNickname());
 
         String encodedPassword = passwordEncoder.encode(requestDto.getPassword());
 
@@ -104,6 +110,8 @@ public class UserService {
 
         validateDuplicatedUser(requestDto);
 
+        validateNicknameModeration(requestDto.getNickname());
+
         user.updateInfo(requestDto.getEmail(), requestDto.getName(), requestDto.getNickname(), requestDto.getPassword(), passwordEncoder);
 
         return UserResponseDto.from(user);
@@ -116,6 +124,15 @@ public class UserService {
 
         if (userRepository.existsByNickname(userRequestDto.getNickname())) {
             throw new CustomException(ErrorCode.EXISTS_NICKNAME);
+        }
+    }
+
+    private void validateNicknameModeration(String nicknmae){
+        NicknameModerationRequestDto nicknameModerationRequest = new NicknameModerationRequestDto(nicknmae);
+        NicknameModerationResponseDto nicknameModerationResult = nicknameModerationService.moderate(nicknameModerationRequest);
+
+        if(nicknameModerationResult.getStatus() == ModerationResultStatusEnum.DENIED){
+            throw new CustomException(ErrorCode.INVALID_NICKNAME);
         }
     }
 
