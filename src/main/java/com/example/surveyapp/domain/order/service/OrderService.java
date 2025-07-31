@@ -45,7 +45,7 @@ public class OrderService {
         Product product = productRepository.findById(requestDto.getProductId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PRODUCT));
 
-        if (point.getPointBalance() < requestDto.getPrice()) {
+        if (point.getPointBalance() < product.getPrice()) {
             throw new CustomException(ErrorCode.NOT_ENOUGH_POINT);
         }
 
@@ -72,6 +72,15 @@ public class OrderService {
                 .toList();
     }
 
+    public OrderResponseDto readOneOrder(Long id) {
+
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ORDER));
+
+        return OrderResponseDto.from(order);
+
+    }
+
     public List<OrderResponseDto> readMyOrderList(int page, int size, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
@@ -83,6 +92,20 @@ public class OrderService {
                 .toList();
         }
 
+    public OrderResponseDto readOneMyOrder(Long id, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ORDER));
+
+        if (!order.getUser().getId().equals(user.getId())){
+            throw new CustomException(ErrorCode.NOT_YOUR_ORDER);
+        }
+
+        return OrderResponseDto.from(order);
+    }
+
     @Transactional
     public void deleteOrder(Long id, Long userId) {
         if (userId == null) {
@@ -92,7 +115,13 @@ public class OrderService {
         Order order = orderRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ORDER));
 
+        if (!order.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.NOT_SAME_ORDER_USER);
+        }
+
         order.delete();
 
     }
+
+
 }

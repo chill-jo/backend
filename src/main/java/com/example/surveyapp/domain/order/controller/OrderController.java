@@ -42,6 +42,13 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("주문목록을 조회 하였습니다.",orderList));
     }
 
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<OrderResponseDto>> readOneOrder(@PathVariable Long id) {
+        OrderResponseDto responseDto = orderService.readOneOrder(id);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("주문 단 건 조회가 완료되었습니다.",responseDto));
+    }
+
     @GetMapping("/my")
     @PreAuthorize("hasRole('SURVEYEE')")
     public ResponseEntity<ApiResponse<List<OrderResponseDto>>> readMyOrders(
@@ -52,6 +59,16 @@ public class OrderController {
         Long userId = userDetails.getId();
         List<OrderResponseDto> myOrderList = orderService.readMyOrderList(page,size,userId);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("내 주문 목록 조회 하였습니다.",myOrderList));
+    }
+
+    @GetMapping("/my/{id}")
+    @PreAuthorize("hasRole('SURVEYEE')")
+    public ResponseEntity<ApiResponse<OrderResponseDto>> readOneMyOrder(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
+        OrderResponseDto responseDto = orderService.readOneMyOrder(id,userId);
+       return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("내 주문 단건 조회하였습니다.",responseDto));
     }
 
     @DeleteMapping("/{id}")
