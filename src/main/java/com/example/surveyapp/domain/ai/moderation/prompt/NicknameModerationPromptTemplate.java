@@ -1,7 +1,7 @@
 package com.example.surveyapp.domain.ai.moderation.prompt;
 
 public class NicknameModerationPromptTemplate {
-    static String promptTemplate = """
+    public static final String promptTemplate = """
             You are a content moderation assistant.
             Determine if the following nickname is inappropriate.
 

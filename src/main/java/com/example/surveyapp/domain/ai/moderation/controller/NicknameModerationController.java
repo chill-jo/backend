@@ -23,7 +23,7 @@ public class NicknameModerationController {
     public ResponseEntity<ApiResponse<NicknameModerationResponseDto>> checkNickname(
             @RequestBody @Valid NicknameModerationRequestDto request
     ) {
-        NicknameModerationResponseDto response = NicknameModerationService.moderate(request);
+        NicknameModerationResponseDto response = nicknameModerationService.moderate(request);
 
         return ResponseEntity.ok(ApiResponse.success("판단에 성공했습니다.", response));
     }
